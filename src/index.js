@@ -7,7 +7,7 @@ import { Provider as StoreProvider } from 'mobx-react';
 import Loading from './components/Loading';
 import AppRouter from './components/AppRouter';
 import Store from './store';
-import './styles.css';
+import './styles/styles.css';
 
 Store.create().then(store => {
     ReactDOM.render((

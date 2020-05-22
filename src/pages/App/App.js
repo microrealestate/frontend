@@ -18,9 +18,10 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import PeopleIcon from '@material-ui/icons/People';
 import PersonIcon from '@material-ui/icons/Person';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-import { useStore } from '../../../store';
+import { useStore } from '../../store';
 
 import { useStyles } from './App.styles';
+import NotFound from '../NotFound';
 
 export default props => {
     const { navigate, children, uri, location: { pathname } } = props;
@@ -66,6 +67,11 @@ export default props => {
         }
     ];
     const selectedMenu = menuItems.find(menuItem => menuItem.pathname === pathname);
+
+    if (!selectedMenu) {
+        return <NotFound />;
+    }
+
     const classes = useStyles();
 
     const handleMenuClick = async (event, menuItem) => {

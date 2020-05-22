@@ -16,7 +16,7 @@ import {
     grayColor,
     blackColor,
     hexToRgb
-} from '../../../styles.js';
+} from '../../styles/styles.js';
 
 export const useStyles = () => {
 

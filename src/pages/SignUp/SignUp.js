@@ -11,14 +11,20 @@ import Typography from '@material-ui/core/Typography';
 import { useStore } from '../../store';
 import { FormTextField } from '../../components/Form';
 
-import { useStyles } from './SignIn.styles';
+import { useStyles } from './SignUp.styles';
 
 const initialValues = {
+  firstName: '',
+  lastName: '',
   email: '',
   password: ''
 };
 
 const validationSchema = Yup.object().shape({
+  firstName: Yup.string()
+    .required('Required'),
+  lastName: Yup.string()
+    .required('Required'),
   email: Yup.string()
     .email('Invalid email')
     .required('Required'),
@@ -29,25 +35,23 @@ const validationSchema = Yup.object().shape({
 export default props => {
   const { navigate } = props;
   const { store: { user } } = useStore();
-  const [signInError, setSignInError] = useState(false);
+  const [signUpError, setSignUpError] = useState(false);
   const classes = useStyles();
 
-  const signIn = async ({ email, password }, actions) => {
+  const signUp = async ({ firstName, lastName, email, password }, actions) => {
     try {
-      await user.signIn(email, password);
-      if (user.signedIn) {
-        setSignInError(false);
-        await navigate('/app/dashboard', { replace: true });
-      }
+      await user.signUp(firstName, lastName, email, password );
+      setSignUpError(false);
+      await navigate('/app/signin');
     } catch (error) {
       console.error(error);
-      setSignInError(true);
+      setSignUpError(true);
     }
   };
 
-  const signUp = async event => {
+  const signIn = async event => {
     event.preventDefault();
-    await navigate('/app/signup');
+    await navigate('/app/signin');
   };
 
   return (
@@ -55,21 +59,31 @@ export default props => {
         <div className={classes.pageTitle}>
           <LocationCityIcon fontSize="large" />
           <Typography component="h1" variant="h5">
-            {`Sign in to ${window.APP_CONFIG.APP_NAME}`}
+            {`Sign up to ${window.APP_CONFIG.APP_NAME}`}
           </Typography>
         </div>
-        <Paper className={classes.signInPaper}>
-          <Collapse className={classes.alert} in={signInError}>
+        <Paper className={classes.signUpPaper}>
+          <Collapse className={classes.alert} in={signUpError}>
             <Alert severity="error">Incorrect email or password.</Alert>
           </Collapse>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={signIn}
+            onSubmit={signUp}
           >
             {({ isValid }) => {
               return (
                 <Form className={classes.form}>
+                  <FormTextField
+                    label="First name"
+                    name="firstName"
+                    autoComplete="firstName"
+                  />
+                  <FormTextField
+                    label="Last name"
+                    name="lastName"
+                    autoComplete="lastName"
+                  />
                   <FormTextField
                     label="Email Address"
                     name="email"
@@ -89,18 +103,18 @@ export default props => {
                     color="primary"
                     disabled={!isValid}
                   >
-                    Sign in
+                    Agree & Join
                   </Button>
                 </Form>
               )
             }}
           </Formik>
         </Paper>
-        <Paper className={classes.signUpPaper}>
+        <Paper className={classes.signInPaper}>
           <div>
-            {`New to ${window.APP_CONFIG.APP_NAME}? `}
-            <Link href="#" onClick={signUp}>
-              Create an account
+            {`Already on ${window.APP_CONFIG.APP_NAME}? `}
+            <Link href="#" onClick={signIn}>
+              Sign in
               </Link>
               .
             </div>

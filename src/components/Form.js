@@ -17,8 +17,8 @@ export const CheckboxField = ({ label, ...props }) => {
 };
 
 export const FormTextField = ({ label, ...props }) => {
-    const [field, meta/*, helpers*/] = useField(props);
-    const hasError = meta.touched && meta.error;
+    const [field, meta] = useField(props);
+    const hasError = !!(meta.touched && meta.error);
 
     return (
         <TextField

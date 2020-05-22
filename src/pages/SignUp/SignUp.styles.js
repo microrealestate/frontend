@@ -14,14 +14,14 @@ export const useStyles = () => {
         flexDirection: 'column',
         alignItems: 'center'
       },
-      signInPaper: {
+      signUpPaper: {
         marginTop: '20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '20px 30px 30px'
       },
-      signUpPaper: {
+      signInPaper: {
         marginTop: '40px',
         display: 'flex',
         flexDirection: 'column',
