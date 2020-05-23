@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useObserver } from 'mobx-react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import Collapse from '@material-ui/core/Collapse';
@@ -34,19 +35,14 @@ const validationSchema = Yup.object().shape({
 
 export default props => {
   const { navigate } = props;
-  const { store: { user } } = useStore();
-  const [signUpError, setSignUpError] = useState(false);
+  const { store, store: { user } } = useStore();
   const classes = useStyles();
 
   const signUp = async ({ firstName, lastName, email, password }, actions) => {
-    try {
       await user.signUp(firstName, lastName, email, password );
-      setSignUpError(false);
-      await navigate('/app/signin');
-    } catch (error) {
-      console.error(error);
-      setSignUpError(true);
-    }
+      if (!store.error) {
+        await navigate('/app/signin');
+      }
   };
 
   const signIn = async event => {
@@ -54,7 +50,7 @@ export default props => {
     await navigate('/app/signin');
   };
 
-  return (
+  return useObserver(() => (
       <main className={classes.main}>
         <div className={classes.pageTitle}>
           <LocationCityIcon fontSize="large" />
@@ -63,8 +59,8 @@ export default props => {
           </Typography>
         </div>
         <Paper className={classes.signUpPaper}>
-          <Collapse className={classes.alert} in={signUpError}>
-            <Alert severity="error">Incorrect email or password.</Alert>
+          <Collapse className={classes.alert} in={!!store.error}>
+            <Alert severity="error">{store.error}</Alert>
           </Collapse>
           <Formik
             initialValues={initialValues}
@@ -120,5 +116,5 @@ export default props => {
             </div>
         </Paper>
       </main>
-  );
+  ));
 };

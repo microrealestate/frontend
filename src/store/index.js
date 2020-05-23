@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { decorate, observable, reaction } from "mobx"
+import { decorate, observable, reaction, action } from "mobx"
 import { MobXProviderContext } from 'mobx-react';
 import axios from 'axios';
 
@@ -23,10 +23,9 @@ export default class Store {
                         clearTimeout(refreshTokenHandle);
                     }
                     refreshTokenHandle = setTimeout(async () => {
-                        try {
-                            await store.user.refreshTokens();
-                        } catch (error) {
-                            console.error(error);
+                        await store.user.refreshTokens();
+                        if (!store.user.signedIn) {
+                            // TODO display a dialog before reloading
                             window.location.reload();
                         }
                     }, (store.user.tokenExpiry * 1000) - Date.now() - 10000);
@@ -41,11 +40,7 @@ export default class Store {
         );
 
         // refresh token at startup
-        try {
-            await store.user.refreshTokens();
-        } catch (error) {
-            console.error(error);
-        }
+        await store.user.refreshTokens();
 
         return store;
     };
@@ -54,9 +49,15 @@ export default class Store {
         baseURL: window.APP_CONFIG.API_URL
     });
 
+    error = '';
+
     user = new User(this);
+
+    clearError = action(() => this.error = '');
+    setError = action(error => this.error = error);
 };
 decorate(Store, {
+    error: observable,
     user: observable
 });
 

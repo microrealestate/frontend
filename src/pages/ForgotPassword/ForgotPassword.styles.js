@@ -14,33 +14,23 @@ export const useStyles = () => {
         flexDirection: 'column',
         alignItems: 'center'
       },
-      signInPaper: {
+      forgotPasswordPaper: {
         marginTop: '20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '20px 30px 30px'
       },
-      signUpPaper: {
-        marginTop: '40px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '20px'
-      },
-      alert: {
-        width: '100%',
-        marginTop: '10px'
-      },
       form: {
         width: '100%',
         marginTop: '10px'
       },
-      forgotPassword: {
-        fontSize: '14px'
-      },
-      submit: {
-        marginTop: '30px'
+      formActions: {
+        display: 'flex',
+        marginTop: '30px',
+        '& > *': {
+          margin: '10px'
+        }
       }
     })();
 };

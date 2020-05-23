@@ -5,25 +5,21 @@ import * as Yup from 'yup';
 import Collapse from '@material-ui/core/Collapse';
 import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { useStore } from '../../store';
 import { FormTextField } from '../../components/Form';
 
-import { useStyles } from './SignIn.styles';
+import { useStyles } from './ForgotPassword.styles';
 
 const initialValues = {
-  email: '',
-  password: ''
+  email: ''
 };
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email')
-    .required('Required'),
-  password: Yup.string()
     .required('Required')
 });
 
@@ -32,21 +28,16 @@ export default props => {
   const { store, store: { user } } = useStore();
   const classes = useStyles();
 
-  const signIn = async ({ email, password }, actions) => {
-    await user.signIn(email, password);
+  const forgotPassword = async ({ email }, actions) => {
+    await user.forgotPassword(email);
     if (!store.error) {
-      await navigate('/app/dashboard', { replace: true });
+      await navigate('/app/resetpassword', { replace: true });
     }
   };
 
-  const signUp = async event => {
+  const signIn = async event => {
     event.preventDefault();
-    await navigate('/app/signup');
-  };
-
-  const forgotPassword = async event => {
-    event.preventDefault();
-    await navigate('/app/forgotpassword');
+    await navigate('/app/signin');
   };
 
   return useObserver(() => (
@@ -54,17 +45,17 @@ export default props => {
       <div className={classes.pageTitle}>
         <LocationCityIcon fontSize="large" />
         <Typography component="h1" variant="h5">
-          {`Sign in to ${window.APP_CONFIG.APP_NAME}`}
+          Reset your password
         </Typography>
       </div>
-      <Paper className={classes.signInPaper}>
+      <Paper className={classes.forgotPasswordPaper}>
         <Collapse className={classes.alert} in={!!store.error}>
           <Alert severity="error">{store.error}</Alert>
         </Collapse>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={signIn}
+          onSubmit={forgotPassword}
         >
           {({ isValid }) => {
             return (
@@ -74,36 +65,27 @@ export default props => {
                   name="email"
                   autoComplete="email"
                 />
-                <FormTextField
-                  label="Password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                />
-                <Link href='#' className={classes.forgotPassword} onClick={forgotPassword}>Forgot password?</Link>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  className={classes.submit}
-                  color="primary"
-                  disabled={!isValid}
-                >
-                  Sign in
+                <div className={classes.formActions}>
+                  <Button
+                    variant="contained"
+                    onClick={signIn}
+                  >
+                    Cancel
                   </Button>
+                  <Button
+                    type="submit"
+                    // fullWidth
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                  >
+                    Send reset password email
+                  </Button>
+                </div>
               </Form>
             )
           }}
         </Formik>
-      </Paper>
-      <Paper className={classes.signUpPaper}>
-        <div>
-          {`New to ${window.APP_CONFIG.APP_NAME}? `}
-          <Link href="#" onClick={signUp}>
-            Create an account
-              </Link>
-              .
-            </div>
       </Paper>
     </main>
   ));
