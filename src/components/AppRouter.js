@@ -18,18 +18,19 @@ import { useStore } from '../store';
 export default props => {
     return useObserver(() => {
         const { store, store: { user } } = useStore();
+        const basePath = process.env.PUBLIC_URL || '';
         return (
             <Location>
                 {({ location }) => {
                     store.clearError();
 
                     return (
-                        <Router basepath="/app">
+                        <Router basepath={basePath}>
                             {user.signedIn ? (
                                 <>
-                                    <Redirect from="/signin" to="/app/dashboard" noThrow />
-                                    <Redirect from="/signup" to="/app/dashboard" noThrow />
-                                    <Redirect from="/" to="/app/dashboard" noThrow />
+                                    <Redirect from="/signin" to={`${basePath}/dashboard`} noThrow />
+                                    <Redirect from="/signup" to={`${basePath}/dashboard`} noThrow />
+                                    <Redirect from="/" to={`${basePath}/dashboard`} noThrow />
                                     <App path="/">
                                         <Dashboard path="/dashboard" />
                                         <Rents path="/rents" />
@@ -42,14 +43,13 @@ export default props => {
                                 </>
                             ) : (
                                 <>
-                                    <Redirect from="/*" to="/app/signin" noThrow />
                                     <SignUp path="/signup" />
                                     <SignIn path="/signin" />
                                     <ForgotPassword path="/forgotpassword" />
                                     <ResetPassword path="/resetpassword/:resetToken" />
+                                    <Redirect from="/*" to={`${basePath}/signin`} noThrow />
                                 </>
                             )}
-                            <NotFound default />
                         </Router>
                     );
                 }}

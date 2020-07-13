@@ -90,7 +90,7 @@ export default props => {
     const signOut = async event => {
         event.preventDefault();
         await user.signOut();
-        await navigate('/app');
+        await navigate(process.env.PUBLIC_URL);
         setAnchorEl(null);
     };
 
