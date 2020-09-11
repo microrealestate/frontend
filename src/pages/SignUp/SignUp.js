@@ -41,13 +41,13 @@ export default props => {
   const signUp = async ({ firstName, lastName, email, password }, actions) => {
       await user.signUp(firstName, lastName, email, password );
       if (!store.error) {
-        await navigate(`${process.env.PUBLIC_URL}/signin`);
+        await navigate('/signin');
       }
   };
 
   const signIn = async event => {
     event.preventDefault();
-    await navigate(`${process.env.PUBLIC_URL}/signin`);
+    await navigate('/signin');
   };
 
   return useObserver(() => (

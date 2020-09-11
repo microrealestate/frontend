@@ -31,13 +31,13 @@ export default props => {
   const forgotPassword = async ({ email }, actions) => {
     await user.forgotPassword(email);
     if (!store.error) {
-      await navigate(`${process.env.PUBLIC_URL}/resetpassword`, { replace: true });
+      await navigate('/resetpassword');
     }
   };
 
   const signIn = async event => {
     event.preventDefault();
-    await navigate(`${process.env.PUBLIC_URL}/signin`);
+    await navigate('/signin');
   };
 
   return useObserver(() => (

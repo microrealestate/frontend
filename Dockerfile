@@ -11,7 +11,6 @@ COPY src src
 COPY package.json .
 COPY package-lock.json .
 COPY LICENSE .
-ENV PUBLIC_URL=/app
 ENV REACT_APP_APP_NAME=
 ENV REACT_APP_API_URL=
 RUN npm ci --silent && \

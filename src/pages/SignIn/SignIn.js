@@ -35,18 +35,18 @@ export default props => {
   const signIn = async ({ email, password }, actions) => {
     await user.signIn(email, password);
     if (!store.error) {
-      await navigate(`${process.env.PUBLIC_URL}/dashboard`, { replace: true });
+      await navigate('/');
     }
   };
 
   const signUp = async event => {
     event.preventDefault();
-    await navigate(`${process.env.PUBLIC_URL}/signup`);
+    await navigate('/signup');
   };
 
   const forgotPassword = async event => {
     event.preventDefault();
-    await navigate(`${process.env.PUBLIC_URL}/forgotpassword`);
+    await navigate('/forgotpassword');
   };
 
   return useObserver(() => (

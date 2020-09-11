@@ -37,13 +37,13 @@ export default props => {
   const resetPassword = async ({ password }, actions) => {
     await user.resetPassword(resetToken, password);
     if (!store.error) {
-      await navigate(`${process.env.PUBLIC_URL}/signin`, { replace: true });
+      await navigate('/signin');
     }
   };
 
   const signIn = async event => {
     event.preventDefault();
-    await navigate(`${process.env.PUBLIC_URL}/signin`);
+    await navigate('/signin');
   };
 
   return useObserver(() => (

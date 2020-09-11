@@ -18,19 +18,18 @@ import { useStore } from '../store';
 export default props => {
     return useObserver(() => {
         const { store, store: { user } } = useStore();
-        const basePath = process.env.PUBLIC_URL || '';
         return (
             <Location>
                 {({ location }) => {
                     store.clearError();
 
                     return (
-                        <Router basepath={basePath}>
+                        <Router>
                             {user.signedIn ? (
                                 <>
-                                    <Redirect from="/signin" to={`${basePath}/dashboard`} noThrow />
-                                    <Redirect from="/signup" to={`${basePath}/dashboard`} noThrow />
-                                    <Redirect from="/" to={`${basePath}/dashboard`} noThrow />
+                                    <Redirect from="/signin" to="/dashboard" noThrow />
+                                    <Redirect from="/signup" to="/dashboard" noThrow />
+                                    <Redirect from="/" to="/dashboard" noThrow />
                                     <App path="/">
                                         <Dashboard path="/dashboard" />
                                         <Rents path="/rents" />
@@ -47,7 +46,7 @@ export default props => {
                                     <SignIn path="/signin" />
                                     <ForgotPassword path="/forgotpassword" />
                                     <ResetPassword path="/resetpassword/:resetToken" />
-                                    <Redirect from="/*" to={`${basePath}/signin`} noThrow />
+                                    <Redirect from="/*" to="/signin" noThrow />
                                 </>
                             )}
                         </Router>
