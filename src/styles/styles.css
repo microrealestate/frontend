@@ -1,4 +1,4 @@
-/*!
+/* /*!
 
  =========================================================
  * Material Dashboard React - v1.8.0 based on Material Dashboard - v1.2.0
@@ -13,7 +13,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
  */
-  html * {
+ /* html * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -167,4 +167,4 @@
 
   footer ul li a:hover {
     text-decoration: none;
-  }
+  } */

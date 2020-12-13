@@ -1,64 +1,43 @@
-import { useContext } from 'react';
-import { decorate, observable, reaction, action } from "mobx"
-import { MobXProviderContext } from 'mobx-react';
-import axios from 'axios';
 
-import User from './User';
+import { useStaticRendering } from 'mobx-react-lite'
+import { createContext, useEffect, useState } from 'react'
+import { isServer } from '../utils';
+import Store from './Store';
 
-export default class Store {
-    static create = async () => {
-        const store = new Store();
+useStaticRendering(isServer());
 
-        // set/unset the Bearer token
-        // trigger refresh token before token expiry date
-        let refreshTokenHandle;
-        reaction(
-            () => store.user.token,
-            token => {
-                if (token) {
-                    store.apiRequest.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+let _store;
 
-                    // trigger refresh in 5 min - 10 seconds (before expiry date)
-                    if (refreshTokenHandle) {
-                        clearTimeout(refreshTokenHandle);
-                    }
-                    refreshTokenHandle = setTimeout(async () => {
-                        await store.user.refreshTokens();
-                        if (!store.user.signedIn) {
-                            // TODO display a dialog before reloading
-                            window.location.reload();
-                        }
-                    }, (store.user.tokenExpiry * 1000) - Date.now() - 10000);
-                } else {
-                    delete store.apiRequest.defaults.headers.common['Authorization'];
-                    if (refreshTokenHandle) {
-                        clearTimeout(refreshTokenHandle);
-                        refreshTokenHandle = undefined;
-                    }
-                }
-            }
-        );
+function getStoreInstance(initialData) {
+  if (isServer()) {
+    return new Store();
+  }
 
-        // refresh token at startup
-        await store.user.refreshTokens();
+  if (!_store) {
+    console.log('create store')
+    _store = new Store();
+    _store._hydrate(initialData);
+    if (process.env.NODE_ENV === 'development') {
+      window.__store = _store;
+    }
+  }
+  return _store;
+}
 
-        return store;
-    };
 
-    apiRequest = axios.create({
-        baseURL: window.APP_CONFIG.API_URL
-    });
+const StoreContext = createContext()
 
-    error = '';
+function InjectStoreContext({ children, initialData }) {
+  const [store, setStore] = useState();
 
-    user = new User(this);
+  useEffect(() => {
+    setStore(getStoreInstance(initialData));
+    if (!isServer() && process.env.NODE_ENV === 'development') {
+      window.__store = store;
+    }
+  }, []);
 
-    clearError = action(() => this.error = '');
-    setError = action(error => this.error = error);
-};
-decorate(Store, {
-    error: observable,
-    user: observable
-});
+  return store ? <StoreContext.Provider value={store}>{children}</StoreContext.Provider> : null;
+}
 
-export const useStore = () => useContext(MobXProviderContext);
+export { InjectStoreContext, StoreContext, getStoreInstance }
