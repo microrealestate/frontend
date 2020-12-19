@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import getConfig from 'next/config'
 import { Form, Formik } from 'formik';
@@ -38,15 +38,30 @@ const validationSchema = Yup.object().shape({
 const SignUp = withTranslation()(({ t }) => {
     const { publicRuntimeConfig: { APP_NAME } } = getConfig();
     const store = useContext(StoreContext);
+    const [error, setError] = useState('');
     const classes = useStyles();
     const router = useRouter();
 
     const signUp = async ({ firstName, lastName, email, password }, actions) => {
         try {
-            await store.user.signUp(firstName, lastName, email, password);
+            const status = await store.user.signUp(firstName, lastName, email, password);
+            if (status !== 200) {
+                switch (status) {
+                    case 422:
+                        setError('Some fields are missing.')
+                        return;
+                    case 409:
+                        setError('This user is already registered.')
+                        return;
+                    default:
+                        setError('Something went wrong :(');
+                        return;
+                }
+            }
             router.push('/signin');
         } catch (error) {
             console.error(error);
+            setError('Something went wrong :(');
         }
     };
 
@@ -59,8 +74,8 @@ const SignUp = withTranslation()(({ t }) => {
                 </Typography>
             </div>
             <Paper className={classes.signUpPaper}>
-                <Collapse className={classes.alert} in={!!store.error}>
-                    <Alert severity="error">{store.error}</Alert>
+                <Collapse className={classes.alert} in={!!error}>
+                    <Alert severity="error">{error}</Alert>
                 </Collapse>
                 <Formik
                     initialValues={initialValues}

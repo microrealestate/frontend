@@ -49,10 +49,10 @@ export const useApiFetch = () => {
             },
             error => {
                 console.error(`${error.config.method.toUpperCase()} ${error.config.url} ${error.response.status}`);
-                if (!isServer() && [401, 403].includes(error.response.status)) {
-                    window.location.assign('/signin');
-                    return;
-                }
+                // if (!isServer() && [401, 403].includes(error.response.status)) {
+                //     window.location.assign('/app/signin');
+                //     return;
+                // }
                 return Promise.reject(error);
             }
         );

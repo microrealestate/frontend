@@ -21,71 +21,43 @@ export default class User {
     }
 
     signUp = flow(function* (firstname, lastname, email, password) {
-        // if (!this.signedIn) {
-        //     try {
-                yield useApiFetch().post('/authenticator/signup', {
-                    firstname,
-                    lastname,
-                    email,
-                    password
-                })
-        //     } catch (error) {
-        //         const status = error.response.status
-        //         switch (status) {
-        //             case 422:
-        //                 this.store.setError('Some fields are missing.')
-        //                 break
-        //             case 409:
-        //                 this.store.setError('This user is already registered.')
-        //                 break
-        //             default:
-        //                 this.store.setError('Something went wrong :(')
-        //         }
-        //     }
-        // } else {
-        //     this.store.setError('Cannot add a new user when signed in.')
-        // }
+        try {
+            yield useApiFetch().post('/authenticator/signup', {
+                firstname,
+                lastname,
+                email,
+                password
+            })
+            return 200;
+        } catch (error) {
+            return error.response.status;
+        }
     })
 
     signIn = flow(function* (email, password) {
-        // if (!this.signedIn) {
-        //     try {
-                const response = yield useApiFetch().post('/authenticator/signin', {
-                    email,
-                    password
-                })
-                const { accessToken } = response.data
-                const { account: { firstname, lastname }, exp } = jwt.decode(accessToken)
-                this.firstName = firstname
-                this.lastName = lastname
-                this.tokenExpiry = exp
-                this.token = accessToken
-                this.locale = 'fr-FR';
-                this.currency = 'EUR';
-        //     } catch (error) {
-        //         const status = error.response.status
-        //         switch (status) {
-        //             case 422:
-        //                 this.store.setError('Some fields are missing.')
-        //                 break
-        //             case 401:
-        //                 this.store.setError('Incorrect email or password.')
-        //                 break
-        //             default:
-        //                 this.store.setError('Something went wrong :(')
-        //         }
-        //     }
-        // } else {
-        //     this.store.setError('Cannot sign in a user when already signed in.')
-        // }
+        try {
+            const response = yield useApiFetch().post('/authenticator/signin', {
+                email,
+                password
+            })
+            const { accessToken } = response.data
+            const { account: { firstname, lastname }, exp } = jwt.decode(accessToken)
+            this.firstName = firstname
+            this.lastName = lastname
+            this.tokenExpiry = exp
+            this.token = accessToken
+            this.locale = 'fr-FR';
+            this.currency = 'EUR';
+            return 200;
+        } catch (error) {
+            console.error(error);
+            return error.response.status
+        }
     })
 
     signOut = flow(function* () {
         try {
             yield useApiFetch().delete('/authenticator/signout')
-        // } catch (error) {
-        //     console.error(error)
-        // }
         } finally {
             this.firstName = undefined
             this.lastName = undefined

@@ -45,7 +45,6 @@ export function withAuthentication(PageComponent) {
                 return {};
             }
 
-
             try {
                 await store.organization.fetch();
                 const organizationName = context.query.organization;

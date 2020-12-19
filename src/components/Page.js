@@ -1,23 +1,18 @@
 import { useState, useContext } from 'react';
 import { useObserver } from 'mobx-react-lite';
-import getConfig from 'next/config'
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
-import LocationCityIcon from '@material-ui/icons/LocationCity';
 
 import { withTranslation } from '../utils/i18n';
 
 import OrganizationSwitcher from './OrganizationSwitcher';
 import { StoreContext } from '../store';
 import { Box, Grid, Tooltip } from '@material-ui/core';
-import IconTypography from './IconTypography';
-
 
 const MainToolbar = withTranslation()(({ t }) => {
     const store = useContext(StoreContext);
     const [anchorEl, setAnchorEl] = useState();
-    const { publicRuntimeConfig: { APP_NAME } } = getConfig();
 
     const signOut = async event => {
         event.preventDefault();
@@ -27,20 +22,10 @@ const MainToolbar = withTranslation()(({ t }) => {
     };
 
     return (
-        <Box display="flex" justifyContent="flex-end">
-            {store.organization.items && store.organization.items.length ? (
+        <Box display="flex" width="100%" justifyContent="flex-end">
+            {store.organization.items && store.organization.items.length && (
                 <OrganizationSwitcher />
-            ) : (
-                    <IconTypography
-                        Icon={LocationCityIcon}
-                        fontSize="large"
-                        variant="h5"
-                        color="textSecondary"
-                        noWrap
-                    >
-                        {APP_NAME}
-                    </IconTypography>
-                )}
+            )}
             <Tooltip title={t('Sign out')} aria-label="sign out">
                 <IconButton
                     aria-label="sign out"

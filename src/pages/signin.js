@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import getConfig from 'next/config'
 import { Form, Formik } from 'formik';
@@ -32,23 +32,40 @@ const validationSchema = Yup.object().shape({
 const SignIn = withTranslation()(({ t }) => {
   console.log('Signin functional component')
   const store = useContext(StoreContext);
+  const [error, setError] = useState('');
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
   const classes = useStyles();
   const router = useRouter();
 
   const signIn = async ({ email, password }, actions) => {
     try {
-      await store.user.signIn(email, password);
+      const status = await store.user.signIn(email, password);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+              setError('Some fields are missing.');
+              return;
+          case 401:
+              setError('Incorrect email or password.')
+              return;
+          default:
+            setError('Something went wrong :(')
+            return;
+        };
+      }
+
       await store.organization.fetch();
       if (store.organization.items.length) {
-        store.organization.setSelected(store.organization.items[0]);
+        if (!store.organization.selected.name) {
+          store.organization.setSelected(store.organization.items[0]);
+        }
         router.push(`/${store.organization.selected.name}/dashboard`);
       } else {
         router.push('/firstaccess');
       }
-
     } catch (error) {
       console.error(error);
+      setError('Something went wrong :(')
     }
   };
 
@@ -61,8 +78,8 @@ const SignIn = withTranslation()(({ t }) => {
           </Typography>
         </div>
         <Paper className={classes.signInPaper}>
-          <Collapse className={classes.alert} in={!!store.error}>
-            <Alert severity="error">{store.error}</Alert>
+          <Collapse className={classes.alert} in={!!error}>
+            <Alert severity="error">{error}</Alert>
           </Collapse>
           <Formik
             initialValues={initialValues}

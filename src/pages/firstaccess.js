@@ -1,15 +1,18 @@
 import React, { useContext, useState } from 'react';
+import getConfig from 'next/config'
 import { useObserver } from 'mobx-react-lite';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormTextField, SubmitButton, RadioFieldGroup, RadioField } from '../components/Form';
+import { Typography, Box, Paper } from '@material-ui/core';
+import LocationCityIcon from '@material-ui/icons/LocationCity';
 
+import { FormTextField, SubmitButton, RadioFieldGroup, RadioField } from '../components/Form';
 import { withTranslation } from '../utils/i18n';
 import { withAuthentication } from '../components/Authentication';
-import { Typography, Box, Paper } from '@material-ui/core';
 import { StoreContext } from '../store';
 import { useStyles } from '../styles/pages/FirstAccess.styles';
 import Page from '../components/Page';
+import IconTypography from '../components/IconTypography';
 
 const initialValues = {
     name: '',
@@ -38,6 +41,7 @@ const validationSchema = Yup.object().shape({
 
 
 const FirstAccess = withTranslation()(({ t }) => {
+    const { publicRuntimeConfig: { APP_NAME } } = getConfig();
     const store = useContext(StoreContext);
     const [value, setValue] = useState(false);
     const classes = useStyles();
@@ -62,7 +66,19 @@ const FirstAccess = withTranslation()(({ t }) => {
     };
 
     return useObserver(() => (
-        <Page>
+        <Page
+            PrimaryToolbar={
+                <IconTypography
+                    Icon={LocationCityIcon}
+                    fontSize="large"
+                    variant="h5"
+                    color="textSecondary"
+                    noWrap
+                >
+                    {APP_NAME}
+                </IconTypography>
+            }
+        >
             <div className={classes.main}>
                 <Box paddingTop={2} paddingBottom={2}>
                     <Typography variant="h3" align="center">
