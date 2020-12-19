@@ -47,7 +47,6 @@ const FirstAccess = withTranslation()(({ t }) => {
     };
 
     const onSubmit = async ({ name, isCompany, company, email }, actions) => {
-        console.log({ name, isCompany, company, email, actions})
         try {
             await new Promise(res => setTimeout(() => {res()}, 3000));
             //   await store.organization.create({

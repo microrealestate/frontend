@@ -57,7 +57,6 @@ export default class Store {
     }
 
     _hydrate(initialData) {
-      console.log({initialData})
       if (!initialData) {
         return;
       }

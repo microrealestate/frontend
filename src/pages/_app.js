@@ -51,7 +51,6 @@ MyApp.getInitialProps = async appContext => {
   if (!appProps.pageProps.initialState) {
     appProps.pageProps.initialState = {};
   }
-  console.log(appProps)
   return appProps;
 }
 
