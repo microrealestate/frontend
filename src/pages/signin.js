@@ -10,11 +10,11 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { FormTextField, SubmitButton } from '../components/Form';
 
-import { useStyles } from '../styles/pages/SignIn.styles';
 import { StoreContext } from '../store'
 import { withTranslation } from '../utils/i18n';
 import Link from '../components/Link';
 import { useRouter } from 'next/router';
+import { Box } from '@material-ui/core';
 
 const initialValues = {
   email: '',
@@ -23,10 +23,10 @@ const initialValues = {
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
-    .email('Invalid email')
-    .required('Required'),
+    .email()
+    .required(),
   password: Yup.string()
-    .required('Required')
+    .required()
 });
 
 const SignIn = withTranslation()(({ t }) => {
@@ -34,7 +34,6 @@ const SignIn = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
-  const classes = useStyles();
   const router = useRouter();
 
   const signIn = async ({ email, password }, actions) => {
@@ -43,13 +42,13 @@ const SignIn = withTranslation()(({ t }) => {
       if (status !== 200) {
         switch (status) {
           case 422:
-              setError('Some fields are missing.');
-              return;
+            setError(t('Some fields are missing.'));
+            return;
           case 401:
-              setError('Incorrect email or password.')
-              return;
+            setError(t('Incorrect email or password.'))
+            return;
           default:
-            setError('Something went wrong :(')
+            setError(t('Something went wrong :('))
             return;
         };
       }
@@ -65,22 +64,27 @@ const SignIn = withTranslation()(({ t }) => {
       }
     } catch (error) {
       console.error(error);
-      setError('Something went wrong :(')
+      setError(t('Something went wrong :('))
     }
   };
 
   return useObserver(() => !store.user.signedIn ? (
-      <div className={classes.main}>
-        <div className={classes.pageTitle}>
+    <Box m="auto" width={500}>
+      <Box mt={10} mb={5}>
+        <Box align="center">
           <LocationCityIcon fontSize="large" />
-          <Typography component="h1" variant="h5">
-            {t('Sign in to', { APP_NAME })}
-          </Typography>
-        </div>
-        <Paper className={classes.signInPaper}>
-          <Collapse className={classes.alert} in={!!error}>
-            <Alert severity="error">{error}</Alert>
-          </Collapse>
+        </Box>
+        <Typography component="h1" variant="h5" align="center">
+          {t('Sign in to {{APP_NAME}}', { APP_NAME })}
+        </Typography>
+      </Box>
+      <Paper>
+        <Box px={4} pb={4} pt={2}>
+          <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
+            <Collapse in={!!error}>
+              <Alert severity="error">{error}</Alert>
+            </Collapse>
+          </Box>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -88,38 +92,42 @@ const SignIn = withTranslation()(({ t }) => {
           >
             {({ isValid, isSubmitting }) => {
               return (
-                <Form className={classes.form}>
+                <Form>
                   <FormTextField
-                    label="Email Address"
+                    label={t('Email Address')}
                     name="email"
                   />
                   <FormTextField
-                    label="Password"
+                    label={t('Password')}
                     name="password"
                     type="password"
                     autoComplete="current-password"
                   />
-                  <Link href='/forgotpassword' className={classes.forgotPassword}>Forgot password?</Link>
-                  <SubmitButton
-                    fullWidth
-                    className={classes.submit}
-                    label={!isSubmitting ? t('Sign in') : t('Signing in')}
-                  />
+                  <Typography variant="body2">
+                    <Link href='/forgotpassword'>{t('Forgot password?')}</Link>
+                  </Typography>
+                  <Box mt={4}>
+                    <SubmitButton
+                      fullWidth
+                      label={!isSubmitting ? t('Sign in') : t('Signing in')}
+                    />
+                  </Box>
                 </Form>
               )
             }}
           </Formik>
+        </Box>
+      </Paper>
+      <Box mt={4}>
+        <Paper>
+          <Box px={4} py={2}>
+            <Typography variant="body2">
+              {t('New to {{APP_NAME}}?',{APP_NAME})} <Link href="/signup">{t('Create an account')}</Link>.
+              </Typography>
+          </Box>
         </Paper>
-        <Paper className={classes.signUpPaper}>
-          <div>
-            {`New to ${APP_NAME}? `}
-            <Link href="/signup">
-              Create an account
-                </Link>
-                .
-              </div>
-        </Paper>
-      </div>
+      </Box>
+    </Box>
   ) : null);
 });
 

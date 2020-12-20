@@ -10,120 +10,126 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { FormTextField, SubmitButton } from '../components/Form';
 
-import { useStyles } from '../styles/pages/SignUp.styles';
 import { withTranslation } from '../utils/i18n';
 import { StoreContext } from '../store';
 import Link from '../components/Link';
 import { useRouter } from 'next/router';
+import { Box } from '@material-ui/core';
 
 const initialValues = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: ''
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: ''
 };
 
 const validationSchema = Yup.object().shape({
-    firstName: Yup.string()
-        .required('Required'),
-    lastName: Yup.string()
-        .required('Required'),
-    email: Yup.string()
-        .email('Invalid email')
-        .required('Required'),
-    password: Yup.string()
-        .required('Required')
+  firstName: Yup.string()
+    .required(),
+  lastName: Yup.string()
+    .required(),
+  email: Yup.string()
+    .email()
+    .required(),
+  password: Yup.string()
+    .required()
 });
 
 const SignUp = withTranslation()(({ t }) => {
-    const { publicRuntimeConfig: { APP_NAME } } = getConfig();
-    const store = useContext(StoreContext);
-    const [error, setError] = useState('');
-    const classes = useStyles();
-    const router = useRouter();
+  const { publicRuntimeConfig: { APP_NAME } } = getConfig();
+  const store = useContext(StoreContext);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-    const signUp = async ({ firstName, lastName, email, password }, actions) => {
-        try {
-            const status = await store.user.signUp(firstName, lastName, email, password);
-            if (status !== 200) {
-                switch (status) {
-                    case 422:
-                        setError('Some fields are missing.')
-                        return;
-                    case 409:
-                        setError('This user is already registered.')
-                        return;
-                    default:
-                        setError('Something went wrong :(');
-                        return;
-                }
-            }
-            router.push('/signin');
-        } catch (error) {
-            console.error(error);
-            setError('Something went wrong :(');
+  const signUp = async ({ firstName, lastName, email, password }, actions) => {
+    try {
+      const status = await store.user.signUp(firstName, lastName, email, password);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            setError(t('Some fields are missing.'))
+            return;
+          case 409:
+            setError(t('This user is already registered.'))
+            return;
+          default:
+            setError(t('Something went wrong :('));
+            return;
         }
-    };
+      }
+      router.push('/signin');
+    } catch (error) {
+      console.error(error);
+      setError(t('Something went wrong :('));
+    }
+  };
 
-    return useObserver(() => (
-        <div className={classes.main}>
-            <div className={classes.pageTitle}>
-                <LocationCityIcon fontSize="large" />
-                <Typography component="h1" variant="h5">
-                    {`Sign up to ${APP_NAME}`}
-                </Typography>
-            </div>
-            <Paper className={classes.signUpPaper}>
-                <Collapse className={classes.alert} in={!!error}>
-                    <Alert severity="error">{error}</Alert>
-                </Collapse>
-                <Formik
-                    initialValues={initialValues}
-                    validationSchema={validationSchema}
-                    onSubmit={signUp}
-                >
-                    {({ isSubmitting }) => {
-                        return (
-                            <Form className={classes.form}>
-                                <FormTextField
-                                    label="First name"
-                                    name="firstName"
-                                />
-                                <FormTextField
-                                    label="Last name"
-                                    name="lastName"
-                                />
-                                <FormTextField
-                                    label="Email Address"
-                                    name="email"
-                                />
-                                <FormTextField
-                                    label="Password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                />
-                                <SubmitButton
-                                    fullWidth
-                                    className={classes.submit}
-                                    label={!isSubmitting ? t('Agree & Join') : t('Joining')}
-                                />
-                            </Form>
-                        )
-                    }}
-                </Formik>
-            </Paper>
-            <Paper className={classes.signInPaper}>
-                <div>
-                    {`Already on ${APP_NAME}? `}
-                    <Link href="/signin">
-                        Sign in
-                    </Link>
-              .
-            </div>
-            </Paper>
-        </div>
-    ));
+  return useObserver(() => (
+    <Box m="auto" width={500}>
+      <Box mt={10} mb={5}>
+        <Box align="center">
+          <LocationCityIcon fontSize="large" />
+        </Box>
+        <Typography component="h1" variant="h5" align="center">
+          {t('Sign up to {{APP_NAME}}', { APP_NAME })}
+        </Typography>
+      </Box>
+      <Paper>
+        <Box px={4} pb={4} pt={2}>
+          <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
+            <Collapse in={!!error}>
+              <Alert severity="error">{error}</Alert>
+            </Collapse>
+          </Box>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={signUp}
+          >
+            {({ isSubmitting }) => {
+              return (
+                <Form>
+                  <FormTextField
+                    label={t('First name')}
+                    name="firstName"
+                  />
+                  <FormTextField
+                    label={t('Last name')}
+                    name="lastName"
+                  />
+                  <FormTextField
+                    label={t('Email Address')}
+                    name="email"
+                  />
+                  <FormTextField
+                    label={t('Password')}
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                  />
+                  <Box mt={4}>
+                    <SubmitButton
+                      fullWidth
+                      label={!isSubmitting ? t('Agree & Join') : t('Joining')}
+                    />
+                  </Box>
+                </Form>
+              )
+            }}
+          </Formik>
+        </Box>
+      </Paper>
+      <Box mt={4}>
+        <Paper>
+          <Box px={4} py={2}>
+            <Typography variant="body2">
+              {t('Already on {{APP_NAME}}?', { APP_NAME })} <Link href="/signin">{t('Sign in')}</Link>.
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
+  ));
 });
 
 export default SignUp;
