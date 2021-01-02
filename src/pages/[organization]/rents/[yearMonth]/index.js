@@ -42,23 +42,7 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
 
 const ListToolbar = withTranslation()(({ t, onSearch }) => {
   return (
-    <Grid container wrap="nowrap" spacing={3}>
-      <Grid item xs={3}>
-        <FullScreenDialogButton
-          fullWidth
-          variant="contained"
-          buttonLabel={t('Send document to tenant')}
-          startIcon={<SendIcon />}
-          dialogTitle={t('Send document to tenant')}
-          cancelButtonLabel={t('Close')}
-          showCancel
-        >
-          <RentTable />
-        </FullScreenDialogButton>
-      </Grid>
-      <Grid item xs={3}>
-      </Grid>
-
+    <Grid container wrap="nowrap" alignItems="center" justify="space-between">
       <Grid item xs={6}>
         <SearchFilterBar
           filters={[
@@ -71,6 +55,20 @@ const ListToolbar = withTranslation()(({ t, onSearch }) => {
           onSearch={onSearch}
         />
       </Grid>
+      <Grid item>
+        <FullScreenDialogButton
+          fullWidth
+          variant="contained"
+          buttonLabel={t('Send document to tenant')}
+          startIcon={<SendIcon />}
+          dialogTitle={t('Send document to tenant')}
+          cancelButtonLabel={t('Close')}
+          showCancel
+        >
+          <RentTable />
+        </FullScreenDialogButton>
+      </Grid>
+
     </Grid>
   )
 });

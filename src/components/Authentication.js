@@ -1,3 +1,4 @@
+import ErrorPage from 'next/error';
 import moment from 'moment';
 import { useContext, useEffect } from 'react';
 import { useObserver } from 'mobx-react-lite';
@@ -17,6 +18,10 @@ export function withAuthentication(PageComponent) {
     const WithAuth = (pageProps) => {
         console.log('WithAuth functional component')
         const store = useContext(StoreContext);
+
+        if (pageProps.error) {
+            return <ErrorPage statusCode={pageProps.error.statusCode} />
+        }
 
         return useObserver(() => {
             changeLocaleCurency(store.user.locale, store.user.currency);
@@ -47,16 +52,28 @@ export function withAuthentication(PageComponent) {
 
             try {
                 await store.organization.fetch();
-                const organizationName = context.query.organization;
-                if (organizationName) {
-                    store.organization.setSelected(
-                        store.organization.items.find(org => org.name === organizationName)
-                    );
+                if (store.organization.items.length) {
+                    console.log(JSON.stringify(store.organization.items, null, 1))
+                    const organizationName = context.query.organization;
+                    if (organizationName) {
+                        store.organization.setSelected(
+                            store.organization.items.find(org => org.name === organizationName)
+                        );
+                    } else {
+                        store.organization.setSelected(store.organization.items[0]);
+                    }
+                    if (!store.organization.selected) {
+                        return  {
+                            error: {
+                                statusCode: 404
+                            }
+                        };
+                    }
                 }
             } catch (error) {
                 console.error(error)
             }
-            await changeLocaleCurency(store.user.locale, store.user.currency);
+            await changeLocaleCurency(store.organization.selected.locale, store.organization.selected.currency);
         }
 
         return PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: JSON.parse(JSON.stringify(store)) } };

@@ -7,9 +7,9 @@ import { StoreContext } from '../store';
 export const numberFormat = value => {
     const store = useContext(StoreContext);
 
-    return Intl.NumberFormat(store.user.locale, {
+    return Intl.NumberFormat(store.organization.selected.locale || 'en', {
         style: 'currency',
-        currency: store.user.currency,
+        currency: store.organization.selected.currency || 'EUR',
         minimumFractionDigits: 2
     }).format(value);
 };

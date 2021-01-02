@@ -55,7 +55,7 @@ const SignIn = withTranslation()(({ t }) => {
 
       await store.organization.fetch();
       if (store.organization.items.length) {
-        if (!store.organization.selected.name) {
+        if (!store.organization.selected) {
           store.organization.setSelected(store.organization.items[0]);
         }
         router.push(`/${store.organization.selected.name}/dashboard`);

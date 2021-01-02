@@ -14,6 +14,7 @@ import { withTranslation } from '../utils/i18n';
 import { StoreContext } from '../store';
 import { useRouter } from 'next/router';
 import { Box, Grid } from '@material-ui/core';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 
 const initialValues = {
   email: ''
@@ -28,6 +29,7 @@ const validationSchema = Yup.object().shape({
 const ForgotPassword = withTranslation()(({ t }) => {
   console.log('ForgotPassword functional component')
   const store = useContext(StoreContext);
+  const [emailSent, setEmailSent] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -44,7 +46,7 @@ const ForgotPassword = withTranslation()(({ t }) => {
             return;
         };
       }
-      router.push('/resetpassword');
+      setEmailSent(email);
     } catch (error) {
       console.error(error);
       setError(t('Something went wrong :('))
@@ -67,47 +69,70 @@ const ForgotPassword = withTranslation()(({ t }) => {
         </Typography>
       </Box>
       <Paper>
-        <Box px={4} pb={4} pt={2}>
-          <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
-            <Collapse in={!!error}>
-              <Alert severity="error">{error}</Alert>
-            </Collapse>
+        {!emailSent && (
+          <Box px={4} pb={4} pt={2}>
+            <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
+              <Collapse in={!!error}>
+                <Alert severity="error">{error}</Alert>
+              </Collapse>
+            </Box>
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={forgotPassword}
+            >
+              {({ isSubmitting }) => {
+                return (
+                  <Form>
+                    <FormTextField
+                      label={t('Email Address')}
+                      name="email"
+                      autoComplete="email"
+                    />
+                    <Box pt={2}>
+                      <Grid container spacing={2}>
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            onClick={signIn}
+                          >
+                            {t('Cancel')}
+                          </Button>
+                        </Grid>
+                        <Grid item>
+                          <SubmitButton
+                            label={!isSubmitting ? t('Send reset password email') : t('Reseting')}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Form>
+                )
+              }}
+            </Formik>
           </Box>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={forgotPassword}
-          >
-            {({ isSubmitting }) => {
-              return (
-                <Form>
-                  <FormTextField
-                    label={t('Email Address')}
-                    name="email"
-                    autoComplete="email"
-                  />
-                  <Box pt={2}>
-                    <Grid container spacing={2}>
-                      <Grid item>
-                        <Button
-                          variant="contained"
-                          onClick={signIn}
-                        >
-                          {t('Cancel')}
-                        </Button>
-                      </Grid>
-                      <Grid item>
-                        <SubmitButton
-                          label={!isSubmitting ? t('Send reset password email') : t('Reseting')}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Form>
-              )
-            }}
-          </Formik>
-        </Box>
+        )}
+        {emailSent && (
+          <Box px={4} pb={4} pt={2}>
+            <Box color="success.main" align="center">
+              <CheckCircleOutlineIcon fontSize="large"/>
+            </Box>
+            <Box pb={1}>
+              <Typography componnent="h2" variant="h6" align="center">{t('Check your email')}</Typography>
+            </Box>
+            <Typography variant="body2" align="center">{t('An email has been sent to your email address {{email}}.', { email: emailSent })}</Typography>
+            <Typography variant="body2" align="center">{t('Follow the directions in the email to reset your password.')}</Typography>
+            <Box align="center" pt={2}>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={signIn}
+              >
+                {t('Done')}
+              </Button>
+            </Box>
+          </Box>
+        )}
       </Paper>
     </Box>
   ));

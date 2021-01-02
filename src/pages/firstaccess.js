@@ -6,32 +6,37 @@ import * as Yup from 'yup';
 import { Typography, Box, Paper, Collapse } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 
-import { FormTextField, SubmitButton, RadioFieldGroup, RadioField } from '../components/Form';
+import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, SelectField } from '../components/Form';
 import { withTranslation } from '../utils/i18n';
 import { withAuthentication } from '../components/Authentication';
 import { StoreContext } from '../store';
 import Page from '../components/Page';
 import IconTypography from '../components/IconTypography';
 import Alert from '@material-ui/lab/Alert';
+import cc from 'currency-codes';
+import getSymbolFromCurrency from 'currency-symbol-map'
+import { useRouter } from 'next/router';
+import { isServer, redirect } from '../utils';
 
 const initialValues = {
   name: '',
+  locale: 'en',
+  currency: 'EUR',
   isCompany: 'false',
   company: '',
   email: ''
 };
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required(),
-  isCompany: Yup.string()
-    .required(),
+  name: Yup.string().required(),
+  locale: Yup.string().required(),
+  currency: Yup.string().required(),
+  isCompany: Yup.string().required(),
   company: Yup.mixed().when('isCompany', {
     is: 'true',
     then: Yup.string().required(),
     otherwise: Yup.string()
   }),
-  // company: Yup.string().required(),
   email: Yup.mixed().when('isCompany', {
     is: 'true',
     then: Yup.string().email().required(),
@@ -39,30 +44,42 @@ const validationSchema = Yup.object().shape({
   })
 });
 
+const currencies = cc.data.reduce((acc, { code, currency }) => {
+  const symbol = getSymbolFromCurrency(code);
+  if (symbol) {
+    acc.push({
+      code,
+      currency,
+      symbol
+    })
+  }
+  return acc
+}, []).sort((c1, c2) => c1.currency.localeCompare(c2.currency));
 
 const FirstAccess = withTranslation()(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
+  const router = useRouter();
 
-  const onSubmit = async ({ name, isCompany, company, email }, actions) => {
+  const onSubmit = async (organization, actions) => {
     try {
-      await new Promise(res => setTimeout(() => { res() }, 3000));
-      //   const status = await store.organization.create({
-      //       name,
-      //       isCompany,
-      //       company: isCompany ? company : '',
-      //       email: isCompany ? email : store.user.email,
-      //       admin: store.user.email
-      //   });
-      // if (status !== 200) {
-      //   switch (status) {
-      //     default:
-      //       setError(t('Something went wrong :('));
-      //       return;
-      //   };
-      // }
-      //   router.push(`${name}/dashboard`);
+      organization.isCompany = organization.isCompany === 'true';
+      const { status, data } = await store.organization.create({
+        ...organization,
+        company: organization.isCompany ? organization.company : '',
+        email: organization.isCompany ? organization.email : store.user.email,
+        administrator: store.user.email
+      });
+      if (status !== 200) {
+        switch (status) {
+          default:
+            setError(t('Something went wrong :('));
+            return;
+        };
+      }
+      store.organization.setSelected(data);
+      router.push(`${store.organization.selected.name}/dashboard`);
     } catch (error) {
       console.error(error);
       setError(t('Something went wrong :('));
@@ -91,7 +108,7 @@ const FirstAccess = withTranslation()(({ t }) => {
         </Box>
         <Box paddingBottom={4}>
           <Typography variant="subtitle2" align="center" color="textSecondary">
-            {t('One more step to tell us who will rent your properties')}
+            {t('One more step. Tell us who will rent your properties')}
           </Typography>
         </Box>
         <Paper>
@@ -117,6 +134,22 @@ const FirstAccess = withTranslation()(({ t }) => {
                       <FormTextField
                         label={t('Landlord name')}
                         name="name"
+                      />
+                      <SelectField
+                        label={t('Language')}
+                        name="locale"
+                        values={[
+                          { id: 'pt-BR', label: 'Brasileiro', value: 'pt-BR' },
+                          { id: 'en', label: 'English', value: 'en' },
+                          { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
+                        ]}
+                      />
+                      <SelectField
+                        label={t('Currency')}
+                        name="currency"
+                        values={currencies.map(({ code, currency, symbol }) => (
+                          { id: code, label: `${currency} (${symbol})`, value: code }
+                        ))}
                       />
                     </Box>
                     <Box>
@@ -158,6 +191,27 @@ const FirstAccess = withTranslation()(({ t }) => {
     </Page>
   ));
 });
+
+
+FirstAccess.getInitialProps = async (context) => {
+  console.log('FirstAccess.getInitialProps')
+  const store = isServer() ? context.store : getStoreInstance();
+
+  if (isServer()) {
+    if (store.organization.items) {
+      redirect(context, `/${store.organization.selected.name}/dashboard`);
+      return {};
+    }
+  }
+
+  const props = {
+    initialState: {
+      store: JSON.parse(JSON.stringify(store))
+    }
+  };
+  return props;
+};
+
 
 
 export default withAuthentication(FirstAccess);

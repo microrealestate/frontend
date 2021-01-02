@@ -12,9 +12,7 @@ export default class User {
 
   @observable lastName
 
-  @observable locale
-
-  @observable currency
+  @observable email
 
   @computed get signedIn() {
     return !!this.token
@@ -44,10 +42,9 @@ export default class User {
       const { account: { firstname, lastname }, exp } = jwt.decode(accessToken)
       this.firstName = firstname
       this.lastName = lastname
+      this.email = email
       this.tokenExpiry = exp
       this.token = accessToken
-      this.locale = 'fr-FR';
-      this.currency = 'EUR';
       return 200;
     } catch (error) {
       console.error(error);
@@ -61,6 +58,7 @@ export default class User {
     } finally {
       this.firstName = undefined
       this.lastName = undefined
+      this.email = undefined
       this.tokenExpiry = undefined
       this.token = undefined
     }
@@ -81,16 +79,16 @@ export default class User {
         response = yield useApiFetch().post('/authenticator/refreshtoken')
       }
       const { accessToken } = response.data
-      const { account: { firstname, lastname }, exp } = jwt.decode(accessToken)
+      const { account: { firstname, lastname, email }, exp } = jwt.decode(accessToken)
       this.firstName = firstname
       this.lastName = lastname
+      this.email = email
       this.tokenExpiry = exp
       this.token = accessToken
-      this.locale = 'fr-FR';
-      this.currency = 'EUR';
     } catch (error) {
       this.firstName = undefined
       this.lastName = undefined
+      this.email = undefined
       this.tokenExpiry = undefined
       this.token = undefined
       throw error;

@@ -74,10 +74,9 @@ export default class Store {
 
       this.user.firstName = user.firstName
       this.user.lastName = user.lastName
+      this.user.email = user.email
       this.user.token = user.token
       this.user.tokenExpiry = user.tokenExpiry
-      this.user.locale = user.locale;
-      this.user.currency = user.currency;
 
       this.organization.items = organization.items;
       this.organization.selected = organization.selected;

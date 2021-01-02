@@ -22,7 +22,7 @@ Index.getInitialProps = async (context) => {
 
     let redirectPath = '/firstaccess';
     if (store.organization.items.length) {
-      if (!store.organization.selected.name) {
+      if (!store.organization.selected) {
         store.organization.setSelected(store.organization.items[0]);
       }
       redirectPath = `/${store.organization.selected.name}/dashboard`;
