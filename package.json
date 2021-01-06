@@ -13,7 +13,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@material-ui/pickers": "^3.2.10",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "currency-codes": "^2.1.0",
     "currency-symbol-map": "^4.0.4",
     "formik": "^2.2.6",
