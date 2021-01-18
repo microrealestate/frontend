@@ -2,8 +2,6 @@ import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import Collapse from '@material-ui/core/Collapse';
-import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 import Paper from '@material-ui/core/Paper';
@@ -15,6 +13,7 @@ import { withTranslation } from '../../utils/i18n';
 import { StoreContext } from '../../store';
 import { useRouter } from 'next/router';
 import { Box, Grid } from '@material-ui/core';
+import RequestError from '../../components/RequestError';
 
 const initialValues = {
   password: '',
@@ -38,6 +37,8 @@ const ResetPassword = withTranslation()(({ t }) => {
 
   const resetPassword = async ({ password }) => {
     try {
+      setError('');
+
       const status = await store.user.resetPassword(resetToken, password);
       if (status !== 200) {
         switch (status) {
@@ -76,11 +77,7 @@ const ResetPassword = withTranslation()(({ t }) => {
       </Box>
       <Paper>
         <Box px={4} pb={4} pt={2}>
-          <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
-            <Collapse in={!!error}>
-              <Alert severity="error">{error}</Alert>
-            </Collapse>
-          </Box>
+          <RequestError error={error} />
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}

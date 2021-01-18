@@ -7,9 +7,9 @@ import ToggleMenu from './ToggleMenu';
 const OrganizationSwitcher = () => {
     const store = useContext(StoreContext);
 
-    const onChange = org => {
-        store.organization.setSelected(store.organization.items.find(({ _id }) => _id === org.id));
-        window.location.assign(`/app/${store.organization.selected.name}/dashboard`);
+    const onChange = ({ id }) => {
+        const organization = store.organization.items.find(({ _id }) => _id === id);
+        window.location.assign(`/app/${organization.name}/dashboard`);
     }
 
     const options = store.organization.items.map(({ _id, name }) => ({

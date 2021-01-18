@@ -56,7 +56,7 @@ const theme = createMuiTheme({
         MuiStepIcon: {
             root: {
                 '&$completed': {
-                    color: successColor[2]
+                    color: successColor[1]
                 }
             }
         }

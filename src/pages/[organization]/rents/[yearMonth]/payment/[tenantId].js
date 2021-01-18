@@ -56,22 +56,41 @@ const FormSection = ({ label, children, ...props }) => {
   );
 }
 
-const emptyPayment = { paymentAmount: '', paymentType: '', paymentReference: '' };
+const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
 
 const PaymentForm = withTranslation()(({ t, rent }) => {
   const store = useContext(StoreContext);
   const router = useRouter();
+
   const onSubmit = async (values, actions) => {
-    console.log(values)
+    // Save only payments
+    values.payments = values.payments.filter(({ amount }) => amount > 0).map(payment => {
+      // convert moment into string for the DB
+      payment.date = payment.date.format('DD/MM/YYYY');
+      return payment;
+    });
+    values.month = rent.month;
+    values.year = rent.year;
+    values._id = rent._id;
+    try {
+      await store.rent.pay(values);
+      await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  const onCancel = async () => {
+    await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
   }
 
   const initialValues = {
     payments: rent.payments.length ? rent.payments.map(({amount, date, type, reference}) => {
       return {
-        paymentAmount: amount === 0 ? '' : amount,
-        paymentDate: date ? moment(date, 'DD/MM/YYYY') : undefined,
-        paymentType: type,
-        paymentReference: reference || ''
+        amount: amount === 0 ? '' : amount,
+        date: date ? moment(date, 'DD/MM/YYYY') : undefined,
+        type: type,
+        reference: reference || ''
       }
     }) : [emptyPayment],
     extracharge: rent.extracharge !== 0 ? rent.extracharge : '',
@@ -81,24 +100,31 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
     description: rent.description || ''
   };
 
-  // console.log(JSON.parse(JSON.stringify(rent)))
-
   const validationSchema = Yup.object().shape({
-    // name: Yup.string()
-    //   .required('Required'),
-    // isCompany: Yup.boolean()
-    //   .required('Required'),
-    // company: Yup.mixed().when('isCompany', {
-    //   is: true,
-    //   then: Yup.string().required(),
-    //   otherwise: Yup.string()
-    // }),
-    // // company: Yup.string().required(),
-    // email: Yup.mixed().when('isCompany', {
-    //   is: true,
-    //   then: Yup.string().email().required(),
-    //   otherwise: Yup.string().email()
-    // })
+    payments: Yup.array().of(
+      Yup.object().shape({
+        amount: Yup.number().positive(),
+        date: Yup.mixed().when('amount', {
+          is: val => val > 0,
+          then: Yup.date().required()
+        }),
+        type: Yup.string().required(),
+        reference: Yup.mixed().when('type', {
+          is: val => val !== 'cash',
+          then:  Yup.string().required()
+        })
+      })),
+      extracharge: Yup.number().positive(),
+      noteextracharge:  Yup.mixed().when('extracharge', {
+        is: val => val > 0,
+        then: Yup.string().required(),
+      }),
+      promo: Yup.number().positive(),
+      notepromo: Yup.mixed().when('promo', {
+        is: val => val > 0,
+        then: Yup.string().required(),
+      }),
+      description: Yup.string()
   });
 
   return (
@@ -122,13 +148,13 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                           <Grid item xs={6}>
                             <FormTextField
                               label={t('Amount')}
-                              name={`payments[${index}].paymentAmount`}
+                              name={`payments[${index}].amount`}
                             />
                           </Grid>
                           <Grid item xs={6}>
                             <DateField
                               label={t('Date')}
-                              name={`payments[${index}].paymentDate`}
+                              name={`payments[${index}].date`}
                             />
                           </Grid>
                         </Grid>
@@ -136,7 +162,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                           <Grid item xs={6}>
                             <SelectField
                               label={t('Type')}
-                              name={`payments[${index}].paymentType`}
+                              name={`payments[${index}].type`}
                               values={[
                                 { id: 'cheque', label: t('Cheque'), value: 'cheque' },
                                 { id: 'cash', label: t('Cash'), value: 'cash' },
@@ -149,7 +175,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                           <Grid item xs={6}>
                             <FormTextField
                               label={t('Reference')}
-                              name={`payments[${index}].paymentReference`}
+                              name={`payments[${index}].reference`}
                             />
                           </Grid>
                         </Grid>
@@ -177,7 +203,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                 )}
               />
             </FormSection>
-            <FormSection label={t('Additional cost')} defaultExpanded={!!(extracharge && extracharge !== 0)}>
+            <FormSection label={t('Additional cost')} defaultExpanded={!!initialValues.extracharge}>
               <FormTextField
                 label={t('Amount')}
                 name="extracharge"
@@ -193,7 +219,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
               />
             </FormSection>
 
-            <FormSection label={t('Discount')} defaultExpanded={!!(promo && promo !== 0)}>
+            <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
               <FormTextField
                 label={t('Discount')}
                 name="promo"
@@ -209,7 +235,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
               />
             </FormSection>
 
-            <FormSection label={t('Internal description')} defaultExpanded={!!description}>
+            <FormSection label={t('Internal description')} defaultExpanded={!!initialValues.description}>
               <FormTextField
                 label={t('Description')}
                 name="description"
@@ -226,7 +252,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                   <Button
                     variant="contained"
                     size="large"
-                    onClick={() => router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`)}
+                    onClick={onCancel}
                   >
                     {t('Cancel')}
                   </Button>
@@ -270,7 +296,7 @@ const RentPayment = withTranslation()(({ t }) => {
             title={t('Rent to pay')}
           >
             <Box pb={1}>
-              <NumberFormat align="right" variant="h4" value={store.rent.selected.totalToPay} />
+              <NumberFormat align="right" variant="h4" value={store.rent.selected.totalToPay > 0 ? store.rent.selected.totalToPay : 0} />
             </Box>
             <Divider />
             <Box pt={1}>
@@ -291,14 +317,19 @@ RentPayment.getInitialProps = async (context) => {
     const { yearMonth, tenantId } = context.query;
     const rentPeriod = moment(yearMonth, 'YYYY.MM', true);
     if (!rentPeriod.isValid()) {
-      return { statusCode: 404 };
+      return { error: { statusCode: 404 } };
     }
+
     store.rent.setPeriod(rentPeriod);
-    await store.rent.fetch();
+    const fetchStatus = await store.rent.fetch();
+    if (fetchStatus !== 200) {
+      // TODO check error code to show a more detail error message
+      return { error: { statusCode: 500 } };
+    }
 
     const selectedRent = store.rent.items.find(({ occupant: { _id } }) => _id === tenantId);
     if (!selectedRent) {
-      return { statusCode: 404 };
+      return { error: { statusCode: 404 } };
     }
     store.rent.setSelected(selectedRent);
     // console.log(JSON.parse(JSON.stringify(store.rent)));

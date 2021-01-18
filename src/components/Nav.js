@@ -3,11 +3,11 @@ import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import PeopleIcon from '@material-ui/icons/People';
+import SettingsIcon from '@material-ui/icons/Settings';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 
 import { useStyles } from '../styles/components/Nav.styles';
@@ -59,10 +59,10 @@ const Nav = withTranslation()((props) => {
             icon: <AccountBalanceWalletIcon />
         },
         {
-            key: 'landlord',
-            value: t('Landlord'),
-            pathname: '/landlord',
-            icon: <AccountBoxIcon />
+            key: 'settings',
+            value: t('Settings'),
+            pathname: '/settings',
+            icon: <SettingsIcon />
         }
     ];
 

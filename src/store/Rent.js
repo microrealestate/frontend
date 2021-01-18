@@ -1,30 +1,14 @@
 import moment from 'moment';
 import { observable, action, flow, computed } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
-
 export default class Rent {
   @observable selected = {};
   @action setSelected = rent => this.selected = rent;
 
   @observable filters = { searchText: '', status: '' };
-  @action setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
 
   _period = moment();
-  @action setPeriod = period => {
-    if (period.isSame(this._period, 'month')) {
-      console.log('same period')
-      this._useCache = true;
-    } else {
-      console.log('not same period')
-      this._useCache = false;
-      this._period = period;
-    }
-  }
-  @computed get period() {
-    return this._period.format('YYYY.MM');
-  }
 
-  _useCache = false;
   @observable items = [];
   @observable countAll;
   @observable countPaid;
@@ -33,6 +17,10 @@ export default class Rent {
   @observable totalToPay;
   @observable totalPaid;
   @observable totalNotPaid;
+
+  @computed get period() {
+    return this._period.format('YYYY.MM');
+  }
 
   @computed get filteredItems() {
     let filteredItems = this.filters.status === '' ? this.items : this.items.filter(({ status }) => {
@@ -77,30 +65,54 @@ export default class Rent {
     return filteredItems;
   }
 
+  @action setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
+
+  @action setPeriod = period => this._period = period;
+
   fetch = flow(function* () {
-    // if (this._useCache) {
-    //   console.log('use cached rents')
-    //   return;
-    // }
+    try {
+      const year = this._period.year();
+      const month = this._period.month() + 1;
 
-    const year = this._period.year();
-    const month = this._period.month() + 1;
+      const response = yield useApiFetch().get(`/rents/${year}/${month}`);
 
-    const [overviewResponse, rentsResponse] = yield Promise.all([
-      useApiFetch().get(`/rents/overview/${year}/${month}`),
-      useApiFetch().get(`/rents/${year}/${month}`)
-    ]);
+      this.countAll = response.data.overview.countAll;
+      this.countPaid = response.data.overview.countPaid;
+      this.countPartiallyPaid = response.data.overview.countPartiallyPaid;
+      this.countNotPaid = response.data.overview.countNotPaid;
+      this.totalToPay = response.data.overview.totalToPay;
+      this.totalPaid = response.data.overview.totalPaid;
+      this.totalNotPaid = response.data.overview.totalNotPaid;
 
-    this.countAll = overviewResponse.data.countAll;
-    this.countPaid = overviewResponse.data.countPaid;
-    this.countPartiallyPaid = overviewResponse.data.countPartiallyPaid;
-    this.countNotPaid = overviewResponse.data.countNotPaid;
-    this.totalToPay = overviewResponse.data.totalToPay;
-    this.totalPaid = overviewResponse.data.totalPaid;
-    this.totalNotPaid = overviewResponse.data.totalNotPaid;
+      this.items = response.data.rents;
+      return 200;
+    } catch (error) {
+      return error.response.status;
+    }
+  });
 
-    this.items = rentsResponse.data;
+  pay = flow(function* (payment) {
+    try {
+      yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);
+      return 200;
+    } catch (error) {
+      return error.response.status;
+    }
+  });
 
-    this._useCache = true;
-  })
+  // payload
+  // {
+  //   document,
+  //   tenantIds,
+  //   year,
+  //   month
+  // }
+  sendEmail = flow(function* (payload) {
+    try {
+      yield useApiFetch().post('/emails', payload);
+      return 200;
+    } catch (error) {
+      return error.response.status;
+    }
+  });
 }

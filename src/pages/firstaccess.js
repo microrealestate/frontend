@@ -1,76 +1,38 @@
 import React, { useContext, useState } from 'react';
 import getConfig from 'next/config'
 import { useObserver } from 'mobx-react-lite';
-import { Form, Formik } from 'formik';
-import * as Yup from 'yup';
 import { Typography, Box, Paper, Collapse } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 
-import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, SelectField } from '../components/Form';
 import { withTranslation } from '../utils/i18n';
 import { withAuthentication } from '../components/Authentication';
-import { StoreContext } from '../store';
+import { getStoreInstance, StoreContext } from '../store';
 import Page from '../components/Page';
 import IconTypography from '../components/IconTypography';
-import Alert from '@material-ui/lab/Alert';
-import cc from 'currency-codes';
-import getSymbolFromCurrency from 'currency-symbol-map'
 import { useRouter } from 'next/router';
 import { isServer, redirect } from '../utils';
-
-const initialValues = {
-  name: '',
-  locale: 'en',
-  currency: 'EUR',
-  isCompany: 'false',
-  company: '',
-  email: ''
-};
-
-const validationSchema = Yup.object().shape({
-  name: Yup.string().required(),
-  locale: Yup.string().required(),
-  currency: Yup.string().required(),
-  isCompany: Yup.string().required(),
-  company: Yup.mixed().when('isCompany', {
-    is: 'true',
-    then: Yup.string().required(),
-    otherwise: Yup.string()
-  }),
-  email: Yup.mixed().when('isCompany', {
-    is: 'true',
-    then: Yup.string().email().required(),
-    otherwise: Yup.string().email()
-  })
-});
-
-const currencies = cc.data.reduce((acc, { code, currency }) => {
-  const symbol = getSymbolFromCurrency(code);
-  if (symbol) {
-    acc.push({
-      code,
-      currency,
-      symbol
-    })
-  }
-  return acc
-}, []).sort((c1, c2) => c1.currency.localeCompare(c2.currency));
+import RequestError from '../components/RequestError';
+import OrganizationSettings from '../components/OrganizationForms/Settings';
 
 const FirstAccess = withTranslation()(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
-  const store = useContext(StoreContext);
   const [error, setError] = useState('');
+  const store = useContext(StoreContext);
   const router = useRouter();
 
-  const onSubmit = async (organization, actions) => {
+  const onSubmit = async (organization) => {
     try {
-      organization.isCompany = organization.isCompany === 'true';
-      const { status, data } = await store.organization.create({
-        ...organization,
-        company: organization.isCompany ? organization.company : '',
-        email: organization.isCompany ? organization.email : store.user.email,
-        administrator: store.user.email
-      });
+      setError('');
+
+      // set current user as administrator of the org
+      organization.members = [{
+        name: `${store.user.firstName} ${store.user.lastName}`,
+        email: store.user.email,
+        role: 'administrator',
+        registered: true
+      }];
+
+      const { status, data } = await store.organization.create(organization);
       if (status !== 200) {
         switch (status) {
           default:
@@ -78,7 +40,7 @@ const FirstAccess = withTranslation()(({ t }) => {
             return;
         };
       }
-      store.organization.setSelected(data);
+      store.organization.setSelected(data, store.user);
       router.push(`${store.organization.selected.name}/dashboard`);
     } catch (error) {
       console.error(error);
@@ -108,83 +70,13 @@ const FirstAccess = withTranslation()(({ t }) => {
         </Box>
         <Box paddingBottom={4}>
           <Typography variant="subtitle2" align="center" color="textSecondary">
-            {t('One more step. Tell us who will rent your properties')}
+            {t('One more step. Tell us who will rent the properties')}
           </Typography>
         </Box>
         <Paper>
           <Box px={4} pb={4} pt={2}>
-            <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
-              <Collapse in={!!error}>
-                <Alert severity="error">{error}</Alert>
-              </Collapse>
-            </Box>
-            <Formik
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              onSubmit={onSubmit}
-            >
-              {({ values, isSubmitting }) => {
-                if (values.isCompany === 'false') {
-                  values.company = '';
-                  values.email = '';
-                }
-                return (
-                  <Form autoComplete="off">
-                    <Box paddingBottom={4}>
-                      <FormTextField
-                        label={t('Landlord name')}
-                        name="name"
-                      />
-                      <SelectField
-                        label={t('Language')}
-                        name="locale"
-                        values={[
-                          { id: 'pt-BR', label: 'Brasileiro', value: 'pt-BR' },
-                          { id: 'en', label: 'English', value: 'en' },
-                          { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
-                        ]}
-                      />
-                      <SelectField
-                        label={t('Currency')}
-                        name="currency"
-                        values={currencies.map(({ code, currency, symbol }) => (
-                          { id: code, label: `${currency} (${symbol})`, value: code }
-                        ))}
-                      />
-                    </Box>
-                    <Box>
-                      <RadioFieldGroup
-                        aria-label="organization type"
-                        label={t('The landlord belongs to')}
-                        name="isCompany"
-                      >
-                        <RadioField value="false" label={`${t('My personal account')} (${store.user.firstName} ${store.user.lastName})`} />
-                        <RadioField value="true" label={t('A business or institution')} />
-                      </RadioFieldGroup>
-                    </Box>
-                    {values.isCompany === 'true' && (
-                      <Box>
-                        <FormTextField
-                          label={t('Name of business or institution')}
-                          name="company"
-                        />
-                        <FormTextField
-                          label={t('Contact email')}
-                          name="email"
-                        />
-                      </Box>
-                    )}
-                    <Box paddingTop={4}>
-                      <SubmitButton
-                        size="large"
-                        fullWidth
-                        label={!isSubmitting ? t('Next') : t('Submitting')}
-                      />
-                    </Box>
-                  </Form>
-                )
-              }}
-            </Formik>
+            <RequestError error={error} />
+            <OrganizationSettings submitLabel={t('Next')} onSubmit={onSubmit} />
           </Box>
         </Paper>
       </Box>

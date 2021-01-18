@@ -42,34 +42,16 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
 
 const ListToolbar = withTranslation()(({ t, onSearch }) => {
   return (
-    <Grid container wrap="nowrap" alignItems="center" justify="space-between">
-      <Grid item xs={6}>
-        <SearchFilterBar
-          filters={[
-            { id: '', label: t('All') },
-            { id: 'notpaid', label: t('Not paid') },
-            { id: 'partiallypaid', label: t('Partially paid') },
-            { id: 'paid', label: t('Paid') },
+    <SearchFilterBar
+      filters={[
+        { id: '', label: t('All') },
+        { id: 'notpaid', label: t('Not paid') },
+        { id: 'partiallypaid', label: t('Partially paid') },
+        { id: 'paid', label: t('Paid') },
 
-          ]}
-          onSearch={onSearch}
-        />
-      </Grid>
-      <Grid item>
-        <FullScreenDialogButton
-          fullWidth
-          variant="contained"
-          buttonLabel={t('Send document to tenant')}
-          startIcon={<SendIcon />}
-          dialogTitle={t('Send document to tenant')}
-          cancelButtonLabel={t('Close')}
-          showCancel
-        >
-          <RentTable />
-        </FullScreenDialogButton>
-      </Grid>
-
-    </Grid>
+      ]}
+      onSearch={onSearch}
+    />
   )
 });
 
@@ -87,7 +69,6 @@ const Rents = withTranslation()(({ t }) => {
   const onPeriodChange = async period => {
     setLoading(true);
     try {
-      console.log(`change period ${period.format('YYYY.MM')}`)
       store.rent.setPeriod(period);
       await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
     } finally {
@@ -95,15 +76,18 @@ const Rents = withTranslation()(({ t }) => {
     }
   }
 
-  const onEdit = (rent) => {
+  const onEdit = async (rent) => {
     store.rent.setSelected(rent);
-    router.push(`/${store.organization.selected.name}/rents/${store.rent.period}/payment/${rent.occupant._id}`);
+    await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}/payment/${rent.occupant._id}`);
   };
 
   return useObserver(() => (
     <Page
       PrimaryToolbar={
         <PeriodToolbar onChange={onPeriodChange} />
+      }
+      SecondaryToolbar={
+        <ListToolbar onSearch={onSearch} />
       }
     >
       <Grid container direction="column">
@@ -115,51 +99,67 @@ const Rents = withTranslation()(({ t }) => {
           </Grid>
         )}
         {!loading && (
-          <>
-            <Box py={4}>
-              <Grid container spacing={3}>
-                <Grid item xs={3}>
-                  <DashboardCard
-                    Icon={ReceiptIcon}
-                    title={t('Rents')}
-                    info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
-                  >
-                    <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
-                  </DashboardCard>
-                </Grid>
-                <Grid item xs={3}>
-                  <DashboardCard
-                    variant="success"
-                    Icon={TrendingUpIcon}
-                    title={t('Paid')}
-                    info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
-                  >
-                    <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
-                  </DashboardCard>
-                </Grid>
-                <Grid item xs={3}>
-                  <DashboardCard
-                    variant="warning"
-                    Icon={TrendingDownIcon}
-                    title={t('Not paid')}
-                    info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
-                  >
-                    <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
-                  </DashboardCard>
+          <Box pt={2}>
+            <Grid container spacing={4}>
+              <Grid item xs={9}>
+                <Grid container spacing={3}>
+                  {store.rent.filteredItems.map(rent => (
+                    <Grid key={rent.uid} item sm={12} md={4}>
+                      <RentCard rent={rent} onEdit={onEdit} />
+                    </Grid>
+                  ))}
                 </Grid>
               </Grid>
-            </Box>
-            <Box width="100%" py={4}>
-              <ListToolbar onSearch={onSearch} />
-            </Box>
-            <Grid container spacing={3}>
-              {store.rent.filteredItems.map(rent => (
-                <Grid key={rent.uid} item xs={4}>
-                  <RentCard rent={rent} onEdit={onEdit} />
+              <Grid item xs={3}>
+                <Grid container direction="column" spacing={4}>
+                  <Grid item>
+                    <Box mb={2}>
+                      <FullScreenDialogButton
+                        variant="contained"
+                        buttonLabel={t('Send document')}
+                        startIcon={<SendIcon />}
+                        dialogTitle={t('Send document')}
+                        cancelButtonLabel={t('Close')}
+                        showCancel
+                        fullWidth
+                      >
+                        <RentTable />
+                      </FullScreenDialogButton>
+                    </Box>
+                  </Grid>
+                  <Grid item>
+                    <DashboardCard
+                      Icon={ReceiptIcon}
+                      title={t('Rents')}
+                      info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
+                    >
+                      <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
+                    </DashboardCard>
+                  </Grid>
+                  <Grid item>
+                    <DashboardCard
+                      variant="success"
+                      Icon={TrendingUpIcon}
+                      title={t('Paid')}
+                      info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
+                    >
+                      <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
+                    </DashboardCard>
+                  </Grid>
+                  <Grid item>
+                    <DashboardCard
+                      variant="warning"
+                      Icon={TrendingDownIcon}
+                      title={t('Not paid')}
+                      info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
+                    >
+                      <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
+                    </DashboardCard>
+                  </Grid>
                 </Grid>
-              ))}
+              </Grid>
             </Grid>
-          </>
+          </Box>
         )}
       </Grid>
     </Page>
@@ -174,19 +174,22 @@ Rents.getInitialProps = async (context) => {
     const { yearMonth } = context.query;
     const rentPeriod = moment(yearMonth, 'YYYY.MM', true);
     if (!rentPeriod.isValid()) {
-      return { statusCode: 404 };
+      return { error: { statusCode: 404 } };
     }
     store.rent.setPeriod(rentPeriod);
   }
 
-  await store.rent.fetch();
+  const fetchStatus = await store.rent.fetch();
+  if (fetchStatus !== 200) {
+    // TODO check error code to show a more detail error message
+    return { error: { statusCode: 500 } };
+  }
 
-  const props = {
+  return {
     initialState: {
       store: JSON.parse(JSON.stringify(store))
     }
   };
-  return props;
 };
 
 export default withAuthentication(Rents);

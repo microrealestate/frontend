@@ -1,22 +1,24 @@
-import { observable, flow, computed } from 'mobx'
+import { observable, flow, computed, action } from 'mobx'
 const jwt = require('jsonwebtoken')
 import { useApiFetch, useAuthApiFetch } from '../utils/fetch'
 import { isServer } from '../utils';
-
 export default class User {
   @observable token
-
   @observable tokenExpiry
-
   @observable firstName
-
   @observable lastName
-
   @observable email
+  @observable role
 
   @computed get signedIn() {
     return !!this.token
   }
+
+  @computed get isAdministrator() {
+    return this.role === 'administrator';
+  }
+
+  @action setRole = role => this.role = role;
 
   signUp = flow(function* (firstname, lastname, email, password) {
     try {
@@ -91,7 +93,7 @@ export default class User {
       this.email = undefined
       this.tokenExpiry = undefined
       this.token = undefined
-      throw error;
+      console.error(error);
     }
   })
 

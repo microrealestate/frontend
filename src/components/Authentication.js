@@ -1,8 +1,7 @@
 import ErrorPage from 'next/error';
 import moment from 'moment';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useObserver } from 'mobx-react-lite';
-import _ from 'lodash';
 import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 
@@ -42,9 +41,9 @@ export function withAuthentication(PageComponent) {
                 return {};
             }
 
-            try {
-                await store.user.refreshTokens(context)
-            } catch (error) {
+            // TODO not refresh token when it is not expired
+            await store.user.refreshTokens(context);
+            if (!store.user.signedIn) {
                 console.log('current refresh token invalid redirecting to /signin')
                 redirect(context, '/signin');
                 return {};
@@ -53,14 +52,17 @@ export function withAuthentication(PageComponent) {
             try {
                 await store.organization.fetch();
                 if (store.organization.items.length) {
-                    console.log(JSON.stringify(store.organization.items, null, 1))
                     const organizationName = context.query.organization;
                     if (organizationName) {
                         store.organization.setSelected(
-                            store.organization.items.find(org => org.name === organizationName)
+                            store.organization.items.find(org => org.name === organizationName),
+                            store.user
                         );
                     } else {
-                        store.organization.setSelected(store.organization.items[0]);
+                        store.organization.setSelected(
+                            store.organization.items[0],
+                            store.user
+                        );
                     }
                     if (!store.organization.selected) {
                         return  {
@@ -69,11 +71,16 @@ export function withAuthentication(PageComponent) {
                             }
                         };
                     }
+                    await changeLocaleCurency(store.organization.selected.locale, store.organization.selected.currency);
                 }
             } catch (error) {
                 console.error(error)
+                return  {
+                    error: {
+                        statusCode: 500
+                    }
+                };
             }
-            await changeLocaleCurency(store.organization.selected.locale, store.organization.selected.currency);
         }
 
         return PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: JSON.parse(JSON.stringify(store)) } };

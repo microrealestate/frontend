@@ -13,8 +13,9 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 import { Select, MenuItem, CircularProgress, Button, FormLabel, RadioGroup, Radio } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
+import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 
-export const CheckboxField = ({ label, ...props }) => {
+export const CheckboxField = RestrictedComponent(({ label, ...props }) => {
   const [field] = useField(props);
   const { isSubmitting } = useFormikContext();
 
@@ -30,9 +31,9 @@ export const CheckboxField = ({ label, ...props }) => {
       disabled={isSubmitting}
     />
   )
-};
+});
 
-export const FormTextField = ({ label, ...props }) => {
+export const FormTextField = RestrictedComponent(({ label, ...props }) => {
   const [displayPassword, showPassword] = useState(false);
   const [field, meta] = useField(props);
   const { isSubmitting } = useFormikContext();
@@ -73,9 +74,9 @@ export const FormTextField = ({ label, ...props }) => {
       {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
     </FormControl>
   );
-};
+});
 
-export const SelectField = ({ label, value: inialValue, values = [], ...props }) => {
+export const SelectField = RestrictedComponent(({ label, value: inialValue, values = [], ...props }) => {
   const [field, meta] = useField(props);
   const [value, setValue] = useState(inialValue);
   const { isSubmitting } = useFormikContext();
@@ -105,7 +106,7 @@ export const SelectField = ({ label, value: inialValue, values = [], ...props })
       {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
     </FormControl>
   );
-};
+});
 
 export const RadioFieldGroup = ({ children, label, ...props }) => {
   const [field, meta] = useField(props);
@@ -125,21 +126,21 @@ export const RadioFieldGroup = ({ children, label, ...props }) => {
   );
 };
 
-export const RadioField = (props) => {
+export const RadioField = ({onlyRoles, ...props}) => {
   const { isSubmitting } = useFormikContext();
 
+  const RestrictedRadio = RestrictedComponent(Radio);
   return (
     <FormControlLabel
       control={
-        <Radio color="default" />
+        <RestrictedRadio color="default" disabled={isSubmitting} onlyRoles={onlyRoles}/>
       }
       {...props}
-      disabled={isSubmitting}
     />
   );
 };
 
-export const DateField = (props) => {
+export const DateField = RestrictedComponent((props) => {
   const [field, meta, helper] = useField(props.name);
   const { isSubmitting } = useFormikContext();
   const hasError = !!(meta.touched && meta.error);
@@ -165,12 +166,12 @@ export const DateField = (props) => {
       />
     </FormControl>
   )
-};
+});
 
 export const SubmitButton = ({ label, ...props }) => {
   const { isValid, isSubmitting } = useFormikContext();
   return (
-    <Button
+    <RestrictButton
       type="submit"
       variant="contained"
       color="primary"
@@ -179,6 +180,6 @@ export const SubmitButton = ({ label, ...props }) => {
       {...props}
     >
       {label}
-    </Button>
+    </RestrictButton>
   );
 };

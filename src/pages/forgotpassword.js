@@ -2,8 +2,6 @@ import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import Collapse from '@material-ui/core/Collapse';
-import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 import Paper from '@material-ui/core/Paper';
@@ -15,6 +13,7 @@ import { StoreContext } from '../store';
 import { useRouter } from 'next/router';
 import { Box, Grid } from '@material-ui/core';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import RequestError from '../components/RequestError';
 
 const initialValues = {
   email: ''
@@ -35,6 +34,8 @@ const ForgotPassword = withTranslation()(({ t }) => {
 
   const forgotPassword = async ({ email }) => {
     try {
+      setError('');
+
       const status = await store.user.forgotPassword(email);
       if (status !== 200) {
         switch (status) {
@@ -71,11 +72,7 @@ const ForgotPassword = withTranslation()(({ t }) => {
       <Paper>
         {!emailSent && (
           <Box px={4} pb={4} pt={2}>
-            <Box pb={!!error ? 2 : 0} pt={!!error ? 2 : 0}>
-              <Collapse in={!!error}>
-                <Alert severity="error">{error}</Alert>
-              </Collapse>
-            </Box>
+            <RequestError error={error} />
             <Formik
               initialValues={initialValues}
               validationSchema={validationSchema}
