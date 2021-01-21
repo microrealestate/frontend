@@ -33,11 +33,13 @@ export const useApiFetch = () => {
         // create axios instance
         if (isServer()) {
             apiFetch = axios.create({
-                baseURL: `${serverRuntimeConfig.LOCA_URL}/api/v2`
+                baseURL: `${serverRuntimeConfig.LOCA_URL}/api/v2`,
+                withCredentials: true
             });
         } else {
             apiFetch = axios.create({
-                baseURL: `${publicRuntimeConfig.API_URL}/v2`
+                baseURL: `${publicRuntimeConfig.API_URL}/v2`,
+                withCredentials: true
             });
         }
 
@@ -69,7 +71,8 @@ export const useAuthApiFetch = (cookie) => {
     const { serverRuntimeConfig } = getConfig();
     authApiFetch = axios.create({
         baseURL: serverRuntimeConfig.AUTHENTICATOR_URL,
-        headers: { cookie }
+        headers: { cookie },
+        withCredentials: true
     });
     // }
     return authApiFetch;
