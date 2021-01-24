@@ -6,6 +6,7 @@ import { isServer } from './index';
 
 let apiFetch;
 let authApiFetch;
+const withCredentials = true;//process.env.NODE_ENV === 'production';
 
 export const setApiHeaders = ({ accessToken, organizationId }) => {
     // console.log('set api headers');
@@ -33,13 +34,13 @@ export const useApiFetch = () => {
         // create axios instance
         if (isServer()) {
             apiFetch = axios.create({
-                baseURL: `${serverRuntimeConfig.LOCA_URL}/api/v2`,
-                withCredentials: true
+                baseURL: serverRuntimeConfig.API_URL,
+                withCredentials
             });
         } else {
             apiFetch = axios.create({
-                baseURL: `${publicRuntimeConfig.API_URL}/v2`,
-                withCredentials: true
+                baseURL: publicRuntimeConfig.API_URL,
+                withCredentials
             });
         }
 
@@ -67,14 +68,14 @@ export const useAuthApiFetch = (cookie) => {
         return;
     }
 
-    // if (!authApiFetch) {
     const { serverRuntimeConfig } = getConfig();
+    console.log(JSON.stringify(cookie, null, 1))
     authApiFetch = axios.create({
-        baseURL: serverRuntimeConfig.AUTHENTICATOR_URL,
+        baseURL: serverRuntimeConfig.API_URL,
         headers: { cookie },
-        withCredentials: true
+        withCredentials
     });
-    // }
+
     return authApiFetch;
 }
 

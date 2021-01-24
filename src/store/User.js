@@ -71,7 +71,7 @@ export default class User {
       let response;
       if (isServer()) {
         const authFetchApi = useAuthApiFetch(context.req.headers.cookie)
-        response = yield authFetchApi.post('/refreshtoken')
+        response = yield authFetchApi.post('/authenticator/refreshtoken')
 
         const cookies = response.headers['set-cookie'];
         if (cookies) {

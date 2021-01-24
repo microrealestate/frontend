@@ -7,8 +7,7 @@
 
 module.exports = {
   serverRuntimeConfig: {
-    LOCA_URL: process.env.LOCA_URL,
-    AUTHENTICATOR_URL: process.env.AUTHENTICATOR_URL
+    API_URL: process.env.DOCKER_API_URL || process.env.API_URL
   },
   publicRuntimeConfig: {
     APP_NAME: process.env.APP_NAME,
