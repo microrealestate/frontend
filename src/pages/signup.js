@@ -54,14 +54,14 @@ const SignUp = withTranslation()(({ t }) => {
             setError(t('This user is already registered.'))
             return;
           default:
-            setError(t('Something went wrong :('));
+            setError(t('Something went wrong'));
             return;
         }
       }
       router.push('/signin');
     } catch (error) {
       console.error(error);
-      setError(t('Something went wrong :('));
+      setError(t('Something went wrong'));
     }
   };
 

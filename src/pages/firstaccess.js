@@ -36,7 +36,7 @@ const FirstAccess = withTranslation()(({ t }) => {
       if (status !== 200) {
         switch (status) {
           default:
-            setError(t('Something went wrong :('));
+            setError(t('Something went wrong'));
             return;
         };
       }
@@ -44,7 +44,7 @@ const FirstAccess = withTranslation()(({ t }) => {
       router.push(`${store.organization.selected.name}/dashboard`);
     } catch (error) {
       console.error(error);
-      setError(t('Something went wrong :('));
+      setError(t('Something went wrong'));
     }
   };
 

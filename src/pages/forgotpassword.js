@@ -43,14 +43,14 @@ const ForgotPassword = withTranslation()(({ t }) => {
             setError(t('Some fields are missing.'));
             return;
           default:
-            setError(t('Something went wrong :('));
+            setError(t('Something went wrong'));
             return;
         };
       }
       setEmailSent(email);
     } catch (error) {
       console.error(error);
-      setError(t('Something went wrong :('))
+      setError(t('Something went wrong'))
     }
   };
 

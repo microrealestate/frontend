@@ -67,7 +67,7 @@ const Settings = withTranslation()(({ t }) => {
         case 409:
           return setError(t('The organization name already exists.'))
         default:
-          return setError(t('Something went wrong :('));
+          return setError(t('Something went wrong'));
       };
     }
 

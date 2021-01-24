@@ -46,7 +46,7 @@ const SignIn = withTranslation()(({ t }) => {
             setError(t('Incorrect email or password.'))
             return;
           default:
-            setError(t('Something went wrong :('))
+            setError(t('Something went wrong'))
             return;
         };
       }
@@ -65,7 +65,7 @@ const SignIn = withTranslation()(({ t }) => {
       }
     } catch (error) {
       console.error(error);
-      setError(t('Something went wrong :('))
+      setError(t('Something went wrong'))
     }
   };
 

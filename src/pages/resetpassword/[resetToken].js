@@ -49,14 +49,14 @@ const ResetPassword = withTranslation()(({ t }) => {
             setError(t('Invalid reset link'));
             return;
           default:
-            setError(t('Something went wrong :('));
+            setError(t('Something went wrong'));
             return;
         };
       }
       router.push('/signin');
     } catch (error) {
       console.error(error);
-      setError(t('Something went wrong :('))
+      setError(t('Something went wrong'))
     }
   };
 
