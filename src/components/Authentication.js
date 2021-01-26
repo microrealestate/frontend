@@ -7,6 +7,7 @@ import { getStoreInstance, StoreContext } from '../store';
 
 import { isServer, redirect } from '../utils';
 import { i18n } from '../utils/i18n';
+// import { buildFetchError } from '../utils/fetch';
 
 const changeLocaleCurency = async (locale = 'en', currency = 'EUR') => {
     moment.locale(locale);
@@ -17,9 +18,15 @@ export function withAuthentication(PageComponent) {
     const WithAuth = (pageProps) => {
         console.log('WithAuth functional component')
         const store = useContext(StoreContext);
-
         if (pageProps.error) {
-            return <ErrorPage statusCode={pageProps.error.statusCode} />
+            return (
+                <>
+                    <ErrorPage statusCode={pageProps.error.statusCode} />
+                    {/* <pre>
+                        {JSON.stringify(pageProps.error.error, null, 1)}
+                    </pre> */}
+                </>
+            );
         }
 
         return useObserver(() => {
@@ -42,6 +49,16 @@ export function withAuthentication(PageComponent) {
             }
 
             // TODO not refresh token when it is not expired
+            console.log('Force refresh token');
+            // const result = await store.user.refreshTokens(context);
+            // if (result.status > 399) {
+            //     return {
+            //         error: {
+            //             statusCode: result.status,
+            //             error: buildFetchError(result.error)
+            //         }
+            //     };
+            // }
             await store.user.refreshTokens(context);
             if (!store.user.signedIn) {
                 console.log('current refresh token invalid redirecting to /signin')
@@ -74,10 +91,16 @@ export function withAuthentication(PageComponent) {
                     await changeLocaleCurency(store.organization.selected.locale, store.organization.selected.currency);
                 }
             } catch (error) {
+                if (error.response?.status === 403) {
+                    console.log('current refresh token invalid redirecting to /signin')
+                    redirect(context, '/signin');
+                    return {};
+                }
                 console.error(error)
                 return  {
                     error: {
-                        statusCode: 500
+                        statusCode: 500,
+                        //error: buildFetchError(error)
                     }
                 };
             }

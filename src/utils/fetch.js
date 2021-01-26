@@ -4,9 +4,10 @@ import FileDownload from 'js-file-download';
 
 import { isServer } from './index';
 
+const { publicRuntimeConfig, serverRuntimeConfig } = getConfig();
 let apiFetch;
 let authApiFetch;
-const withCredentials = true;//process.env.NODE_ENV === 'production';
+const withCredentials = publicRuntimeConfig.CORS_ENABLED;
 
 export const setApiHeaders = ({ accessToken, organizationId }) => {
     // console.log('set api headers');
@@ -29,7 +30,6 @@ export const setApiHeaders = ({ accessToken, organizationId }) => {
 export const useApiFetch = () => {
     if (!apiFetch) {
         // console.log('create api fetch')
-        const { publicRuntimeConfig, serverRuntimeConfig } = getConfig();
 
         // create axios instance
         if (isServer()) {
@@ -79,10 +79,26 @@ export const useAuthApiFetch = (cookie) => {
     return authApiFetch;
 }
 
+export const buildFetchError = (error) => {
+    return {
+        error: {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            headers: error.response?.headers,
+            request: {
+                url: error.response?.config?.url,
+                method: error.response?.config?.method,
+                headers: error.response?.config?.headers,
+                baseURL: error.response?.config?.baseURL,
+                withCredentials: error.response?.config?.withCredentials,
+            }
+        }
+    };
+}
+
 export const downloadDocument = async (endpoint, documentName) => {
     const response = await useApiFetch().get(`/documents${endpoint}`, {
         responseType: 'blob',
     });
     FileDownload(response.data, documentName);
 }
-

@@ -87,6 +87,7 @@ export default class User {
       this.email = email
       this.tokenExpiry = exp
       this.token = accessToken
+      return { status: 200 };
     } catch (error) {
       this.firstName = undefined
       this.lastName = undefined
@@ -94,6 +95,7 @@ export default class User {
       this.tokenExpiry = undefined
       this.token = undefined
       console.error(error);
+      return { status: error.response.status, error }
     }
   })
 
