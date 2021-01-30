@@ -42,16 +42,18 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
 
 const ListToolbar = withTranslation()(({ t, onSearch }) => {
   return (
-    <SearchFilterBar
-      filters={[
-        { id: '', label: t('All') },
-        { id: 'notpaid', label: t('Not paid') },
-        { id: 'partiallypaid', label: t('Partially paid') },
-        { id: 'paid', label: t('Paid') },
+    <Box pb={4} width={600}>
+      <SearchFilterBar
+        filters={[
+          { id: '', label: t('All') },
+          { id: 'notpaid', label: t('Not paid') },
+          { id: 'partiallypaid', label: t('Partially paid') },
+          { id: 'paid', label: t('Paid') },
 
-      ]}
-      onSearch={onSearch}
-    />
+        ]}
+        onSearch={onSearch}
+      />
+    </Box>
   )
 });
 
@@ -87,7 +89,16 @@ const Rents = withTranslation()(({ t }) => {
         <PeriodToolbar onChange={onPeriodChange} />
       }
       SecondaryToolbar={
-        <ListToolbar onSearch={onSearch} />
+        <FullScreenDialogButton
+          variant="contained"
+          buttonLabel={t('Send mass emails')}
+          startIcon={<SendIcon />}
+          dialogTitle={t('Send mass emails')}
+          cancelButtonLabel={t('Close')}
+          showCancel
+        >
+          <RentTable />
+        </FullScreenDialogButton>
       }
     >
       <Grid container direction="column">
@@ -99,67 +110,51 @@ const Rents = withTranslation()(({ t }) => {
           </Grid>
         )}
         {!loading && (
-          <Box pt={2}>
-            <Grid container spacing={4}>
-              <Grid item xs={9}>
-                <Grid container spacing={3}>
-                  {store.rent.filteredItems.map(rent => (
-                    <Grid key={rent.uid} item sm={12} md={4}>
-                      <RentCard rent={rent} onEdit={onEdit} />
-                    </Grid>
-                  ))}
-                </Grid>
+          <Grid container spacing={10}>
+            <Grid item xs={9}>
+              <ListToolbar onSearch={onSearch} />
+              <Grid container spacing={3}>
+                {store.rent.filteredItems.map(rent => (
+                  <Grid key={rent.uid} item xs={4}>
+                    <RentCard rent={rent} onEdit={onEdit} />
+                  </Grid>
+                ))}
               </Grid>
-              <Grid item xs={3}>
-                <Grid container direction="column" spacing={4}>
-                  <Grid item>
-                    <Box mb={2}>
-                      <FullScreenDialogButton
-                        variant="contained"
-                        buttonLabel={t('Send document')}
-                        startIcon={<SendIcon />}
-                        dialogTitle={t('Send document')}
-                        cancelButtonLabel={t('Close')}
-                        showCancel
-                        fullWidth
-                      >
-                        <RentTable />
-                      </FullScreenDialogButton>
-                    </Box>
-                  </Grid>
-                  <Grid item>
-                    <DashboardCard
-                      Icon={ReceiptIcon}
-                      title={t('Rents')}
-                      info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
-                    >
-                      <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
-                    </DashboardCard>
-                  </Grid>
-                  <Grid item>
-                    <DashboardCard
-                      variant="success"
-                      Icon={TrendingUpIcon}
-                      title={t('Paid')}
-                      info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
-                    >
-                      <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
-                    </DashboardCard>
-                  </Grid>
-                  <Grid item>
-                    <DashboardCard
-                      variant="warning"
-                      Icon={TrendingDownIcon}
-                      title={t('Not paid')}
-                      info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
-                    >
-                      <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
-                    </DashboardCard>
-                  </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container direction="column" spacing={4}>
+                <Grid item>
+                  <DashboardCard
+                    Icon={ReceiptIcon}
+                    title={t('Rents')}
+                    info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
+                  >
+                    <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
+                  </DashboardCard>
+                </Grid>
+                <Grid item>
+                  <DashboardCard
+                    variant="success"
+                    Icon={TrendingUpIcon}
+                    title={t('Paid')}
+                    info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
+                  >
+                    <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
+                  </DashboardCard>
+                </Grid>
+                <Grid item>
+                  <DashboardCard
+                    variant="warning"
+                    Icon={TrendingDownIcon}
+                    title={t('Not paid')}
+                    info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
+                  >
+                    <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
+                  </DashboardCard>
                 </Grid>
               </Grid>
             </Grid>
-          </Box>
+          </Grid>
         )}
       </Grid>
     </Page>

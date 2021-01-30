@@ -22,7 +22,7 @@ const DownloadLink = ({ label, tooltipText, url, withIcon = false, documentName,
                 </Link>
             )}
             {withIcon && !tooltipText && (
-                <Box>
+                <Box display="flex" alignItems="center">
                     {label && <Typography {...props}>{label}</Typography>}
                     <IconButton size="small"
                         onClick={onClick}

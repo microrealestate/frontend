@@ -85,6 +85,9 @@ export default class Rent {
       this.totalNotPaid = response.data.overview.totalNotPaid;
 
       this.items = response.data.rents;
+      if (this.selected._id) {
+        this.selected = this.items.find(item => item._id === this.selected._id) || {};
+      }
       return 200;
     } catch (error) {
       return error.response.status;

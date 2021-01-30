@@ -3,19 +3,26 @@ import { Typography } from "@material-ui/core";
 import { useContext } from 'react';
 import { StoreContext } from '../store';
 
-
-export const numberFormat = value => {
-    const store = useContext(StoreContext);
-
-    return Intl.NumberFormat(store.organization.selected.locale || 'en', {
+export const numberFormat = (locale, currency, value) => {
+    return Intl.NumberFormat(locale || 'en', {
         style: 'currency',
-        currency: store.organization.selected.currency || 'EUR',
+        currency: currency || 'EUR',
         minimumFractionDigits: 2
     }).format(value);
 };
 
+export const useNumberFormat = value => {
+    const store = useContext(StoreContext);
+
+    return numberFormat(
+        store.organization.selected.locale,
+        store.organization.selected.currency,
+        value
+    );
+};
+
 export const NumberFormat = (({ value, ...props }) => {
     return (
-        <Typography noWrap {...props}>{numberFormat(value)}</Typography>
+        <Typography noWrap {...props}>{useNumberFormat(value)}</Typography>
     );
 });

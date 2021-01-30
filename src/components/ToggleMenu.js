@@ -38,6 +38,7 @@ export default function ToggleMenu({ startIcon, options, value, onChange = () =>
                 startIcon={startIcon}
                 endIcon={<ExpandMoreIcon />}
                 onClick={handleClick}
+                fullWidth
             >
                 <Typography noWrap>{selectedOption && selectedOption.label ? selectedOption.label : ''}</Typography>
             </Button>

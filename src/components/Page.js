@@ -8,7 +8,7 @@ import { withTranslation } from '../utils/i18n';
 
 import OrganizationSwitcher from './OrganizationSwitcher';
 import { StoreContext } from '../store';
-import { Box, Grid, Tooltip } from '@material-ui/core';
+import { Box, Tooltip } from '@material-ui/core';
 
 const MainToolbar = withTranslation()(({ t }) => {
     const store = useContext(StoreContext);
@@ -22,7 +22,7 @@ const MainToolbar = withTranslation()(({ t }) => {
     };
 
     return (
-        <Box display="flex" width="100%" justifyContent="flex-end">
+        <Box display="flex" justifyContent="flex-end">
             {store.organization.items && store.organization.items.length && (
                 <OrganizationSwitcher />
             )}
@@ -39,7 +39,6 @@ const MainToolbar = withTranslation()(({ t }) => {
     )
 });
 
-
 const Page = ({ children, PrimaryToolbar, SecondaryToolbar }) => {
     console.log('Page functional component')
     const store = useContext(StoreContext);
@@ -51,28 +50,18 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar }) => {
             <>
                 {displayToolbars && (
                     <Toolbar>
-                        <Grid container alignItems="center" wrap="nowrap">
-                            <Grid item xs={9}>
-                                <Grid container alignItems="center" spacing={2} wrap="nowrap">
-                                    {PrimaryToolbar && (
-                                        <Grid item xs={SecondaryToolbar ? 6 : 12}>
-                                            {PrimaryToolbar}
-                                        </Grid>
-                                    )}
-                                    {SecondaryToolbar && (
-                                        <Grid item xs={PrimaryToolbar ? 6 : 12}>
-                                            {SecondaryToolbar}
-                                        </Grid>
-                                    )}
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <MainToolbar />
-                            </Grid>
-                        </Grid>
+                        <Box display="flex" alignItems="center" width="100%">
+                            <Box width="100%" flexGrow={1}>
+                                {PrimaryToolbar && PrimaryToolbar}
+                            </Box>
+                            <Box mx={5} flexGrow={0} whiteSpace="nowrap">
+                                {SecondaryToolbar && SecondaryToolbar}
+                            </Box>
+                            <MainToolbar />
+                        </Box>
                     </Toolbar>
                 )}
-                <Box px={3}>
+                <Box mt={4} margin="auto" maxWidth={1200}>
                     {children}
                 </Box>
             </>

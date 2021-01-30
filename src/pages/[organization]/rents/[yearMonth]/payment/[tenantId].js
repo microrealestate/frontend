@@ -1,8 +1,8 @@
 import moment from 'moment';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, Typography } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, List, ListItem, Typography, withStyles } from '@material-ui/core';
 import { useObserver } from 'mobx-react-lite'
 import { withTranslation } from 'next-i18next';
-import { Children, useContext } from 'react';
+import { Children, useContext, useState } from 'react';
 import Page from '../../../../../components/Page'
 
 import { withAuthentication } from '../../../../../components/Authentication'
@@ -16,8 +16,14 @@ import { NumberFormat } from '../../../../../utils/numberformat';
 import { PaymentBalance } from '../../../../../components/RentCard';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import SendIcon from '@material-ui/icons/Send';
+import HistoryIcon from '@material-ui/icons/History';
 import Link from '../../../../../components/Link';
 import { useRouter } from 'next/router';
+import SendRentEmailMenu from '../../../../../components/SendRentEmailMenu';
+import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
+import RequestError from '../../../../../components/RequestError';
+import DownloadLink from '../../../../../components/DownloadLink';
 
 const BreadcrumbBar = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
@@ -75,7 +81,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
     try {
       await store.rent.pay(values);
       await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
-    } catch(error) {
+    } catch (error) {
       console.error(error);
     }
   }
@@ -85,7 +91,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
   }
 
   const initialValues = {
-    payments: rent.payments.length ? rent.payments.map(({amount, date, type, reference}) => {
+    payments: rent.payments.length ? rent.payments.map(({ amount, date, type, reference }) => {
       return {
         amount: amount === 0 ? '' : amount,
         date: date ? moment(date, 'DD/MM/YYYY') : undefined,
@@ -111,20 +117,20 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
         type: Yup.string().required(),
         reference: Yup.mixed().when('type', {
           is: val => val !== 'cash',
-          then:  Yup.string().required()
+          then: Yup.string().required()
         })
       })),
-      extracharge: Yup.number().positive(),
-      noteextracharge:  Yup.mixed().when('extracharge', {
-        is: val => val > 0,
-        then: Yup.string().required(),
-      }),
-      promo: Yup.number().positive(),
-      notepromo: Yup.mixed().when('promo', {
-        is: val => val > 0,
-        then: Yup.string().required(),
-      }),
-      description: Yup.string()
+    extracharge: Yup.number().positive(),
+    noteextracharge: Yup.mixed().when('extracharge', {
+      is: val => val > 0,
+      then: Yup.string().required(),
+    }),
+    promo: Yup.number().positive(),
+    notepromo: Yup.mixed().when('promo', {
+      is: val => val > 0,
+      then: Yup.string().required(),
+    }),
+    description: Yup.string()
   });
 
   return (
@@ -133,7 +139,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
       validationSchema={validationSchema}
       onSubmit={onSubmit}
     >
-      {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description }}) => {
+      {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description } }) => {
         return (
           <Form autoComplete="off">
 
@@ -142,7 +148,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                 name="payments"
                 render={arrayHelpers => (
                   <div>
-                    {payments.map(( payment, index) => (
+                    {payments.map((payment, index) => (
                       <Box key={index}>
                         <Grid container spacing={2}>
                           <Grid item xs={6}>
@@ -181,15 +187,15 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                         </Grid>
                         { payments.length > 1 && (
                           <Box display="flex" justifyContent="flex-end">
-                              <Button
-                                variant="contained"
-                                size="small"
-                                onClick={() => arrayHelpers.remove(index)}
-                                >
-                                {t('Remove payment')}
-                              </Button>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => arrayHelpers.remove(index)}
+                            >
+                              {t('Remove payment')}
+                            </Button>
                           </Box>
-                         )}
+                        )}
                       </Box>
                     ))}
                     <Button
@@ -247,7 +253,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
             <Box
               pt={2}
             >
-              <Grid container spacing={1} justify="flex-end">
+              <Grid container spacing={1}>
                 <Grid item>
                   <Button
                     variant="contained"
@@ -258,10 +264,10 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
                   </Button>
                 </Grid>
                 <Grid item>
-                <SubmitButton
-                  size="large"
-                  label={!isSubmitting ? t('Save') : t('Saving')}
-                />
+                  <SubmitButton
+                    size="large"
+                    label={!isSubmitting ? t('Save') : t('Saving')}
+                  />
                 </Grid>
               </Grid>
             </Box>
@@ -272,36 +278,127 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
   )
 });
 
+const StyledListItem = withStyles(theme => ({
+  root: {
+    paddingLeft: 0,
+    paddingRight: 0
+  }
+}))(ListItem);
 
 const RentPayment = withTranslation()(({ t }) => {
   console.log('RentPayment functional component')
   const store = useContext(StoreContext);
+  const [error, setError] = useState('');
+
+  //TODO manage errors
 
   return useObserver(() => (
     <Page
       PrimaryToolbar={
         <BreadcrumbBar />
       }
+      SecondaryToolbar={
+        <Box display="flex" width="100%" align="right">
+          <Box mr={1.5}>
+            <FullScreenDialogButton
+              variant="contained"
+              buttonLabel={t('Payments history')}
+              startIcon={<HistoryIcon />}
+              dialogTitle={t('Payments history')}
+              cancelButtonLabel={t('Close')}
+              showCancel
+            >
+              TODO
+            </FullScreenDialogButton>
+          </Box>
+          <SendRentEmailMenu
+            tenantIds={[store.rent.selected.occupant._id]}
+            period={store.rent._period}
+            variant="contained"
+            startIcon={<SendIcon />}
+          />
+        </Box>
+      }
     >
-      <Box py={2}>
-        <Typography color="textSecondary" variant="h5">{`${store.rent.selected.occupant.name} - ${store.rent._period.format('MMMM YYYY')}`}</Typography>
-      </Box>
-      <Grid container spacing={5}>
-        <Grid item xs={9}>
+      <RequestError error={error} />
+      <Grid container spacing={10}>
+        <Grid item xs={8}>
           <PaymentForm rent={store.rent.selected} />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}>
+          <Box pb={4}>
+            <DashboardCard
+              Icon={ReceiptIcon}
+              title={t('Rent of {{monthYear}}', { monthYear: store.rent._period.format('MMMM YYYY') })}
+            >
+              <Box pb={1}>
+                <NumberFormat align="right" variant="h5" value={store.rent.selected.totalAmount > 0 ? store.rent.selected.totalAmount : 0} />
+              </Box>
+              <Divider />
+              <Box pt={1}>
+                <PaymentBalance rent={store.rent.selected} />
+              </Box>
+            </DashboardCard>
+          </Box>
           <DashboardCard
-            Icon={ReceiptIcon}
-            title={t('Rent to pay')}
+            Icon={SendIcon}
+            title={t('Documents sent')}
           >
-            <Box pb={1}>
-              <NumberFormat align="right" variant="h4" value={store.rent.selected.totalToPay > 0 ? store.rent.selected.totalToPay : 0} />
-            </Box>
-            <Divider />
-            <Box pt={1}>
-              <PaymentBalance rent={store.rent.selected} />
-            </Box>
+            {store.rent.selected.emailStatus ? (
+              <List>
+                {(store.rent.selected.emailStatus.status?.rentcall) && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('First notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall.sentDate).format('L hh:mm') })}
+                      url={`/rentcall/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t('first notice')}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+
+                {(store.rent.selected.emailStatus.status?.rentcall_reminder) && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Second notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_reminder.sentDate).format('L hh:mm') })}
+                      url={`/rentcall_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t('second notice')}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+                {(store.rent.selected.emailStatus.status?.rentcall_last_reminder) && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Last notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_last_reminder.sentDate).format('L hh:mm') })}
+                      url={`/rentcall_last_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t('last notice')}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+                {(store.rent.selected.emailStatus.status?.invoice) && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Receipt sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.invoice.sentDate).format('L hh:mm') })}
+                      url={`/invoice/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t('invoice')}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+              </List>
+            ) : (
+                <Typography
+                  color="textSecondary"
+                >
+                  {t('No documents sent')}
+                </Typography>
+              )}
           </DashboardCard>
         </Grid>
       </Grid>
@@ -332,7 +429,6 @@ RentPayment.getInitialProps = async (context) => {
       return { error: { statusCode: 404 } };
     }
     store.rent.setSelected(selectedRent);
-    // console.log(JSON.parse(JSON.stringify(store.rent)));
   }
 
   const props = {
