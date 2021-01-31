@@ -6,7 +6,7 @@ import { CircularProgress } from '@material-ui/core';
 import { withTranslation } from '../utils/i18n';
 import { StoreContext } from '../store';
 
-const SendRentEmailMenu = withTranslation()(({ t, period, tenantIds, onError, ...buttonProps }) => {
+const SendRentEmailMenu = withTranslation()(({ t, i18n, tReady, period, tenantIds, onError, ...buttonProps }) => {
   const store = useContext(StoreContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [sendingEmail, setSendingEmail] = useState(false);
