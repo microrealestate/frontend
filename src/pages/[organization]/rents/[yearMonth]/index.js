@@ -5,7 +5,6 @@ import { withAuthentication } from '../../../../components/Authentication'
 import { useContext, useState } from 'react';
 import { isServer } from '../../../../utils';
 import { Box, CircularProgress, Grid, Typography } from '@material-ui/core';
-import { useStyles } from '../../../../styles/pages/Rents.styles';
 import { withTranslation } from '../../../../utils/i18n';
 import SendIcon from '@material-ui/icons/Send';
 import Page from '../../../../components/Page';
@@ -61,7 +60,6 @@ const Rents = withTranslation()(({ t }) => {
   console.log('Rents functional component')
   const store = useContext(StoreContext);
   const [loading, setLoading] = useState(false);
-  const classes = useStyles();
   const router = useRouter();
 
   const onSearch = (status, searchText) => {
@@ -104,9 +102,9 @@ const Rents = withTranslation()(({ t }) => {
       <Grid container direction="column">
         {loading && (
           <Grid item xs={12}>
-            <div className={classes.loading}>
+            <Box marginLeft="50%" marginTop={20}>
               <CircularProgress />
-            </div>
+            </Box>
           </Grid>
         )}
         {!loading && (
