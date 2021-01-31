@@ -94,6 +94,16 @@ export default class Rent {
     }
   });
 
+  fetchTenantRents = flow(function* (tenantId) {
+    try {
+      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}`);
+      return { status: 200, data: response.data };
+    } catch (error) {
+      console.error(error);
+      return { status: error.response.status };
+    }
+  });
+
   pay = flow(function* (payment) {
     try {
       yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);

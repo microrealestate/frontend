@@ -24,6 +24,7 @@ import SendRentEmailMenu from '../../../../../components/SendRentEmailMenu';
 import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
 import RequestError from '../../../../../components/RequestError';
 import DownloadLink from '../../../../../components/DownloadLink';
+import PaymentHistory from '../../../../../components/PaymentHistory';
 
 const BreadcrumbBar = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
@@ -308,7 +309,7 @@ const RentPayment = withTranslation()(({ t }) => {
               cancelButtonLabel={t('Close')}
               showCancel
             >
-              TODO
+              <PaymentHistory tenantId={store.rent.selected.occupant._id}/>
             </FullScreenDialogButton>
           </Box>
           <SendRentEmailMenu

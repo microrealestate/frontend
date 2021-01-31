@@ -1,5 +1,5 @@
 import { createMuiTheme } from '@material-ui/core/styles';
-import { whiteColor, blackColor, grayColor, successColor, infoColor, primaryColor } from './styles';
+import { whiteColor, blackColor, grayColor, successColor, infoColor, primaryColor, hexToRgb } from './styles';
 
 // Create a theme instance.
 const theme = createMuiTheme({
@@ -57,6 +57,13 @@ const theme = createMuiTheme({
             root: {
                 '&$completed': {
                     color: successColor[1]
+                }
+            }
+        },
+        MuiTableRow: {
+            root: {
+                '&$selected, &$selected$hover': {
+                    backgroundColor: 'rgba(' + hexToRgb(successColor[1]) + ', 0.08)',
                 }
             }
         }
