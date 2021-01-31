@@ -199,7 +199,7 @@ const RentTable = withTranslation()(({ t }) => {
   return (
     <>
       <RequestError error={error} />
-      <Box pt={2} pb={1}>
+      <Box pt={2} pb={1} width={600}>
         <SearchFilterBar
           filters={[
             { id: '', label: t('All') },
@@ -213,7 +213,7 @@ const RentTable = withTranslation()(({ t }) => {
       </Box>
       <Paper variant="outlined" square>
         <TableToolbar selected={selected} onSend={onSend} />
-        <Table aria-label="rent table">
+        <Table stickyHeader aria-label="rent table">
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">

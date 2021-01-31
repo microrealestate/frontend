@@ -6,8 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { withTranslation } from '../utils/i18n';
 
-const ConfirmDialog = withTranslation()(({ t, ...props }) => {
-  const { children, open, setOpen, onConfirm } = props;
+const ConfirmDialog = withTranslation()(({ t, children, open, setOpen, onConfirm }) => {
   return (
     <Dialog
       open={!!open}

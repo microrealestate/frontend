@@ -456,7 +456,7 @@ const RentCard = withTranslation()(({ t, rent, onEdit }) => {
       <CardActions>
         <CardRow width="100%">
           <SendRentEmailMenu
-            period={moment(rent.term, 'YYYYMMDDHHMM')}
+            period={moment(rent.term, 'YYYYMMDDHH')}
             tenantIds={[rent.occupant._id]}
             // onError={() => {}}
             size="small"
