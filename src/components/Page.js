@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { useObserver } from 'mobx-react-lite';
+import getConfig from 'next/config';
 import { IconButton, Box, Tooltip, Container, Toolbar } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
@@ -7,6 +8,8 @@ import { withTranslation } from '../utils/i18n';
 
 import OrganizationSwitcher from './OrganizationSwitcher';
 import { StoreContext } from '../store';
+
+const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
 const MainToolbar = withTranslation()(({ t }) => {
     const store = useContext(StoreContext);
@@ -16,7 +19,7 @@ const MainToolbar = withTranslation()(({ t }) => {
         event.preventDefault();
         await store.user.signOut();
         setAnchorEl(null);
-        window.location.assign('/app/signin')
+        window.location.assign(`${BASE_PATH}/signin`);
     };
 
     return (

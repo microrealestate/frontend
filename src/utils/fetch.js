@@ -53,7 +53,7 @@ export const useApiFetch = () => {
             error => {
                 console.error(`${error.config.method.toUpperCase()} ${error.config.url} ${error.response.status}`);
                 // if (!isServer() && [401, 403].includes(error.response.status)) {
-                //     window.location.assign('/app/signin');
+                //     window.location.assign('${BASE_PATH}/signin');
                 //     return;
                 // }
                 return Promise.reject(error);

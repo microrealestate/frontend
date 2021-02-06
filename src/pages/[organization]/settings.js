@@ -1,9 +1,10 @@
 import { useObserver } from 'mobx-react-lite'
 import { useContext, useState } from 'react'
+import getConfig from 'next/config';
 import Page from '../../components/Page'
 
 import { withAuthentication } from '../../components/Authentication'
-import { Box, Collapse, Grid, Tab, Tabs, Typography, withStyles } from '@material-ui/core'
+import { Box, Grid, Tab, Tabs, Typography, withStyles } from '@material-ui/core'
 import { withTranslation } from 'next-i18next'
 import OrganizationSettings from '../../components/OrganizationForms/Settings'
 import OrganizationBilling from '../../components/OrganizationForms/Billing'
@@ -11,6 +12,8 @@ import OrganizationMembers from '../../components/OrganizationForms/Members'
 import OrganizationNotification from '../../components/OrganizationForms/Notification'
 import { StoreContext } from '../../store'
 import RequestError from '../../components/RequestError'
+
+const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -78,7 +81,7 @@ const Settings = withTranslation()(({ t }) => {
     ]);
 
     if (newName !== previousName) {
-      window.location.assign(`/app/${store.organization.selected.name}/settings`);
+      window.location.assign(`${BASE_PATH}/${store.organization.selected.name}/settings`);
     }
   }
 

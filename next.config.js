@@ -12,10 +12,11 @@ module.exports = {
   publicRuntimeConfig: {
     APP_NAME: process.env.APP_NAME,
     API_URL: process.env.API_URL,
-    CORS_ENABLED: process.env.CORS_ENABLED === 'true'
+    CORS_ENABLED: process.env.CORS_ENABLED === 'true',
+    BASE_PATH: process.env.BASE_PATH || '',
     // localeSubpaths
   },
-  basePath: '/app'
+  basePath: process.env.BASE_PATH || ''
   // i18n: {
   //   locales: ['en-US', 'fr-FR', 'pt-BR'],
   //   defaultLocale: 'en-US'
