@@ -1,22 +1,23 @@
-import moment from 'moment';
+import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
+import { useRouter } from 'next/router';
+import moment from 'moment';
+import { Box, CircularProgress, Grid, Typography } from '@material-ui/core';
+import TrendingDownIcon from '@material-ui/icons/TrendingDown';
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+
 import { StoreContext, getStoreInstance } from '../../../../store'
 import { withAuthentication } from '../../../../components/Authentication'
-import { useContext, useState } from 'react';
 import { isServer } from '../../../../utils';
-import { Box, CircularProgress, Grid, Typography } from '@material-ui/core';
 import { withTranslation } from '../../../../utils/i18n';
 import SendIcon from '@material-ui/icons/Send';
 import Page from '../../../../components/Page';
 import RentCard from '../../../../components/RentCard';
 
 import MonthPicker from '../../../../components/MonthPicker';
-import DashboardCard from '../../../../components/DashboardCard';
+import { PageCard } from '../../../../components/Cards';
 import { NumberFormat } from '../../../../utils/numberformat';
-import TrendingDownIcon from '@material-ui/icons/TrendingDown';
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import { useRouter } from 'next/router';
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
 import RentTable from '../../../../components/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
@@ -41,7 +42,7 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
 
 const ListToolbar = withTranslation()(({ t, onSearch }) => {
   return (
-    <Box pb={4} width={600}>
+    <Box pb={4}>
       <SearchFilterBar
         filters={[
           { id: '', label: t('All') },
@@ -109,47 +110,48 @@ const Rents = withTranslation()(({ t }) => {
         )}
         {!loading && (
           <Grid container spacing={10}>
-            <Grid item xs={9}>
-              <ListToolbar onSearch={onSearch} />
+            <Grid item xs={12}>
               <Grid container spacing={3}>
-                {store.rent.filteredItems.map(rent => (
-                  <Grid key={rent.uid} item xs={4}>
-                    <RentCard rent={rent} onEdit={onEdit} />
-                  </Grid>
-                ))}
-              </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container direction="column" spacing={4}>
-                <Grid item>
-                  <DashboardCard
+                <Grid item xs={4}>
+                  <PageCard
+                    variant="info"
                     Icon={ReceiptIcon}
                     title={t('Rents')}
                     info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
                   >
                     <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
-                  </DashboardCard>
+                  </PageCard>
                 </Grid>
-                <Grid item>
-                  <DashboardCard
+                <Grid item xs={4}>
+                  <PageCard
                     variant="success"
                     Icon={TrendingUpIcon}
                     title={t('Paid')}
                     info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
                   >
                     <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
-                  </DashboardCard>
+                  </PageCard>
                 </Grid>
-                <Grid item>
-                  <DashboardCard
+                <Grid item xs={4}>
+                  <PageCard
                     variant="warning"
                     Icon={TrendingDownIcon}
                     title={t('Not paid')}
                     info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
                   >
                     <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
-                  </DashboardCard>
+                  </PageCard>
                 </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ListToolbar onSearch={onSearch} />
+              <Grid container spacing={3}>
+                {store.rent.filteredItems.map(rent => (
+                  <Grid key={rent.uid} item xs={12} md={12} lg={4}>
+                    <RentCard rent={rent} onEdit={onEdit} />
+                  </Grid>
+                ))}
               </Grid>
             </Grid>
           </Grid>

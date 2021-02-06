@@ -1,25 +1,25 @@
-import moment from 'moment';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, List, ListItem, Typography, withStyles } from '@material-ui/core';
-import { useObserver } from 'mobx-react-lite'
-import { withTranslation } from 'next-i18next';
 import { Children, useContext, useState } from 'react';
-import Page from '../../../../../components/Page'
-
-import { withAuthentication } from '../../../../../components/Authentication'
-import { getStoreInstance, StoreContext } from '../../../../../store';
-import { isServer } from '../../../../../utils';
+import { useObserver } from 'mobx-react-lite'
+import { useRouter } from 'next/router';
+import { withTranslation } from 'next-i18next';
+import moment from 'moment';
 import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../../components/Form';
-import DashboardCard from '../../../../../components/DashboardCard';
-import { NumberFormat } from '../../../../../utils/numberformat';
-import { PaymentBalance } from '../../../../../components/RentCard';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, List, ListItem, Typography, withStyles } from '@material-ui/core';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SendIcon from '@material-ui/icons/Send';
 import HistoryIcon from '@material-ui/icons/History';
+
+import Page from '../../../../../components/Page'
+import { withAuthentication } from '../../../../../components/Authentication'
+import { getStoreInstance, StoreContext } from '../../../../../store';
+import { isServer } from '../../../../../utils';
+import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../../components/Form';
+import { DashboardCard } from '../../../../../components/Cards';
+import { NumberFormat } from '../../../../../utils/numberformat';
+import { PaymentBalance } from '../../../../../components/RentCard';
 import Link from '../../../../../components/Link';
-import { useRouter } from 'next/router';
 import SendRentEmailMenu from '../../../../../components/SendRentEmailMenu';
 import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
 import RequestError from '../../../../../components/RequestError';
