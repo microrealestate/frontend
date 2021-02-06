@@ -1,17 +1,9 @@
 import moment from 'moment';
 import { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-import Checkbox from '@material-ui/core/Checkbox';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import IconButton from '@material-ui/core/IconButton';
-import { Select, MenuItem, CircularProgress, Button, FormLabel, RadioGroup, Radio } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 
@@ -55,7 +47,6 @@ export const FormTextField = RestrictedComponent(({ label, ...props }) => {
       <InputLabel htmlFor={props.name} error={hasError}>{label}</InputLabel>
       <Input
         error={hasError}
-        type={(props.type === 'password' && displayPassword) ? 'text' : props.type}
         endAdornment={props.type === 'password' ? (
           <InputAdornment position="end">
             <IconButton
@@ -70,6 +61,7 @@ export const FormTextField = RestrictedComponent(({ label, ...props }) => {
         disabled={isSubmitting}
         {...props}
         {...field}
+        type={(props.type === 'password' && displayPassword) ? 'text' : props.type}
       />
       {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
     </FormControl>
