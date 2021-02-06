@@ -1,14 +1,12 @@
 import { useState, useContext } from 'react';
 import { useObserver } from 'mobx-react-lite';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
+import { IconButton, Box, Tooltip, Container, Toolbar } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 import { withTranslation } from '../utils/i18n';
 
 import OrganizationSwitcher from './OrganizationSwitcher';
 import { StoreContext } from '../store';
-import { Box, Tooltip } from '@material-ui/core';
 
 const MainToolbar = withTranslation()(({ t }) => {
     const store = useContext(StoreContext);
@@ -39,7 +37,7 @@ const MainToolbar = withTranslation()(({ t }) => {
     )
 });
 
-const Page = ({ children, PrimaryToolbar, SecondaryToolbar }) => {
+const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
     console.log('Page functional component')
     const store = useContext(StoreContext);
 
@@ -61,9 +59,11 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar }) => {
                         </Box>
                     </Toolbar>
                 )}
-                <Box mt={4} margin="auto" maxWidth={1200}>
-                    {children}
-                </Box>
+                <Container maxWidth={maxWidth}>
+                    <Box mt={4}>
+                        {children}
+                    </Box>
+                </Container>
             </>
         )
     });

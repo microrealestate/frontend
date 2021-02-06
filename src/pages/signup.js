@@ -1,19 +1,18 @@
 import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
+import { useRouter } from 'next/router';
 import getConfig from 'next/config'
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { Box, Typography, Paper } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import { FormTextField, SubmitButton } from '../components/Form';
 
+import { FormTextField, SubmitButton } from '../components/Form';
 import { withTranslation } from '../utils/i18n';
 import { StoreContext } from '../store';
 import Link from '../components/Link';
-import { useRouter } from 'next/router';
-import { Box } from '@material-ui/core';
 import RequestError from '../components/RequestError';
+import Page from '../components/Page';
 
 const initialValues = {
   firstName: '',
@@ -66,7 +65,7 @@ const SignUp = withTranslation()(({ t }) => {
   };
 
   return useObserver(() => (
-    <Box m="auto" width={500}>
+    <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
           <LocationCityIcon fontSize="large" />
@@ -125,7 +124,7 @@ const SignUp = withTranslation()(({ t }) => {
           </Box>
         </Paper>
       </Box>
-    </Box>
+    </Page>
   ));
 });
 

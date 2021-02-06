@@ -1,19 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
+import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import Button from '@material-ui/core/Button';
+import { Button, Box, Grid, Paper, Typography } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 
 import { FormTextField, SubmitButton } from '../../components/Form';
-
 import { withTranslation } from '../../utils/i18n';
 import { StoreContext } from '../../store';
-import { useRouter } from 'next/router';
-import { Box, Grid } from '@material-ui/core';
 import RequestError from '../../components/RequestError';
+import Page from '../../components/Page';
 
 const initialValues = {
   password: '',
@@ -66,7 +63,7 @@ const ResetPassword = withTranslation()(({ t }) => {
   };
 
   return useObserver(() => (
-    <Box m="auto" width={500}>
+    <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
           <LocationCityIcon fontSize="large" />
@@ -119,7 +116,7 @@ const ResetPassword = withTranslation()(({ t }) => {
           </Formik>
         </Box>
       </Paper>
-    </Box>
+    </Page>
   ));
 });
 

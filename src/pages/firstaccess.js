@@ -1,7 +1,8 @@
 import React, { useContext, useState } from 'react';
 import getConfig from 'next/config'
+import { useRouter } from 'next/router';
 import { useObserver } from 'mobx-react-lite';
-import { Typography, Box, Paper, Collapse } from '@material-ui/core';
+import { Typography, Box, Paper } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 
 import { withTranslation } from '../utils/i18n';
@@ -9,7 +10,6 @@ import { withAuthentication } from '../components/Authentication';
 import { getStoreInstance, StoreContext } from '../store';
 import Page from '../components/Page';
 import IconTypography from '../components/IconTypography';
-import { useRouter } from 'next/router';
 import { isServer, redirect } from '../utils';
 import RequestError from '../components/RequestError';
 import OrganizationSettings from '../components/OrganizationForms/Settings';
@@ -61,25 +61,24 @@ const FirstAccess = withTranslation()(({ t }) => {
           {APP_NAME}
         </IconTypography>
       }
+      maxWidth="sm"
     >
-      <Box m="auto" width={500}>
-        <Box paddingTop={2} paddingBottom={2}>
-          <Typography component="h1" variant="h4" align="center">
-            {t('Welcome {{firstName}} {{lastName}}!', { firstName: store.user.firstName, lastName: store.user.lastName })}
-          </Typography>
-        </Box>
-        <Box paddingBottom={4}>
-          <Typography variant="subtitle2" align="center" color="textSecondary">
-            {t('One more step. Tell us who will rent the properties')}
-          </Typography>
-        </Box>
-        <Paper>
-          <Box px={4} pb={4} pt={2}>
-            <RequestError error={error} />
-            <OrganizationSettings submitLabel={t('Next')} onSubmit={onSubmit} />
-          </Box>
-        </Paper>
+      <Box paddingTop={2} paddingBottom={2}>
+        <Typography component="h1" variant="h4" align="center">
+          {t('Welcome {{firstName}} {{lastName}}!', { firstName: store.user.firstName, lastName: store.user.lastName })}
+        </Typography>
       </Box>
+      <Box paddingBottom={4}>
+        <Typography variant="subtitle2" align="center" color="textSecondary">
+          {t('One more step. Tell us who will rent the properties')}
+        </Typography>
+      </Box>
+      <Paper>
+        <Box px={4} pb={4} pt={2}>
+          <RequestError error={error} />
+          <OrganizationSettings submitLabel={t('Next')} onSubmit={onSubmit} />
+        </Box>
+      </Paper>
     </Page>
   ));
 });

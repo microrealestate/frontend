@@ -1,19 +1,18 @@
 import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import getConfig from 'next/config'
+import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { Box, Paper, Typography } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import { FormTextField, SubmitButton } from '../components/Form';
 
+import { FormTextField, SubmitButton } from '../components/Form';
 import { StoreContext } from '../store'
 import { withTranslation } from '../utils/i18n';
 import Link from '../components/Link';
-import { useRouter } from 'next/router';
-import { Box } from '@material-ui/core';
 import RequestError from '../components/RequestError';
+import Page from '../components/Page';
 
 const initialValues = {
   email: '',
@@ -70,7 +69,7 @@ const SignIn = withTranslation()(({ t }) => {
   };
 
   return useObserver(() => !store.user.signedIn ? (
-    <Box m="auto" width={500}>
+    <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
           <LocationCityIcon fontSize="large" />
@@ -124,7 +123,7 @@ const SignIn = withTranslation()(({ t }) => {
           </Box>
         </Paper>
       </Box>
-    </Box>
+    </Page>
   ) : null);
 });
 
