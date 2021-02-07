@@ -72,23 +72,25 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
             <MainToolbar />
           </Toolbar>
         )}
-        <ElevationScroll>
-          <AppBar
-            position="sticky"
-          >
-            <Toolbar>
-              <Box display="flex" justifyContent="space-between" width="100%">
-                <Box>
-                  {PrimaryToolbar && PrimaryToolbar}
+        { (PrimaryToolbar || SecondaryToolbar) && (
+          <ElevationScroll>
+            <AppBar
+              position="sticky"
+            >
+              <Toolbar>
+                <Box display="flex" justifyContent="space-between" width="100%">
+                  <Box>
+                    {PrimaryToolbar && PrimaryToolbar}
+                  </Box>
+                  <Box ml={PrimaryToolbar ? 5 : 0} flexGrow={0} whiteSpace="nowrap">
+                    {SecondaryToolbar && SecondaryToolbar}
+                  </Box>
                 </Box>
-                <Box ml={PrimaryToolbar ? 5 : 0} flexGrow={0} whiteSpace="nowrap">
-                  {SecondaryToolbar && SecondaryToolbar}
-                </Box>
-              </Box>
-            </Toolbar>
-          </AppBar>
-        </ElevationScroll>
-        <Box mt={4}>
+              </Toolbar>
+            </AppBar>
+          </ElevationScroll>
+        )}
+        <Box mt={(PrimaryToolbar || SecondaryToolbar) ? 4 : 0}>
           <Container maxWidth={maxWidth}>
             {children}
           </Container>
