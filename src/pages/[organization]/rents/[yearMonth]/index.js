@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { useRouter } from 'next/router';
 import moment from 'moment';
-import { Box, CircularProgress, Grid, Typography } from '@material-ui/core';
+import { Box, CircularProgress, Grid, Hidden, Typography } from '@material-ui/core';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import ReceiptIcon from '@material-ui/icons/Receipt';
@@ -109,52 +109,56 @@ const Rents = withTranslation()(({ t }) => {
           </Grid>
         )}
         {!loading && (
-          <Grid container spacing={10}>
-            <Grid item xs={12}>
-              <Grid container spacing={3}>
-                <Grid item xs={4}>
-                  <PageCard
-                    variant="info"
-                    Icon={ReceiptIcon}
-                    title={t('Rents')}
-                    info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
-                  >
-                    <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
-                  </PageCard>
-                </Grid>
-                <Grid item xs={4}>
-                  <PageCard
-                    variant="success"
-                    Icon={TrendingUpIcon}
-                    title={t('Paid')}
-                    info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
-                  >
-                    <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
-                  </PageCard>
-                </Grid>
-                <Grid item xs={4}>
-                  <PageCard
-                    variant="warning"
-                    Icon={TrendingDownIcon}
-                    title={t('Not paid')}
-                    info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
-                  >
-                    <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
-                  </PageCard>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <ListToolbar onSearch={onSearch} />
-              <Grid container spacing={3}>
-                {store.rent.filteredItems.map(rent => (
-                  <Grid key={rent.uid} item xs={12} md={12} lg={4}>
-                    <RentCard rent={rent} onEdit={onEdit} />
+          <>
+            <Hidden smDown>
+              <Box pb={5}>
+                <Grid container spacing={3}>
+                  <Grid item xs={4}>
+                    <PageCard
+                      variant="info"
+                      Icon={ReceiptIcon}
+                      title={t('Rents')}
+                      info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
+                    >
+                      <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
+                    </PageCard>
                   </Grid>
-                ))}
+                  <Grid item xs={4}>
+                    <PageCard
+                      variant="success"
+                      Icon={TrendingUpIcon}
+                      title={t('Paid')}
+                      info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
+                    >
+                      <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
+                    </PageCard>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <PageCard
+                      variant="warning"
+                      Icon={TrendingDownIcon}
+                      title={t('Not paid')}
+                      info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
+                    >
+                      <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
+                    </PageCard>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Hidden>
+            <Grid container>
+              <Grid item xs={12}>
+                <ListToolbar onSearch={onSearch} />
+                <Grid container spacing={3}>
+                  {store.rent.filteredItems.map(rent => (
+                    <Grid key={rent.uid} item xs={12} md={4}>
+                      <RentCard rent={rent} onEdit={onEdit} />
+                    </Grid>
+                  ))}
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          </>
         )}
       </Grid>
     </Page>

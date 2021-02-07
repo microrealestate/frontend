@@ -5,7 +5,7 @@ import { withTranslation } from 'next-i18next';
 import moment from 'moment';
 import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, List, ListItem, Typography, withStyles } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, Hidden, List, ListItem, Typography, withStyles } from '@material-ui/core';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SendIcon from '@material-ui/icons/Send';
@@ -323,85 +323,87 @@ const RentPayment = withTranslation()(({ t }) => {
     >
       <RequestError error={error} />
       <Grid container spacing={10}>
-        <Grid item xs={8}>
+        <Grid item sm={12} md={8}>
           <PaymentForm rent={store.rent.selected} />
         </Grid>
-        <Grid item xs={4}>
-          <Box pb={4}>
+        <Hidden smDown>
+          <Grid item md={4}>
+            <Box pb={4}>
+              <DashboardCard
+                Icon={ReceiptIcon}
+                title={t('Rent of {{monthYear}}', { monthYear: store.rent._period.format('MMMM YYYY') })}
+              >
+                <Box pb={1}>
+                  <NumberFormat align="right" variant="h5" value={store.rent.selected.totalAmount > 0 ? store.rent.selected.totalAmount : 0} />
+                </Box>
+                <Divider />
+                <Box pt={1}>
+                  <PaymentBalance rent={store.rent.selected} />
+                </Box>
+              </DashboardCard>
+            </Box>
             <DashboardCard
-              Icon={ReceiptIcon}
-              title={t('Rent of {{monthYear}}', { monthYear: store.rent._period.format('MMMM YYYY') })}
+              Icon={SendIcon}
+              title={t('Documents sent')}
             >
-              <Box pb={1}>
-                <NumberFormat align="right" variant="h5" value={store.rent.selected.totalAmount > 0 ? store.rent.selected.totalAmount : 0} />
-              </Box>
-              <Divider />
-              <Box pt={1}>
-                <PaymentBalance rent={store.rent.selected} />
-              </Box>
-            </DashboardCard>
-          </Box>
-          <DashboardCard
-            Icon={SendIcon}
-            title={t('Documents sent')}
-          >
-            {store.rent.selected.emailStatus ? (
-              <List>
-                {(store.rent.selected.emailStatus.status?.rentcall) && (
-                  <StyledListItem>
-                    <DownloadLink
-                      label={t('First notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall.sentDate).format('L hh:mm') })}
-                      url={`/rentcall/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                      documentName={`${store.rent.selected.occupant.name}-${t('first notice')}.pdf`}
-                      variant="body2"
-                      color="textSecondary"
-                    />
-                  </StyledListItem>
-                )}
+              {store.rent.selected.emailStatus ? (
+                <List>
+                  {(store.rent.selected.emailStatus.status?.rentcall) && (
+                    <StyledListItem>
+                      <DownloadLink
+                        label={t('First notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall.sentDate).format('L hh:mm') })}
+                        url={`/rentcall/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                        documentName={`${store.rent.selected.occupant.name}-${t('first notice')}.pdf`}
+                        variant="body2"
+                        color="textSecondary"
+                      />
+                    </StyledListItem>
+                  )}
 
-                {(store.rent.selected.emailStatus.status?.rentcall_reminder) && (
-                  <StyledListItem>
-                    <DownloadLink
-                      label={t('Second notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_reminder.sentDate).format('L hh:mm') })}
-                      url={`/rentcall_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                      documentName={`${store.rent.selected.occupant.name}-${t('second notice')}.pdf`}
-                      variant="body2"
-                      color="textSecondary"
-                    />
-                  </StyledListItem>
+                  {(store.rent.selected.emailStatus.status?.rentcall_reminder) && (
+                    <StyledListItem>
+                      <DownloadLink
+                        label={t('Second notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_reminder.sentDate).format('L hh:mm') })}
+                        url={`/rentcall_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                        documentName={`${store.rent.selected.occupant.name}-${t('second notice')}.pdf`}
+                        variant="body2"
+                        color="textSecondary"
+                      />
+                    </StyledListItem>
+                  )}
+                  {(store.rent.selected.emailStatus.status?.rentcall_last_reminder) && (
+                    <StyledListItem>
+                      <DownloadLink
+                        label={t('Last notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_last_reminder.sentDate).format('L hh:mm') })}
+                        url={`/rentcall_last_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                        documentName={`${store.rent.selected.occupant.name}-${t('last notice')}.pdf`}
+                        variant="body2"
+                        color="textSecondary"
+                      />
+                    </StyledListItem>
+                  )}
+                  {(store.rent.selected.emailStatus.status?.invoice) && (
+                    <StyledListItem>
+                      <DownloadLink
+                        label={t('Receipt sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.invoice.sentDate).format('L hh:mm') })}
+                        url={`/invoice/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                        documentName={`${store.rent.selected.occupant.name}-${t('invoice')}.pdf`}
+                        variant="body2"
+                        color="textSecondary"
+                      />
+                    </StyledListItem>
+                  )}
+                </List>
+              ) : (
+                  <Typography
+                    color="textSecondary"
+                  >
+                    {t('No documents sent')}
+                  </Typography>
                 )}
-                {(store.rent.selected.emailStatus.status?.rentcall_last_reminder) && (
-                  <StyledListItem>
-                    <DownloadLink
-                      label={t('Last notice sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.rentcall_last_reminder.sentDate).format('L hh:mm') })}
-                      url={`/rentcall_last_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                      documentName={`${store.rent.selected.occupant.name}-${t('last notice')}.pdf`}
-                      variant="body2"
-                      color="textSecondary"
-                    />
-                  </StyledListItem>
-                )}
-                {(store.rent.selected.emailStatus.status?.invoice) && (
-                  <StyledListItem>
-                    <DownloadLink
-                      label={t('Receipt sent on {{datetime}}', { datetime: moment(store.rent.selected.emailStatus.last.invoice.sentDate).format('L hh:mm') })}
-                      url={`/invoice/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                      documentName={`${store.rent.selected.occupant.name}-${t('invoice')}.pdf`}
-                      variant="body2"
-                      color="textSecondary"
-                    />
-                  </StyledListItem>
-                )}
-              </List>
-            ) : (
-                <Typography
-                  color="textSecondary"
-                >
-                  {t('No documents sent')}
-                </Typography>
-              )}
-          </DashboardCard>
-        </Grid>
+            </DashboardCard>
+          </Grid>
+        </Hidden>
       </Grid>
     </Page>
   ))
