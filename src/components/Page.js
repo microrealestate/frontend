@@ -78,11 +78,16 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
               position="sticky"
             >
               <Toolbar>
-                <Box display="flex" justifyContent="space-between" width="100%">
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  width="100%"
+                >
                   <Box>
                     {PrimaryToolbar && PrimaryToolbar}
                   </Box>
-                  <Box ml={PrimaryToolbar ? 5 : 0} flexGrow={0} whiteSpace="nowrap">
+                  <Box ml={PrimaryToolbar ? 5 : 0} flexGrow={1} whiteSpace="nowrap">
                     {SecondaryToolbar && SecondaryToolbar}
                   </Box>
                 </Box>
@@ -91,7 +96,9 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
           </ElevationScroll>
         )}
         <Box mt={(PrimaryToolbar || SecondaryToolbar) ? 4 : 0}>
-          <Container maxWidth={maxWidth}>
+          <Container
+            maxWidth={maxWidth}
+          >
             {children}
           </Container>
         </Box>

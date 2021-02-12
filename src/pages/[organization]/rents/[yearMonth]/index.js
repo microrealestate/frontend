@@ -40,23 +40,6 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
   );
 });
 
-const ListToolbar = withTranslation()(({ t, onSearch }) => {
-  return (
-    <Box pb={4}>
-      <SearchFilterBar
-        filters={[
-          { id: '', label: t('All') },
-          { id: 'notpaid', label: t('Not paid') },
-          { id: 'partiallypaid', label: t('Partially paid') },
-          { id: 'paid', label: t('Paid') },
-
-        ]}
-        onSearch={onSearch}
-      />
-    </Box>
-  )
-});
-
 const Rents = withTranslation()(({ t }) => {
   console.log('Rents functional component')
   const store = useContext(StoreContext);
@@ -88,16 +71,32 @@ const Rents = withTranslation()(({ t }) => {
         <PeriodToolbar onChange={onPeriodChange} />
       }
       SecondaryToolbar={
-        <FullScreenDialogButton
-          variant="contained"
-          buttonLabel={t('Send mass emails')}
-          startIcon={<SendIcon />}
-          dialogTitle={t('Send mass emails')}
-          cancelButtonLabel={t('Close')}
-          showCancel
-        >
-          <RentTable />
-        </FullScreenDialogButton>
+        <Box display="flex" alignItems="center">
+          <Box flexGrow={1} mr={5}>
+            <SearchFilterBar
+              filters={[
+                { id: '', label: t('All') },
+                { id: 'notpaid', label: t('Not paid') },
+                { id: 'partiallypaid', label: t('Partially paid') },
+                { id: 'paid', label: t('Paid') },
+
+              ]}
+              onSearch={onSearch}
+            />
+          </Box>
+          <Box>
+            <FullScreenDialogButton
+              variant="contained"
+              buttonLabel={t('Send mass emails')}
+              startIcon={<SendIcon />}
+              dialogTitle={t('Send mass emails')}
+              cancelButtonLabel={t('Close')}
+              showCancel
+            >
+              <RentTable />
+            </FullScreenDialogButton>
+          </Box>
+        </Box>
       }
     >
       <Grid container direction="column">
@@ -146,17 +145,12 @@ const Rents = withTranslation()(({ t }) => {
                 </Grid>
               </Box>
             </Hidden>
-            <Grid container>
-              <Grid item xs={12}>
-                <ListToolbar onSearch={onSearch} />
-                <Grid container spacing={3}>
-                  {store.rent.filteredItems.map(rent => (
-                    <Grid key={rent.uid} item xs={12} md={4}>
-                      <RentCard rent={rent} onEdit={onEdit} />
-                    </Grid>
-                  ))}
+            <Grid container spacing={3}>
+              {store.rent.filteredItems.map(rent => (
+                <Grid key={rent.uid} item xs={12} md={4}>
+                  <RentCard rent={rent} onEdit={onEdit} />
                 </Grid>
-              </Grid>
+              ))}
             </Grid>
           </>
         )}
