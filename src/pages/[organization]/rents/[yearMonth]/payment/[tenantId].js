@@ -26,20 +26,17 @@ import RequestError from '../../../../../components/RequestError';
 import DownloadLink from '../../../../../components/DownloadLink';
 import PaymentHistory from '../../../../../components/PaymentHistory';
 
-const BreadcrumbBar = withTranslation()(({ t }) => {
+const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
 
-
-  return useObserver(() => {
-    return (
-      <Breadcrumbs aria-label="breadcrumb">
-        <Link color="inherit" href={`/${store.organization.selected.name}/rents/${store.rent.period}`}>
-          {t('Rents of {{date}}', { date: store.rent._period.format('MMM YYYY') })}
-        </Link>
-        <Typography variant="h6" noWrap>{store.rent.selected.occupant.name}</Typography>
-      </Breadcrumbs>
-    );
-  });
+  return (
+    <Breadcrumbs aria-label="breadcrumb">
+      <Link color="inherit" href={backPath}>
+        {t('Rents of {{date}}', { date: store.rent._period.format('MMM YYYY') })}
+      </Link>
+      <Typography variant="h6" noWrap>{store.rent.selected.occupant.name}</Typography>
+    </Breadcrumbs>
+  );
 });
 
 const FormSection = ({ label, children, ...props }) => {
@@ -65,7 +62,7 @@ const FormSection = ({ label, children, ...props }) => {
 
 const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
 
-const PaymentForm = withTranslation()(({ t, rent }) => {
+const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
   const store = useContext(StoreContext);
   const router = useRouter();
 
@@ -81,14 +78,14 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
     values._id = rent._id;
     try {
       await store.rent.pay(values);
-      await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
+      await router.push(backPath);
     } catch (error) {
       console.error(error);
     }
   }
 
   const onCancel = async () => {
-    await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
+    await router.push(backPath);
   }
 
   const initialValues = {
@@ -293,10 +290,15 @@ const RentPayment = withTranslation()(({ t }) => {
 
   //TODO manage errors
 
+  let backPath = `../`
+  if (store.rent.filters.searchText || store.rent.filters.status) {
+    backPath = `../?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
+  }
+
   return useObserver(() => (
     <Page
       PrimaryToolbar={
-        <BreadcrumbBar />
+        <BreadcrumbBar backPath={backPath}/>
       }
       SecondaryToolbar={
         <Box display="flex" width="100%" align="right">
@@ -309,7 +311,7 @@ const RentPayment = withTranslation()(({ t }) => {
               cancelButtonLabel={t('Close')}
               showCancel
             >
-              <PaymentHistory tenantId={store.rent.selected.occupant._id}/>
+              <PaymentHistory tenantId={store.rent.selected.occupant._id} />
             </FullScreenDialogButton>
           </Box>
           <SendRentEmailMenu
@@ -324,7 +326,7 @@ const RentPayment = withTranslation()(({ t }) => {
       <RequestError error={error} />
       <Grid container spacing={10}>
         <Grid item sm={12} md={8}>
-          <PaymentForm rent={store.rent.selected} />
+          <PaymentForm rent={store.rent.selected} backPath={backPath} />
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>

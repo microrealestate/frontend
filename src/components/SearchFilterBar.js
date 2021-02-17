@@ -5,9 +5,9 @@ import { withTranslation } from 'next-i18next';
 import { useState, useEffect } from 'react';
 import ToggleMenu  from './ToggleMenu';
 
-const SearchFilterBar = withTranslation()(({ t, filters, onSearch }) => {
-    const [filter, setFilter] = useState('');
-    const [searchText, setSearchText] = useState('');
+const SearchFilterBar = withTranslation()(({ t, filters, onSearch, defaultValue = { status: '', searchText: ''} }) => {
+    const [filter, setFilter] = useState(defaultValue.status);
+    const [searchText, setSearchText] = useState(defaultValue.searchText);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -21,6 +21,7 @@ const SearchFilterBar = withTranslation()(({ t, filters, onSearch }) => {
             <Box flexGrow={1}>
                 <TextField
                     placeholder={t('Search')}
+                    defaultValue={defaultValue.searchText}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -38,7 +39,7 @@ const SearchFilterBar = withTranslation()(({ t, filters, onSearch }) => {
                 <ToggleMenu
                     startIcon={<FilterListIcon />}
                     options={filters}
-                    value={filters[0]}
+                    value={filters.find(f => f.id === defaultValue.status) || filters[0]}
                     onChange={option => setFilter(option.id)}
                 />
             </Box>

@@ -4,6 +4,7 @@ import { observable, reaction } from 'mobx'
 import User from './User'
 import Organization from './Organization'
 import Rent from './Rent'
+import Tenant from './Tenant';
 import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
 
@@ -11,6 +12,7 @@ export default class Store {
     @observable user = new User()
     @observable organization = new Organization()
     @observable rent = new Rent()
+    @observable tenant = new Tenant()
 
     constructor() {
       let refreshTokenHandle;
@@ -69,6 +71,9 @@ export default class Store {
         },
         rent = {
           items: []
+        },
+        tenant = {
+          items: []
         }
       } = initialData;
 
@@ -86,7 +91,6 @@ export default class Store {
       this.rent.selected = rent.selected;
       this.rent.filters = rent.filters;
       this.rent.setPeriod(rent._period ? moment(rent._period) : moment());
-      this.rent._useCache = rent.items.length !== 0;
       this.rent.countAll = rent.countAll;
       this.rent.countPaid = rent.countPaid;
       this.rent.countPartiallyPaid = rent.countPartiallyPaid;
@@ -94,5 +98,9 @@ export default class Store {
       this.rent.totalToPay = rent.totalToPay;
       this.rent.totalPaid = rent.totalPaid;
       this.rent.totalNotPaid = rent.totalNotPaid;
+
+      this.tenant.items = tenant.items;
+      this.tenant.selected = tenant.selected;
+      this.tenant.filters = tenant.filters;
     }
   }

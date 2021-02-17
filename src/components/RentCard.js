@@ -32,55 +32,6 @@ const CardRow = ({ children, ...props }) => (
   </Box>
 );
 
-// const Contacts = ({ rent }) => {
-//     const contacts = rent.occupant.contacts
-//         .reduce((acc, { contact, email, phone }) => {
-//             if (contact) {
-//                 acc.names.push(_.startCase(_.capitalize(contact)));
-//             }
-//             if (email) {
-//                 acc.emails.push(email.toLowerCase());
-//             }
-//             if (phone) {
-//                 acc.phones.push(phone);
-//             }
-
-//             return acc;
-//         }, { names: [], emails: [], phones: [] });
-
-//     return (
-//         <Typography
-//             color="textSecondary"
-//             variant="body2"
-//         >
-//             {contacts.names.length ? contacts.names[0] : <br />}
-//         </Typography>
-//         //  <CardContent className={classes.contact}>
-//         //     <IconTypography
-//         //         Icon={
-//         //             <PersonIcon />
-//         //         }
-//         //     >
-//         //         {contacts.names.join(' - ')}
-//         //     </IconTypography>
-//         //     <IconTypography
-//         //         Icon={
-//         //             <PhoneIcon />
-//         //         }
-//         //     >
-//         //         {contacts.phones.join(' - ')}
-//         //     </IconTypography>
-//         //     <IconTypography
-//         //         Icon={
-//         //             <EmailIcon />
-//         //         }
-//         //     >
-//         //         {contacts.emails.join(' - ')}
-//         //     </IconTypography>
-//         // </CardContent>
-//     );
-// }
-
 const Header = withTranslation()(({ t, rent, onEdit }) => {
   const classes = useStyles();
   return (

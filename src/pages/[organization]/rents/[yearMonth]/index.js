@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { useRouter } from 'next/router';
+import getConfig from 'next/config';
 import moment from 'moment';
 import { Box, CircularProgress, Grid, Hidden, Typography } from '@material-ui/core';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
@@ -21,6 +22,8 @@ import { NumberFormat } from '../../../../utils/numberformat';
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
 import RentTable from '../../../../components/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
+
+const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
 const PeriodToolbar = withTranslation()(({ t, onChange }) => {
   const router = useRouter();
@@ -47,6 +50,16 @@ const Rents = withTranslation()(({ t }) => {
   const router = useRouter();
 
   const onSearch = (status, searchText) => {
+    let queryString = '';
+    if (searchText || status) {
+      queryString = `?search=${encodeURIComponent(searchText)}&status=${encodeURIComponent(status)}`
+    }
+    router.push(
+      `/${store.organization.selected.name}/rents/${store.rent.period}${queryString}`,
+      undefined,
+      { shallow: true }
+    );
+
     store.rent.setFilters({ status, searchText });
   }
 
@@ -81,6 +94,7 @@ const Rents = withTranslation()(({ t }) => {
                 { id: 'paid', label: t('Paid') },
 
               ]}
+              defaultValue={store.rent.filters}
               onSearch={onSearch}
             />
           </Box>
@@ -109,7 +123,7 @@ const Rents = withTranslation()(({ t }) => {
         )}
         {!loading && (
           <>
-            <Hidden smDown>
+            {!store.rent.filters.searchText && (<Hidden smDown>
               <Box pb={5}>
                 <Grid container spacing={3}>
                   <Grid item xs={4}>
@@ -144,7 +158,7 @@ const Rents = withTranslation()(({ t }) => {
                   </Grid>
                 </Grid>
               </Box>
-            </Hidden>
+            </Hidden>)}
             <Grid container spacing={3}>
               {store.rent.filteredItems.map(rent => (
                 <Grid key={rent.uid} item xs={12} md={4}>
@@ -164,12 +178,13 @@ Rents.getInitialProps = async (context) => {
   const store = isServer() ? context.store : getStoreInstance();
 
   if (isServer()) {
-    const { yearMonth } = context.query;
+    const { yearMonth, search, status } = context.query;
     const rentPeriod = moment(yearMonth, 'YYYY.MM', true);
     if (!rentPeriod.isValid()) {
       return { error: { statusCode: 404 } };
     }
     store.rent.setPeriod(rentPeriod);
+    store.rent.setFilters({searchText: search, status});
   }
 
   const fetchStatus = await store.rent.fetch();
