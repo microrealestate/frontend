@@ -290,9 +290,9 @@ const RentPayment = withTranslation()(({ t }) => {
 
   //TODO manage errors
 
-  let backPath = `../`
+  let backPath = `/${store.organization.selected.name}/rents/${store.rent.period}`;
   if (store.rent.filters.searchText || store.rent.filters.status) {
-    backPath = `../?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
+    backPath = `${backPath}?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
   }
 
   return useObserver(() => (
