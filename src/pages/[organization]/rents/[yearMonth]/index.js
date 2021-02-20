@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
+import { reaction, toJS } from 'mobx';
 import { useRouter } from 'next/router';
-import getConfig from 'next/config';
 import moment from 'moment';
-import { Box, CircularProgress, Grid, Hidden, Typography } from '@material-ui/core';
+import { Box, Grid, Hidden, Typography } from '@material-ui/core';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import ReceiptIcon from '@material-ui/icons/Receipt';
@@ -22,8 +22,6 @@ import { NumberFormat } from '../../../../utils/numberformat';
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
 import RentTable from '../../../../components/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
-
-const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
 const PeriodToolbar = withTranslation()(({ t, onChange }) => {
   const router = useRouter();
@@ -46,7 +44,6 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
 const Rents = withTranslation()(({ t }) => {
   console.log('Rents functional component')
   const store = useContext(StoreContext);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const onSearch = (status, searchText) => {
@@ -59,18 +56,12 @@ const Rents = withTranslation()(({ t }) => {
       undefined,
       { shallow: true }
     );
-
     store.rent.setFilters({ status, searchText });
   }
 
   const onPeriodChange = async period => {
-    setLoading(true);
-    try {
-      store.rent.setPeriod(period);
-      await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
-    } finally {
-      setLoading(false);
-    }
+    store.rent.setPeriod(period);
+    await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
   }
 
   const onEdit = async (rent) => {
@@ -113,61 +104,50 @@ const Rents = withTranslation()(({ t }) => {
         </Box>
       }
     >
-      <Grid container direction="column">
-        {loading && (
-          <Grid item xs={12}>
-            <Box marginLeft="50%" marginTop={20}>
-              <CircularProgress />
-            </Box>
-          </Grid>
-        )}
-        {!loading && (
-          <>
-            {!store.rent.filters.searchText && (<Hidden smDown>
-              <Box pb={5}>
-                <Grid container spacing={3}>
-                  <Grid item xs={4}>
-                    <PageCard
-                      variant="info"
-                      Icon={ReceiptIcon}
-                      title={t('Rents')}
-                      info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
-                    >
-                      <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
-                    </PageCard>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <PageCard
-                      variant="success"
-                      Icon={TrendingUpIcon}
-                      title={t('Paid')}
-                      info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
-                    >
-                      <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
-                    </PageCard>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <PageCard
-                      variant="warning"
-                      Icon={TrendingDownIcon}
-                      title={t('Not paid')}
-                      info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
-                    >
-                      <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
-                    </PageCard>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Hidden>)}
+      {!store.rent.filters.searchText && (
+        <Hidden smDown>
+          <Box pb={5}>
             <Grid container spacing={3}>
-              {store.rent.filteredItems.map(rent => (
-                <Grid key={rent.uid} item xs={12} md={4}>
-                  <RentCard rent={rent} onEdit={onEdit} />
-                </Grid>
-              ))}
+              <Grid item xs={4}>
+                <PageCard
+                  variant="info"
+                  Icon={ReceiptIcon}
+                  title={t('Rents')}
+                  info={t('Rents of {{period}}', { period: store.rent._period.format('MMMM YYYY') })}
+                >
+                  <Typography align="right" variant="h5">{store.rent.countAll}</Typography>
+                </PageCard>
+              </Grid>
+              <Grid item xs={4}>
+                <PageCard
+                  variant="success"
+                  Icon={TrendingUpIcon}
+                  title={t('Paid')}
+                  info={t('{{count}} rents paid', { count: store.rent.countPaid + store.rent.countPartiallyPaid })}
+                >
+                  <NumberFormat align="right" variant="h5" value={store.rent.totalPaid} />
+                </PageCard>
+              </Grid>
+              <Grid item xs={4}>
+                <PageCard
+                  variant="warning"
+                  Icon={TrendingDownIcon}
+                  title={t('Not paid')}
+                  info={t('{{count}} rents not paid', { count: store.rent.countNotPaid })}
+                >
+                  <NumberFormat align="right" variant="h5" value={store.rent.totalToPay} />
+                </PageCard>
+              </Grid>
             </Grid>
-          </>
-        )}
+          </Box>
+        </Hidden>
+      )}
+      <Grid container spacing={3}>
+        {store.rent.filteredItems.map(rent => (
+          <Grid key={rent.uid} item xs={12} md={4}>
+            <RentCard rent={rent} onEdit={onEdit} />
+          </Grid>
+        ))}
       </Grid>
     </Page>
   ));
@@ -184,7 +164,7 @@ Rents.getInitialProps = async (context) => {
       return { error: { statusCode: 404 } };
     }
     store.rent.setPeriod(rentPeriod);
-    store.rent.setFilters({searchText: search, status});
+    store.rent.setFilters({ searchText: search, status });
   }
 
   const fetchStatus = await store.rent.fetch();
@@ -195,7 +175,7 @@ Rents.getInitialProps = async (context) => {
 
   return {
     initialState: {
-      store: JSON.parse(JSON.stringify(store))
+      store: toJS(store)
     }
   };
 };

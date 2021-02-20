@@ -2,6 +2,7 @@ import ErrorPage from 'next/error';
 import moment from 'moment';
 import { useContext } from 'react';
 import { useObserver } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 
@@ -106,7 +107,7 @@ export function withAuthentication(PageComponent) {
             }
         }
 
-        return PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: JSON.parse(JSON.stringify(store)) } };
+        return PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: toJS(store) } };
     }
     return WithAuth;
 }

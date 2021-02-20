@@ -1,4 +1,4 @@
-import { useState, useContext, cloneElement } from 'react';
+import { useState, useContext, cloneElement, useEffect } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import getConfig from 'next/config';
 import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography } from '@material-ui/core';
@@ -7,6 +7,8 @@ import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import { withTranslation } from '../utils/i18n';
 import OrganizationSwitcher from './OrganizationSwitcher';
 import { StoreContext } from '../store';
+import Loading from './Loading';
+import { useRouter } from 'next/router';
 
 const { publicRuntimeConfig: { APP_NAME, BASE_PATH } } = getConfig();
 
@@ -46,8 +48,7 @@ const MainToolbar = withTranslation()(({ t }) => {
 
 const ElevationScroll = ({ children }) => {
   const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    //threshold: 4
+    disableHysteresis: true
   });
 
   return cloneElement(children, {
@@ -61,6 +62,29 @@ const ElevationScroll = ({ children }) => {
 const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
   console.log('Page functional component')
   const store = useContext(StoreContext);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const routeChangeStart = (url, { shallow }) => {
+      if (!shallow) {
+        setLoading(true);
+      }
+    };
+    const routeChangeComplete = (url, { shallow }) => {
+      if (!shallow) {
+        setLoading(false);
+      }
+    };
+
+    router.events.on('routeChangeStart', routeChangeStart)
+    router.events.on('routeChangeComplete', routeChangeComplete)
+
+    return () => {
+      router.events.off('routeChangeStart', routeChangeStart)
+      router.events.off('routeChangeComplete', routeChangeComplete)
+    }
+  }, []);
 
   return useObserver(() => {
     const displayToolbars = store.user.signedIn;
@@ -72,7 +96,7 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
             <MainToolbar />
           </Toolbar>
         )}
-        { (PrimaryToolbar || SecondaryToolbar) && (
+        { !loading && (PrimaryToolbar || SecondaryToolbar) && (
           <ElevationScroll>
             <AppBar
               position="sticky"
@@ -95,11 +119,13 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
             </AppBar>
           </ElevationScroll>
         )}
-        <Box mt={(PrimaryToolbar || SecondaryToolbar) ? 4 : 0}>
+        <Box mt={(!loading && (PrimaryToolbar || SecondaryToolbar)) ? 4 : 0}>
           <Container
             maxWidth={maxWidth}
           >
-            {children}
+            {loading || store.appLoading ? (
+              <Loading />
+            ) : children}
           </Container>
         </Box>
       </>

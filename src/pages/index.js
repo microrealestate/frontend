@@ -1,5 +1,6 @@
-import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { toJS } from "mobx";
 import { withAuthentication } from "../components/Authentication";
 import { getStoreInstance } from "../store";
 import { isServer, redirect } from "../utils";
@@ -38,7 +39,7 @@ Index.getInitialProps = async (context) => {
     const props = {
       redirectPath,
       initialState: {
-        store: JSON.parse(JSON.stringify(store))
+        store: toJS(store)
       }
     };
     return props;

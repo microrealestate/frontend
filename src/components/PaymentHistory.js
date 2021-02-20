@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Box, CircularProgress, Paper, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,6 +10,7 @@ import { withTranslation } from 'next-i18next';
 import { StoreContext } from '../store';
 import { NumberFormat } from '../utils/numberformat';
 import RequestError from './RequestError';
+import Loading from './Loading';
 
 const PaymentHistory = withTranslation()(({ t, tenantId }) => {
   const store = useContext(StoreContext);
@@ -44,9 +45,7 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
   return (
     <>
       { loading && (
-        <Box marginLeft="50%" marginTop={20}>
-          <CircularProgress />
-        </Box>
+        <Loading />
       )}
       { error && <RequestError error={error} />}
       { !loading && !error && (

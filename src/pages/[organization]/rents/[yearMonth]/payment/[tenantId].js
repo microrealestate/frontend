@@ -1,5 +1,6 @@
 import { Children, useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
+import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import { withTranslation } from 'next-i18next';
 import moment from 'moment';
@@ -438,7 +439,7 @@ RentPayment.getInitialProps = async (context) => {
 
   const props = {
     initialState: {
-      store: JSON.parse(JSON.stringify(store))
+      store: toJS(store)
     }
   };
   return props;

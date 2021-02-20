@@ -2,6 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { useContext } from 'react';
 import { useObserver } from 'mobx-react-lite'
+import { toJS } from 'mobx';
 import { Avatar, Box, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
 import OfficeIcon from '@material-ui/icons/HomeWork';
 import ParkingIcon from '@material-ui/icons/LocalParking';
@@ -174,7 +175,7 @@ Tenants.getInitialProps = async (context) => {
 
   return {
     initialState: {
-      store: JSON.parse(JSON.stringify(store))
+      store: toJS(store)
     }
   };
 };

@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import getConfig from 'next/config'
 import { useRouter } from 'next/router';
 import { useObserver } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import { Typography, Box, Paper } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 
@@ -97,7 +98,7 @@ FirstAccess.getInitialProps = async (context) => {
 
   const props = {
     initialState: {
-      store: JSON.parse(JSON.stringify(store))
+      store: toJS(store)
     }
   };
   return props;
