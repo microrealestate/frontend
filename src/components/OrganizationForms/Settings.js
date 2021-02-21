@@ -66,6 +66,7 @@ const OrganizationSettings = withTranslation()(({ t, submitLabel, submitFullWidt
                 ...store.organization.selected.companyInfo,
                 name: settings.company,
                 ein: settings.ein,
+                legalStructure: settings.legalStructure
             }
         }
 
