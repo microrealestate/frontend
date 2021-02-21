@@ -1,26 +1,46 @@
-import { observable, flow, computed, action } from 'mobx'
+import { observable, flow, computed, action, makeObservable } from 'mobx'
 const jwt = require('jsonwebtoken')
 import { useApiFetch, useAuthApiFetch } from '../utils/fetch'
 import { isServer } from '../utils';
 export default class User {
-  @observable token
-  @observable tokenExpiry
-  @observable firstName
-  @observable lastName
-  @observable email
-  @observable role
+  token
+  tokenExpiry
+  firstName
+  lastName
+  email
+  role
 
-  @computed get signedIn() {
+  constructor() {
+    makeObservable(this, {
+      token: observable,
+      tokenExpiry: observable,
+      firstName: observable,
+      lastName: observable,
+      email: observable,
+      role: observable,
+      signedIn: computed,
+      isAdministrator: computed,
+      setRole: action,
+      signUp: flow,
+      signIn: flow,
+      signOut: flow,
+      refreshTokens: flow,
+      forgotPassword: flow,
+      resetPassword: flow
+    })
+  }
+
+  get signedIn() {
     return !!this.token
   }
 
-  @computed get isAdministrator() {
+  get isAdministrator() {
     return this.role === 'administrator';
   }
 
-  @action setRole = role => this.role = role;
+  setRole = role => this.role = role;
 
-  signUp = flow(function* (firstname, lastname, email, password) {
+  *signUp(firstname, lastname, email, password) {
     try {
       yield useApiFetch().post('/authenticator/signup', {
         firstname,
@@ -32,9 +52,9 @@ export default class User {
     } catch (error) {
       return error.response.status;
     }
-  })
+  }
 
-  signIn = flow(function* (email, password) {
+  *signIn(email, password) {
     try {
       const response = yield useApiFetch().post('/authenticator/signin', {
         email,
@@ -52,9 +72,9 @@ export default class User {
       console.error(error);
       return error.response.status
     }
-  })
+  }
 
-  signOut = flow(function* () {
+  *signOut() {
     try {
       yield useApiFetch().delete('/authenticator/signout')
     } finally {
@@ -64,9 +84,9 @@ export default class User {
       this.tokenExpiry = undefined
       this.token = undefined
     }
-  })
+  }
 
-  refreshTokens = flow(function* (context) {
+  *refreshTokens(context) {
     try {
       let response;
       if (isServer()) {
@@ -97,9 +117,9 @@ export default class User {
       console.error(error);
       return { status: error.response.status, error }
     }
-  })
+  }
 
-  forgotPassword = flow(function* (email) {
+  *forgotPassword(email) {
     try {
       yield useApiFetch().post('/authenticator/forgotpassword', {
         email
@@ -109,9 +129,9 @@ export default class User {
       console.error(error);
       return error.response.status
     }
-  })
+  }
 
-  resetPassword = flow(function* (resetToken, password) {
+  *resetPassword(resetToken, password) {
     try {
       yield useApiFetch().patch('/authenticator/resetpassword', {
         resetToken,
@@ -122,5 +142,5 @@ export default class User {
       console.error(error);
       return error.response.status;
     }
-  })
+  }
 }

@@ -1,11 +1,23 @@
-import { observable, action, flow } from 'mobx';
+import { observable, action, flow, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 
 export default class Organization {
-  @observable selected;
-  @observable items = [];
+  selected;
+  items = [];
 
-  @action setSelected = (org, user) => {
+  constructor() {
+    makeObservable(this, {
+      selected: observable,
+      items: observable,
+      setSelected: action,
+      setItems: action,
+      fetch: flow,
+      create: flow,
+      update: flow
+    })
+  }
+
+  setSelected = (org, user) => {
     this.selected = org;
     user.setRole(
       this.selected.members
@@ -14,11 +26,11 @@ export default class Organization {
     );
   }
 
-  @action setItems = (organizations = []) => {
+  setItems = (organizations = []) => {
     this.items = organizations;
   };
 
-  fetch = flow(function* () {
+  *fetch() {
     try {
       const response = yield useApiFetch().get('/realms');
       this.setItems(response.data);
@@ -27,9 +39,9 @@ export default class Organization {
       console.error(error)
       return error.response.status;
     }
-  });
+  };
 
-  create = flow(function* (organization) {
+  *create(organization) {
     try {
       const response = yield useApiFetch().post('/realms', organization);
       return { status: 200, data: response.data };
@@ -37,9 +49,9 @@ export default class Organization {
       console.error(error);
       return { status: error.response.status };
     }
-  });
+  };
 
-  update = flow(function* (organization) {
+  *update(organization) {
     try {
       const response = yield useApiFetch().patch(`/realms/${organization._id}`, organization);
       return { status: 200, data: response.data };
@@ -47,5 +59,5 @@ export default class Organization {
       console.error(error);
       return { status: error.response.status };
     }
-  });
+  };
 }

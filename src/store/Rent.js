@@ -1,28 +1,48 @@
 import moment from 'moment';
-import { observable, action, flow, computed } from 'mobx';
+import { observable, action, flow, computed, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 export default class Rent {
-  @observable selected = {};
-  @action setSelected = rent => this.selected = rent;
-
-  @observable filters = { searchText: '', status: '' };
-
+  selected = {};
+  filters = { searchText: '', status: '' };
   _period = moment();
+  items = [];
+  countAll;
+  countPaid;
+  countPartiallyPaid;
+  countNotPaid;
+  totalToPay;
+  totalPaid;
+  totalNotPaid;
 
-  @observable items = [];
-  @observable countAll;
-  @observable countPaid;
-  @observable countPartiallyPaid;
-  @observable countNotPaid;
-  @observable totalToPay;
-  @observable totalPaid;
-  @observable totalNotPaid;
+  constructor() {
+    makeObservable(this, {
+      selected: observable,
+      filters: observable,
+      items: observable,
+      countAll: observable,
+      countPaid: observable,
+      countPartiallyPaid: observable,
+      countNotPaid: observable,
+      totalToPay: observable,
+      totalPaid: observable,
+      totalNotPaid: observable,
+      period: computed,
+      filteredItems: computed,
+      setSelected: action,
+      setFilters: action,
+      setPeriod: action,
+      fetch: flow,
+      fetchTenantRents: flow,
+      pay: flow,
+      sendEmail: flow
+    });
+  }
 
-  @computed get period() {
+  get period() {
     return this._period.format('YYYY.MM');
   }
 
-  @computed get filteredItems() {
+  get filteredItems() {
     let filteredItems = this.filters.status === '' ? this.items : this.items.filter(({ status }) => {
       if (status === this.filters.status) {
         return true;
@@ -64,12 +84,13 @@ export default class Rent {
     }
     return filteredItems;
   }
+  setSelected = rent => this.selected = rent;
 
-  @action setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
+  setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
 
-  @action setPeriod = period => this._period = period;
+  setPeriod = period => this._period = period;
 
-  fetch = flow(function* () {
+  *fetch() {
     try {
       const year = this._period.year();
       const month = this._period.month() + 1;
@@ -92,9 +113,9 @@ export default class Rent {
     } catch (error) {
       return error.response.status;
     }
-  });
+  };
 
-  fetchTenantRents = flow(function* (tenantId) {
+  *fetchTenantRents(tenantId) {
     try {
       const response = yield useApiFetch().get(`/rents/tenant/${tenantId}`);
       return { status: 200, data: response.data };
@@ -102,16 +123,16 @@ export default class Rent {
       console.error(error);
       return { status: error.response.status };
     }
-  });
+  };
 
-  pay = flow(function* (payment) {
+  *pay(payment) {
     try {
       yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);
       return 200;
     } catch (error) {
       return error.response.status;
     }
-  });
+  };
 
   // payload
   // {
@@ -120,12 +141,12 @@ export default class Rent {
   //   year,
   //   month
   // }
-  sendEmail = flow(function* (payload) {
+  *sendEmail(payload) {
     try {
       yield useApiFetch().post('/emails', payload);
       return 200;
     } catch (error) {
       return error.response.status;
     }
-  });
+  };
 }

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { observable, reaction } from 'mobx'
+import { makeObservable, observable, reaction } from 'mobx'
 
 import User from './User'
 import Organization from './Organization'
@@ -9,12 +9,19 @@ import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
 
 export default class Store {
-  @observable user = new User();
-  @observable organization = new Organization();
-  @observable rent = new Rent();
-  @observable tenant = new Tenant();
+  user = new User();
+  organization = new Organization();
+  rent = new Rent();
+  tenant = new Tenant();
 
   constructor() {
+    makeObservable(this, {
+      user: observable,
+      organization: observable,
+      rent: observable,
+      tenant: observable
+    });
+
     let refreshTokenHandle;
     reaction(
       () => this.user.token,

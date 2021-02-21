@@ -1,17 +1,24 @@
-import { observable, action, flow, computed } from 'mobx';
+import { observable, action, flow, computed, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 
 export default class Tenant {
-  @observable selected = {};
-  @action setSelected = tenant => this.selected = tenant;
+  selected = {};
+  filters = { searchText: '', status: 'inprogress' };
+  items = [];
 
-  @observable filters = { searchText: '', status: 'inprogress' };
+  constructor() {
+    makeObservable(this, {
+      selected: observable,
+      filters: observable,
+      items: observable,
+      filteredItems: computed,
+      setSelected: action,
+      setFilters: action,
+      fetch: flow
+    });
+  }
 
-  @observable items = [];
-
-  @action setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
-
-  @computed get filteredItems() {
+  get filteredItems() {
     let filteredItems = this.filters.status === '' ? this.items : this.items.filter(({ status }) => {
       if (status === this.filters.status) {
         return true;
@@ -63,7 +70,11 @@ export default class Tenant {
     return filteredItems;
   }
 
-  fetch = flow(function* () {
+  setSelected = tenant => this.selected = tenant;
+
+  setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
+
+  *fetch() {
     try {
 
       const response = yield useApiFetch().get('/tenants');
@@ -76,5 +87,5 @@ export default class Tenant {
     } catch (error) {
       return error.response.status;
     }
-  });
+  };
 }
