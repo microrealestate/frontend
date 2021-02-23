@@ -10,7 +10,15 @@ import { StoreContext } from '../store';
 import Loading from './Loading';
 import { useRouter } from 'next/router';
 
-const { publicRuntimeConfig: { APP_NAME, BASE_PATH } } = getConfig();
+const { publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH } } = getConfig();
+
+const Demonstrationbar = withTranslation()(({ t }) => {
+  return DEMO_MODE ? (
+    <Box color="primary.contrastText" bgcolor="success.dark">
+      <Typography variant="button" component="div" align="center">{t('Demonstration mode')}</Typography>
+    </Box>
+  ) : null;
+});
 
 const MainToolbar = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
@@ -91,6 +99,7 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
 
     return (
       <>
+        <Demonstrationbar />
         {displayToolbars && (
           <Toolbar>
             <MainToolbar />

@@ -14,9 +14,11 @@ import Link from '../components/Link';
 import RequestError from '../components/RequestError';
 import Page from '../components/Page';
 
+const { publicRuntimeConfig: { DEMO_MODE, APP_NAME } } = getConfig();
+
 const initialValues = {
-  email: '',
-  password: ''
+  email: DEMO_MODE ? 'demo@demo.com' : '',
+  password: DEMO_MODE ? 'demo' : ''
 };
 
 const validationSchema = Yup.object().shape({
@@ -28,7 +30,6 @@ const SignIn = withTranslation()(({ t }) => {
   console.log('Signin functional component')
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
-  const { publicRuntimeConfig: { APP_NAME } } = getConfig();
   const router = useRouter();
 
   const signIn = async ({ email, password }, actions) => {
@@ -99,9 +100,11 @@ const SignIn = withTranslation()(({ t }) => {
                     type="password"
                     autoComplete="current-password"
                   />
-                  <Typography variant="body2">
-                    <Link href='/forgotpassword'>{t('Forgot password?')}</Link>
-                  </Typography>
+                  {!DEMO_MODE && (
+                    <Typography variant="body2">
+                      <Link href='/forgotpassword'>{t('Forgot password?')}</Link>
+                    </Typography>
+                  )}
                   <Box mt={4}>
                     <SubmitButton
                       fullWidth
@@ -114,15 +117,17 @@ const SignIn = withTranslation()(({ t }) => {
           </Formik>
         </Box>
       </Paper>
-      <Box mt={4}>
-        <Paper>
-          <Box px={4} py={2}>
-            <Typography variant="body2">
-              {t('New to {{APP_NAME}}?',{APP_NAME})} <Link href="/signup">{t('Create an account')}</Link>.
+      {!DEMO_MODE && (
+        <Box mt={4}>
+          <Paper>
+            <Box px={4} py={2}>
+              <Typography variant="body2">
+                {t('New to {{APP_NAME}}?', { APP_NAME })} <Link href="/signup">{t('Create an account')}</Link>.
               </Typography>
-          </Box>
-        </Paper>
-      </Box>
+            </Box>
+          </Paper>
+        </Box>
+      )}
     </Page>
   ) : null);
 });
