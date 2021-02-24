@@ -15,10 +15,12 @@ import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 
-
 const useStyles = makeStyles((theme) => ({
+  avatarInProgress: {
+    backgroundColor: theme.palette.success.dark
+  },
   inProgress: {
-    backgroundColor: theme.palette.success.main
+    color: theme.palette.success.dark
   },
 }));
 
@@ -86,7 +88,7 @@ const TenantList = withTranslation()(({ t }) => {
             }}>
               <Hidden smDown>
                 <ListItemAvatar>
-                  <Avatar className={!tenant.terminated ? classes.inProgress : null}>{avatar}</Avatar>
+                  <Avatar className={!tenant.terminated ? classes.avatarInProgress : null}>{avatar}</Avatar>
                 </ListItemAvatar>
               </Hidden>
               <ListItemText
@@ -98,23 +100,31 @@ const TenantList = withTranslation()(({ t }) => {
                       </Typography>
                       {tenant.isCompany && (
                         <Typography
+                          variant="caption"
                           color="textSecondary"
+                          component="div"
                         >
                           {_.startCase(_.capitalize(tenant.manager))}
                         </Typography>
                       )}
                       <Typography
+                        variant="caption"
                         color="textSecondary"
+                        component="div"
                       >
-                        {t('Contract {{contract}}', { contract: tenant.contract })}
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                      >
-                        {t('From {{startDate}} to {{endDate}}', {
+                        {t('Contract {{contract}} - from {{startDate}} to {{endDate}}', {
+                          contract: tenant.contract,
                           startDate: moment(tenant.beginDate, 'DD/MM/YYYY').format('L'),
                           endDate: moment(tenant.terminated ? tenant.terminationDate : tenant.endDate, 'DD/MM/YYYY').format('L')
                         })}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        component="div"
+                        className={!tenant.terminated ? classes.inProgress : null}
+                      >
+                        {tenant.terminated ? t('Terminated') : t('In progress')}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} md={8}>
