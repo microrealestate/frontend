@@ -1,7 +1,7 @@
-import { Children } from 'react'
-import { useObserver } from 'mobx-react-lite';
 import _ from 'lodash';
 import moment from 'moment';
+import { Children } from 'react'
+import { useObserver } from 'mobx-react-lite';
 import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
 import { withTranslation } from "../utils/i18n";
@@ -164,6 +164,7 @@ export const PaymentBalance = withTranslation()(({ t, rent }) => {
           color="textSecondary"
           value={rentDetails.payment}
           noWrap
+          withColor
         />
       </CardRow>
       <Divider />

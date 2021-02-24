@@ -1,9 +1,10 @@
+import _ from 'lodash';
+import moment from 'moment';
 import { Children, useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import { withTranslation } from 'next-i18next';
-import moment from 'moment';
 import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, Hidden, List, ListItem, Typography, withStyles } from '@material-ui/core';
@@ -68,24 +69,39 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
   const router = useRouter();
 
   const onSubmit = async (values, actions) => {
+    // clone to avoid changing the form fields
+    const clonedValues = _.cloneDeep(values);
+
     // Save only payments
-    values.payments = values.payments.filter(({ amount }) => amount > 0).map(payment => {
+    clonedValues.payments = clonedValues.payments.filter(({ amount }) => amount > 0).map(payment => {
       // convert moment into string for the DB
       payment.date = payment.date.format('DD/MM/YYYY');
       return payment;
     });
-    values.month = rent.month;
-    values.year = rent.year;
-    values._id = rent._id;
+    clonedValues.month = rent.month;
+    clonedValues.year = rent.year;
+    clonedValues._id = rent._id;
     try {
-      await store.rent.pay(values);
-      await router.push(backPath);
+      await store.rent.pay(clonedValues);
+
+      // clean fields if empty amounts were saved
+      if (clonedValues.payments.length === 0) {
+        values.payments = [emptyPayment];
+      }
+      if (!clonedValues.extracharge || clonedValues.extracharge === '0') {
+        values.extracharge = '';
+        values.noteextracharge = '';
+      }
+      if (!clonedValues.promo || clonedValues.promo === '0') {
+        values.promo = '';
+        values.notepromo = '';
+      }
     } catch (error) {
       console.error(error);
     }
   }
 
-  const onCancel = async () => {
+  const onClose = async () => {
     await router.push(backPath);
   }
 
@@ -108,7 +124,7 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
   const validationSchema = Yup.object().shape({
     payments: Yup.array().of(
       Yup.object().shape({
-        amount: Yup.number().positive(),
+        amount: Yup.number().min(0),
         date: Yup.mixed().when('amount', {
           is: val => val > 0,
           then: Yup.date().required()
@@ -119,12 +135,12 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
           then: Yup.string().required()
         })
       })),
-    extracharge: Yup.number().positive(),
+    extracharge: Yup.number().min(0),
     noteextracharge: Yup.mixed().when('extracharge', {
       is: val => val > 0,
       then: Yup.string().required(),
     }),
-    promo: Yup.number().positive(),
+    promo: Yup.number().min(0),
     notepromo: Yup.mixed().when('promo', {
       is: val => val > 0,
       then: Yup.string().required(),
@@ -185,7 +201,7 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                           </Grid>
                         </Grid>
                         { payments.length > 1 && (
-                          <Box display="flex" justifyContent="flex-end">
+                          <Box pb={1} display="flex" justifyContent="flex-end">
                             <Button
                               variant="contained"
                               size="small"
@@ -197,13 +213,19 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                         )}
                       </Box>
                     ))}
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => arrayHelpers.push(emptyPayment)}
-                    >
-                      {t('Add payment')}
-                    </Button>
+                    <Box display="flex" justifyContent="space-between">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => arrayHelpers.push(emptyPayment)}
+                      >
+                        {t('Add payment')}
+                      </Button>
+                      <SubmitButton
+                        size="small"
+                        label={!isSubmitting ? t('Save') : t('Saving')}
+                      />
+                    </Box>
                   </div>
                 )}
               />
@@ -214,7 +236,6 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 name="extracharge"
                 value={extracharge}
               />
-
               <FormTextField
                 label={t('Description')}
                 name="noteextracharge"
@@ -222,6 +243,12 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
+              <Box align="right">
+                <SubmitButton
+                  size="small"
+                  label={!isSubmitting ? t('Save') : t('Saving')}
+                />
+              </Box>
             </FormSection>
 
             <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
@@ -230,7 +257,6 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 name="promo"
                 value={promo}
               />
-
               <FormTextField
                 label={t('Description')}
                 name="notepromo"
@@ -238,6 +264,12 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
+              <Box align="right">
+                <SubmitButton
+                  size="small"
+                  label={!isSubmitting ? t('Save') : t('Saving')}
+                />
+              </Box>
             </FormSection>
 
             <FormSection label={t('Internal description')} defaultExpanded={!!initialValues.description}>
@@ -248,27 +280,23 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
+              <Box align="right">
+                <SubmitButton
+                  size="small"
+                  label={!isSubmitting ? t('Save') : t('Saving')}
+                />
+              </Box>
             </FormSection>
             <Box
               pt={2}
             >
-              <Grid container spacing={1}>
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={onCancel}
-                  >
-                    {t('Cancel')}
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <SubmitButton
-                    size="large"
-                    label={!isSubmitting ? t('Save') : t('Saving')}
-                  />
-                </Grid>
-              </Grid>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={onClose}
+              >
+                {t('Close')}
+              </Button>
             </Box>
           </Form>
         )
@@ -299,7 +327,7 @@ const RentPayment = withTranslation()(({ t }) => {
   return useObserver(() => (
     <Page
       PrimaryToolbar={
-        <BreadcrumbBar backPath={backPath}/>
+        <BreadcrumbBar backPath={backPath} />
       }
       SecondaryToolbar={
         <Box display="flex" width="100%" align="right">

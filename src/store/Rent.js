@@ -127,7 +127,15 @@ export default class Rent {
 
   *pay(payment) {
     try {
-      yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);
+      const response = yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);
+      const rent = response.data;
+      const index = this.items.findIndex(item => item._id === payment._id);
+      if (index > -1) {
+        this.items.splice(index, 1, rent);
+        if (this.selected._id === payment._id) {
+          this.selected = this.items[index];
+        }
+      }
       return 200;
     } catch (error) {
       return error.response.status;

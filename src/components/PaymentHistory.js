@@ -92,9 +92,7 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
                         {rent.promo > 0 && <NumberFormat variant="body1" value={rent.promo} />}
                       </TableCell>
                       <TableCell align="right">
-                        <Box color="success.dark">
-                          {rent.payment > 0 && <NumberFormat variant="body1" value={rent.payment} />}
-                        </Box>
+                        {rent.payment > 0 && <NumberFormat variant="body1" value={rent.payment} withColor/>}
                       </TableCell>
                       <TableCell align="right">
                         <NumberFormat variant="body1" value={rent.newBalance} />
