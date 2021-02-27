@@ -1,5 +1,6 @@
-import { Box, Divider, Paper, Typography } from "@material-ui/core";
-import IconTypography from "./IconTypography";
+import { Children } from 'react';
+import { Box, Divider, Paper, Typography } from '@material-ui/core';
+import IconTypography from './IconTypography';
 
 const _variantToBgColor = variant => {
   switch (variant) {
@@ -13,6 +14,16 @@ const _variantToBgColor = variant => {
       return 'info.main';
   }
 };
+
+export const CardRow = ({ children, ...props }) => (
+  <Box display="flex" alignItems="center" {...props}>
+    { Children.toArray(children).map((child, index) => (
+      <Box key={index} flexGrow={index === 0 ? 1 : 0}>
+        {child}
+      </Box>
+    ))}
+  </Box>
+);
 
 export const PageCard = ({ variant, Icon, title, info, children}) => {
 

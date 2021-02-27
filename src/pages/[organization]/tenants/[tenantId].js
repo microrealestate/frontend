@@ -1,9 +1,12 @@
+import moment from 'moment';
 import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
-import { Box, Breadcrumbs, Grid, Hidden, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Breadcrumbs, Divider, Grid, Hidden, Tab, Tabs, Typography } from '@material-ui/core';
 import HistoryIcon from '@material-ui/icons/History';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import SubjectIcon from '@material-ui/icons/Subject';
 
 import Page from '../../../components/Page'
 import { withAuthentication } from '../../../components/Authentication'
@@ -13,9 +16,9 @@ import Link from '../../../components/Link';
 import FullScreenDialogButton from '../../../components/FullScreenDialogButton';
 import RequestError from '../../../components/RequestError';
 import PaymentHistory from '../../../components/PaymentHistory';
-import { StyledTab, StyledTabs, TabPanel } from '../../../components/Tabs';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import { DashboardCard } from '../../../components/Cards';
+import { TabPanel } from '../../../components/Tabs';
+import { CardRow, DashboardCard } from '../../../components/Cards';
+import { NumberFormat } from '../../../utils/numberformat';
 
 const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
@@ -27,6 +30,178 @@ const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
       </Link>
       <Typography variant="h6" noWrap>{store.tenant.selected.name}</Typography>
     </Breadcrumbs>
+  );
+});
+
+const ContractOverview = withTranslation()(({ t, tenant }) => {
+  return (
+    <>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Type')}
+        </Typography>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {tenant.contract}
+        </Typography>
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Status')}
+        </Typography>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {tenant.terminated ? t('Terminated') : t('In progress')}
+        </Typography>
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Start date')}
+        </Typography>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {moment(tenant.beginDate, 'DD/MM/YYYY').format('L')}
+        </Typography>
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('End date')}
+        </Typography>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {moment(tenant.terminationDate || tenant.endDate, 'DD/MM/YYYY').format('L')}
+        </Typography>
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Deposit')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={tenant.guaranty}
+          noWrap
+        />
+      </CardRow>
+    </>
+  );
+});
+
+const RentOverview = withTranslation()(({ t, tenant }) => {
+  return (
+    <>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Base')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={tenant.rental}
+          noWrap
+        />
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Expenses')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={tenant.expenses}
+          noWrap
+        />
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Discount')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={tenant.discount ? tenant.discount * -1 : tenant.discount}
+          noWrap
+        />
+      </CardRow>
+      {tenant.isVat && (
+        <>
+          <Box pb={1}>
+            <Divider />
+          </Box>
+          <CardRow>
+            <Typography
+              color="textSecondary"
+              noWrap
+            >
+              {t('Pre-tax total')}
+            </Typography>
+            <NumberFormat
+              color="textSecondary"
+              value={tenant.preTaxTotal}
+              noWrap
+            />
+          </CardRow>
+          <CardRow>
+            <Typography
+              color="textSecondary"
+              noWrap
+            >
+              {t('V.A.T.')}
+            </Typography>
+            <NumberFormat
+              color="textSecondary"
+              value={tenant.vat}
+              noWrap
+            />
+          </CardRow>
+        </>
+      )}
+      <Box pb={1}>
+        <Divider />
+      </Box>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Total')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={tenant.total}
+          noWrap
+        />
+      </CardRow>
+
+    </>
   );
 });
 
@@ -100,10 +275,19 @@ const Tenant = withTranslation()(({ t }) => {
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>
+            <Box pb={2}>
+              <DashboardCard
+                Icon={SubjectIcon}
+                title={t('Contract')}
+              >
+                <ContractOverview tenant={store.tenant.selected} />
+              </DashboardCard>
+            </Box>
             <DashboardCard
               Icon={ReceiptIcon}
               title={t('Rental')}
             >
+              <RentOverview tenant={store.tenant.selected} />
             </DashboardCard>
           </Grid>
         </Hidden>

@@ -25,7 +25,7 @@ export const NumberFormat = (({ value, withColor, ...props }) => {
     const classes = {};
     if (withColor && value !== 0) {
       classes.root = {
-        color: value > 0 ? theme.palette.success.dark : theme.palette.error.dark
+        color: value > 0 ? theme.palette.success.dark : theme.palette.warning.dark
       };
     }
     return classes;

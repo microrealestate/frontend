@@ -18,9 +18,8 @@ import { withAuthentication } from '../../../../../components/Authentication'
 import { getStoreInstance, StoreContext } from '../../../../../store';
 import { isServer } from '../../../../../utils';
 import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../../components/Form';
-import { DashboardCard } from '../../../../../components/Cards';
+import { CardRow, DashboardCard } from '../../../../../components/Cards';
 import { NumberFormat } from '../../../../../utils/numberformat';
-import { PaymentBalance } from '../../../../../components/RentCard';
 import Link from '../../../../../components/Link';
 import SendRentEmailMenu from '../../../../../components/SendRentEmailMenu';
 import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
@@ -311,6 +310,126 @@ const StyledListItem = withStyles(theme => ({
     paddingRight: 0
   }
 }))(ListItem);
+
+const _rentDetails = rent => {
+  const turnToNegative = amount => amount !== 0 ? amount * (-1) : 0;
+
+  return {
+    balance: turnToNegative(rent.balance),
+    newBalance: rent.newBalance,
+    additionalCosts: turnToNegative(rent.extracharge),
+    rent: turnToNegative(rent.totalWithoutBalanceAmount + rent.promo - rent.extracharge),
+    discount: rent.promo,
+    payment: rent.payment,
+    totalAmount: rent.totalAmount
+  };
+};
+
+export const PaymentBalance = withTranslation()(({ t, rent }) => {
+  const rentDetails = _rentDetails(rent);
+
+  return (
+    <>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Prev. balance')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.balance}
+          noWrap
+          withColor
+        />
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Rent')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.rent}
+          noWrap
+        />
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Additional costs')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.additionalCosts}
+          noWrap
+        />
+      </CardRow>
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Discount')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.discount}
+          noWrap
+        />
+      </CardRow>
+      <Divider />
+      <CardRow>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Total to pay')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.totalAmount}
+          noWrap
+        />
+      </CardRow>
+      <CardRow pb={1.5}>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Payments')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.payment}
+          noWrap
+          withColor
+        />
+      </CardRow>
+      <Divider />
+      <CardRow pt={1.5}>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {rentDetails.newBalance < 0 ? t('Debit balance') : t('Credit balance')}
+        </Typography>
+        <NumberFormat
+          color="textSecondary"
+          value={rentDetails.newBalance}
+          noWrap
+          withColor
+        />
+      </CardRow>
+    </>
+  )
+});
+
 
 const RentPayment = withTranslation()(({ t }) => {
   console.log('RentPayment functional component')

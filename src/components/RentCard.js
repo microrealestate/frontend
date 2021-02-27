@@ -1,15 +1,15 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Children } from 'react'
 import { useObserver } from 'mobx-react-lite';
 import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
 import { withTranslation } from "../utils/i18n";
 import { NumberFormat } from "../utils/numberformat";
 import DownloadLink from './DownloadLink';
+import SendRentEmailMenu from './SendRentEmailMenu';
+import { CardRow } from './Cards';
 
 import { useStyles } from '../styles/components/RentCards.styles';
-import SendRentEmailMenu from './SendRentEmailMenu';
 
 const SuccessChip = withStyles((theme) => ({
   root: {
@@ -21,16 +21,6 @@ const SuccessChip = withStyles((theme) => ({
     color: theme.palette.common.white
   }
 }))(Chip);
-
-const CardRow = ({ children, ...props }) => (
-  <Box display="flex" alignItems="center" {...props}>
-    { Children.toArray(children).map((child, index) => (
-      <Box key={index} flexGrow={index === 0 ? 1 : 0}>
-        {child}
-      </Box>
-    ))}
-  </Box>
-);
 
 const Header = withTranslation()(({ t, rent, onEdit }) => {
   const classes = useStyles();
@@ -58,130 +48,6 @@ const Header = withTranslation()(({ t, rent, onEdit }) => {
           {rent.occupant.isCompany ? _.startCase(_.capitalize(rent.occupant.manager)) : <br />}
         </Typography>
       </Box>
-    </>
-  )
-});
-
-const _rentDetails = rent => {
-  const turnToNegative = amount => amount !== 0 ? amount * (-1) : 0;
-
-  return {
-    balance: turnToNegative(rent.balance),
-    newBalance: rent.newBalance,
-    additionalCosts: turnToNegative(rent.extracharge),
-    rent: turnToNegative(rent.totalWithoutBalanceAmount + rent.promo - rent.extracharge),
-    discount: rent.promo,
-    payment: rent.payment,
-    totalAmount: rent.totalAmount
-  };
-};
-
-export const PaymentBalance = withTranslation()(({ t, rent }) => {
-  const classes = useStyles();
-
-  const balanceClass = (amount) => {
-    return amount < 0 ? classes.debit : classes.credit;
-  }
-  const rentDetails = _rentDetails(rent);
-
-  return (
-    <>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Prev. balance')}
-        </Typography>
-        <NumberFormat
-          className={balanceClass(rentDetails.balance)}
-          color="textSecondary"
-          value={rentDetails.balance}
-          noWrap
-        />
-      </CardRow>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Rent')}
-        </Typography>
-        <NumberFormat
-          color="textSecondary"
-          value={rentDetails.rent}
-          noWrap
-        />
-      </CardRow>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Additional costs')}
-        </Typography>
-        <NumberFormat
-          color="textSecondary"
-          value={rentDetails.additionalCosts}
-          noWrap
-        />
-      </CardRow>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Discount')}
-        </Typography>
-        <NumberFormat
-          color="textSecondary"
-          value={rentDetails.discount}
-          noWrap
-        />
-      </CardRow>
-      <Divider />
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Total to pay')}
-        </Typography>
-        <NumberFormat
-          color="textSecondary"
-          value={rentDetails.totalAmount}
-          noWrap
-        />
-      </CardRow>
-      <CardRow pb={1.5}>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Payments')}
-        </Typography>
-        <NumberFormat
-          color="textSecondary"
-          value={rentDetails.payment}
-          noWrap
-          withColor
-        />
-      </CardRow>
-      <Divider />
-      <CardRow pt={1.5}>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {rentDetails.newBalance < 0 ? t('Debit balance') : t('Credit balance')}
-        </Typography>
-        <NumberFormat
-          className={balanceClass(rentDetails.newBalance)}
-          color="textSecondary"
-          value={rentDetails.newBalance}
-          noWrap
-        />
-      </CardRow>
     </>
   )
 });
