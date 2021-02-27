@@ -1,41 +1,20 @@
 import { useObserver } from 'mobx-react-lite'
 import { useContext, useState } from 'react'
 import getConfig from 'next/config';
-import Page from '../../components/Page'
-
-import { withAuthentication } from '../../components/Authentication'
-import { Box, Grid, Tab, Tabs, Typography, withStyles } from '@material-ui/core'
 import { withTranslation } from 'next-i18next'
+import { Paper, Tab, Tabs, Typography } from '@material-ui/core'
+
+import Page from '../../components/Page'
+import { withAuthentication } from '../../components/Authentication'
 import OrganizationSettings from '../../components/OrganizationForms/Settings'
 import OrganizationBilling from '../../components/OrganizationForms/Billing'
 import OrganizationMembers from '../../components/OrganizationForms/Members'
 import OrganizationNotification from '../../components/OrganizationForms/Notification'
-import { StoreContext } from '../../store'
 import RequestError from '../../components/RequestError'
+import { TabPanel } from '../../components/Tabs';
+import { StoreContext } from '../../store'
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
-
-const TabPanel = (props) => {
-  const { children, value, index, ...other } = props;
-
-  return value === index ? (
-    <Box>
-      {children}
-    </Box>
-  ) : null;
-};
-
-const StyledTabs = withStyles(theme => ({
-  root: {
-    borderRight: `1px solid ${theme.palette.divider}`
-  }
-}))(Tabs);
-
-const StyledTab = withStyles(theme => ({
-  wrapper: {
-    alignItems: 'flex-start'
-  }
-}))(Tab);
 
 const Settings = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
@@ -88,47 +67,43 @@ const Settings = withTranslation()(({ t }) => {
   return useObserver(() => (
     <Page>
       <RequestError error={error} />
-      <Grid container spacing={5}>
-        <Grid item xs={3}>
-          <StyledTabs
-            orientation="vertical"
-            value={tabSelected}
-            onChange={onTabChange}
-            aria-label="Vertical tabs example"
-          >
-            <StyledTab label={t('Settings')} />
-            <StyledTab label={t('Billing')} />
-            <StyledTab label={t('Manage access')} />
-            <StyledTab label={t('Notifications')} />
-          </StyledTabs>
-        </Grid>
-        <Grid item xs={9}>
-          <TabPanel value={tabSelected} index={0}>
-            <Typography variant="h5">
-              {t('Settings')}
-              <OrganizationSettings submitLabel={t('Setup settings')} submitFullWidth={false} onSubmit={onSubmit} />
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabSelected} index={1}>
-            <Typography variant="h5">
-              {t('Billing information')}
-              <OrganizationBilling onSubmit={onSubmit} />
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabSelected} index={2}>
-            <Typography variant="h5">
-              {t('Manage access')}
-              <OrganizationMembers onSubmit={onSubmit} />
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabSelected} index={3}>
-            <Typography variant="h5">
-              {t('Notifications')}
-              <OrganizationNotification onSubmit={onSubmit} />
-            </Typography>
-          </TabPanel>
-        </Grid>
-      </Grid>
+      <Paper>
+        <Tabs
+          variant="scrollable"
+          value={tabSelected}
+          onChange={onTabChange}
+          aria-label="Vertical tabs example"
+        >
+          <Tab label={t('Settings')} />
+          <Tab label={t('Billing')} />
+          <Tab label={t('Manage access')} />
+          <Tab label={t('Notifications')} />
+        </Tabs>
+        <TabPanel value={tabSelected} index={0}>
+          <Typography variant="h5">
+            {t('Settings')}
+            <OrganizationSettings submitLabel={t('Setup settings')} submitFullWidth={false} onSubmit={onSubmit} />
+          </Typography>
+        </TabPanel>
+        <TabPanel value={tabSelected} index={1}>
+          <Typography variant="h5">
+            {t('Billing information')}
+            <OrganizationBilling onSubmit={onSubmit} />
+          </Typography>
+        </TabPanel>
+        <TabPanel value={tabSelected} index={2}>
+          <Typography variant="h5">
+            {t('Manage access')}
+            <OrganizationMembers onSubmit={onSubmit} />
+          </Typography>
+        </TabPanel>
+        <TabPanel value={tabSelected} index={3}>
+          <Typography variant="h5">
+            {t('Notifications')}
+            <OrganizationNotification onSubmit={onSubmit} />
+          </Typography>
+        </TabPanel>
+      </Paper>
     </Page>
   ))
 });

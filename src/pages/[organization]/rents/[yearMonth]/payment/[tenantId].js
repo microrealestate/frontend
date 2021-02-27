@@ -452,17 +452,13 @@ RentPayment.getInitialProps = async (context) => {
     }
 
     store.rent.setPeriod(rentPeriod);
-    const fetchStatus = await store.rent.fetch();
-    if (fetchStatus !== 200) {
+    const response = await store.rent.fetchOneTenantRent(tenantId);
+    if (response.status !== 200) {
       // TODO check error code to show a more detail error message
       return { error: { statusCode: 500 } };
     }
 
-    const selectedRent = store.rent.items.find(({ occupant: { _id } }) => _id === tenantId);
-    if (!selectedRent) {
-      return { error: { statusCode: 404 } };
-    }
-    store.rent.setSelected(selectedRent);
+    store.rent.setSelected(response.data);
   }
 
   const props = {

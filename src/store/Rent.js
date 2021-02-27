@@ -32,6 +32,7 @@ export default class Rent {
       setFilters: action,
       setPeriod: action,
       fetch: flow,
+      fetchOneTenantRent: flow,
       fetchTenantRents: flow,
       pay: flow,
       sendEmail: flow
@@ -109,9 +110,22 @@ export default class Rent {
       if (this.selected._id) {
         this.selected = this.items.find(item => item._id === this.selected._id) || {};
       }
-      return 200;
+      return { status: 200, data: response.data };
     } catch (error) {
-      return error.response.status;
+      return { status: error.response.status };
+    }
+  };
+
+  *fetchOneTenantRent(tenantId) {
+    try {
+      const year = this._period.year();
+      const month = this._period.month() + 1;
+
+      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}/${year}/${month}`);
+
+      return { status: 200, data: response.data };
+    } catch (error) {
+      return { status: error.response.status };
     }
   };
 

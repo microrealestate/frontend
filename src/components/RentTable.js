@@ -180,8 +180,8 @@ const RentTable = withTranslation()(({ t }) => {
       return setError(t('Email service cannot send emails.'));
     }
 
-    const fetchStatus = await store.rent.fetch();
-    if (fetchStatus !== 200) {
+    const response = await store.rent.fetch();
+    if (response.status !== 200) {
       // TODO check error code to show a more detail error message
       return setError(t('Cannot fetch rents from server'));
     }

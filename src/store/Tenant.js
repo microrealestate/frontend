@@ -14,7 +14,8 @@ export default class Tenant {
       filteredItems: computed,
       setSelected: action,
       setFilters: action,
-      fetch: flow
+      fetch: flow,
+      fetchOne: flow
     });
   }
 
@@ -83,9 +84,20 @@ export default class Tenant {
       if (this.selected._id) {
         this.selected = this.items.find(item => item._id === this.selected._id) || {};
       }
-      return 200;
+      return { status: 200, data: response.data };
     } catch (error) {
-      return error.response.status;
+      return { status: error.response.status };
     }
   };
+
+  *fetchOne(tenantId) {
+    try {
+
+      const response = yield useApiFetch().get(`/tenants/${tenantId}`);
+
+      return { status: 200, data: response.data };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  }
 }

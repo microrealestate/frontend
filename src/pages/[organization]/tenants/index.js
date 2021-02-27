@@ -14,6 +14,7 @@ import { withTranslation } from '../../../utils/i18n';
 import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {
@@ -61,7 +62,13 @@ const Properties = ({ tenant }) => {
 
 const TenantList = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
+  const router = useRouter();
   const classes = useStyles();
+
+  const onEdit = async tenant => {
+    store.tenant.setSelected(tenant);
+    await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
+  }
 
   return useObserver(() => (
     <List
@@ -83,9 +90,13 @@ const TenantList = withTranslation()(({ t }) => {
 
         return (
           <Paper key={tenant._id}>
-            <ListItem button style={{
-              marginBottom: 20
-            }}>
+            <ListItem
+              button
+              style={{
+                marginBottom: 20
+              }}
+              onClick={() => onEdit(tenant)}
+            >
               <Hidden smDown>
                 <ListItemAvatar>
                   <Avatar className={!tenant.terminated ? classes.avatarInProgress : null}>{avatar}</Avatar>
@@ -177,8 +188,8 @@ Tenants.getInitialProps = async (context) => {
   console.log('Tenants.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
 
-  const fetchStatus = await store.tenant.fetch();
-  if (fetchStatus !== 200) {
+  const response = await store.tenant.fetch();
+  if (response.status !== 200) {
     // TODO check error code to show a more detail error message
     return { error: { statusCode: 500 } };
   }
