@@ -11,6 +11,7 @@ module.exports = {
   },
   publicRuntimeConfig: {
     DEMO_MODE: process.env.DEMO_MODE === 'true',
+    SIGNUP: process.env.SIGNUP === 'true',
     APP_NAME: process.env.APP_NAME,
     API_URL: process.env.API_URL,
     CORS_ENABLED: process.env.CORS_ENABLED === 'true',

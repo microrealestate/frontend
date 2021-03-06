@@ -14,7 +14,7 @@ import Link from '../components/Link';
 import RequestError from '../components/RequestError';
 import Page from '../components/Page';
 
-const { publicRuntimeConfig: { DEMO_MODE, APP_NAME } } = getConfig();
+const { publicRuntimeConfig: { DEMO_MODE, SIGNUP, APP_NAME } } = getConfig();
 
 const initialValues = {
   email: DEMO_MODE ? 'demo@demo.com' : '',
@@ -117,7 +117,7 @@ const SignIn = withTranslation()(({ t }) => {
           </Formik>
         </Box>
       </Paper>
-      {!DEMO_MODE && (
+      {!DEMO_MODE && SIGNUP && (
         <Box mt={4}>
           <Paper>
             <Box px={4} py={2}>

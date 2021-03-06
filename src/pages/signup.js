@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite';
+import ErrorPage from 'next/error';
 import { useRouter } from 'next/router';
 import getConfig from 'next/config'
 import { Form, Formik } from 'formik';
@@ -13,6 +14,8 @@ import { StoreContext } from '../store';
 import Link from '../components/Link';
 import RequestError from '../components/RequestError';
 import Page from '../components/Page';
+
+const { publicRuntimeConfig: { APP_NAME, SIGNUP } } = getConfig();
 
 const initialValues = {
   firstName: '',
@@ -33,11 +36,16 @@ const validationSchema = Yup.object().shape({
     .required()
 });
 
-const SignUp = withTranslation()(({ t }) => {
-  const { publicRuntimeConfig: { APP_NAME } } = getConfig();
+const SignUp = withTranslation()(({ t, pageError }) => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  if (pageError) {
+    return (
+      <ErrorPage statusCode={pageError.statusCode} />
+    );
+  }
 
   const signUp = async ({ firstName, lastName, email, password }, actions) => {
     try {
@@ -127,5 +135,15 @@ const SignUp = withTranslation()(({ t }) => {
     </Page>
   ));
 });
+
+SignUp.getInitialProps = async (context) => {
+  console.log('SignUp.getInitialProps')
+
+  if (!SIGNUP) {
+    return { pageError: { statusCode: 404 } };
+  }
+
+  return {};
+};
 
 export default SignUp;
