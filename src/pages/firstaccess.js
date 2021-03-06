@@ -13,7 +13,7 @@ import Page from '../components/Page';
 import IconTypography from '../components/IconTypography';
 import { isServer, redirect } from '../utils';
 import RequestError from '../components/RequestError';
-import OrganizationSettings from '../components/OrganizationForms/Settings';
+import Landlord from '../components/OrganizationForms/Landlord';
 
 const FirstAccess = withTranslation()(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
@@ -77,7 +77,7 @@ const FirstAccess = withTranslation()(({ t }) => {
       <Paper>
         <Box px={4} pb={4} pt={2}>
           <RequestError error={error} />
-          <OrganizationSettings submitLabel={t('Next')} onSubmit={onSubmit} />
+          <Landlord onSubmit={onSubmit} />
         </Box>
       </Paper>
     </Page>

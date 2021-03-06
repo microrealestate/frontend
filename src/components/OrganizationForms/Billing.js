@@ -158,7 +158,7 @@ const OrganizationBilling = withTranslation()(({ t, onSubmit }) => {
                         <Box paddingTop={4}>
                             <SubmitButton
                                 size="large"
-                                label={!isSubmitting ? t('Setup billing information') : t('Submitting')}
+                                label={!isSubmitting ? t('Save') : t('Saving')}
                                 onlyRoles={allowedRoles}
                             />
                         </Box>

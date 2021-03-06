@@ -6,7 +6,7 @@ import { Paper, Tab, Tabs, Typography } from '@material-ui/core'
 
 import Page from '../../components/Page'
 import { withAuthentication } from '../../components/Authentication'
-import OrganizationSettings from '../../components/OrganizationForms/Settings'
+import Landlord from '../../components/OrganizationForms/Landlord';
 import OrganizationBilling from '../../components/OrganizationForms/Billing'
 import OrganizationMembers from '../../components/OrganizationForms/Members'
 import OrganizationNotification from '../../components/OrganizationForms/Notification'
@@ -74,15 +74,15 @@ const Settings = withTranslation()(({ t }) => {
           onChange={onTabChange}
           aria-label="Vertical tabs example"
         >
-          <Tab label={t('Settings')} />
+          <Tab label={t('Landlord')} />
           <Tab label={t('Billing')} />
           <Tab label={t('Manage access')} />
           <Tab label={t('Notifications')} />
         </Tabs>
         <TabPanel value={tabSelected} index={0}>
           <Typography variant="h5">
-            {t('Settings')}
-            <OrganizationSettings submitLabel={t('Setup settings')} submitFullWidth={false} onSubmit={onSubmit} />
+            {t('Landlord information')}
+            <Landlord submitFullWidth={false} onSubmit={onSubmit} />
           </Typography>
         </TabPanel>
         <TabPanel value={tabSelected} index={1}>

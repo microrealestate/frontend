@@ -40,7 +40,7 @@ const currencies = cc.data.reduce((acc, { code, currency }) => {
     return acc
 }, []).sort((c1, c2) => c1.currency.localeCompare(c2.currency));
 
-const OrganizationSettings = withTranslation()(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
+const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
     const store = useContext(StoreContext);
 
     const initialValues = {
@@ -145,8 +145,7 @@ const OrganizationSettings = withTranslation()(({ t, submitLabel, submitFullWidt
                         <Box paddingTop={4}>
                             <SubmitButton
                                 size="large"
-                                fullWidth={submitFullWidth}
-                                label={!isSubmitting ? submitLabel : t('Submitting')}
+                                label={!isSubmitting ? t('Save') : t('Saving')}
                                 onlyRoles={allowedRoles}
                             />
                         </Box>
@@ -157,4 +156,4 @@ const OrganizationSettings = withTranslation()(({ t, submitLabel, submitFullWidt
     ));
 });
 
-export default OrganizationSettings;
+export default Landlord;

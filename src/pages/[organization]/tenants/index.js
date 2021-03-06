@@ -56,7 +56,6 @@ const Properties = ({ tenant }) => {
         );
       })}
     </Box>
-
   );
 }
 

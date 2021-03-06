@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
-import { Box, Breadcrumbs, Divider, Grid, Hidden, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Breadcrumbs, Divider, Grid, Hidden, Paper, Tab, Tabs, Typography } from '@material-ui/core';
 import HistoryIcon from '@material-ui/icons/History';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import SubjectIcon from '@material-ui/icons/Subject';
@@ -112,6 +112,10 @@ const ContractOverview = withTranslation()(({ t, tenant }) => {
 const RentOverview = withTranslation()(({ t, tenant }) => {
   return (
     <>
+      <NumberFormat align="right" variant="h5" value={tenant.total} />
+      <Box py={1}>
+        <Divider />
+      </Box>
       <CardRow>
         <Typography
           color="textSecondary"
@@ -247,31 +251,33 @@ const Tenant = withTranslation()(({ t }) => {
       <RequestError error={error} />
       <Grid container spacing={10}>
         <Grid item sm={12} md={8}>
-          <Tabs
-            variant="scrollable"
-            value={tabSelected}
-            onChange={onTabChange}
-            aria-label="Vertical tabs example"
-          >
-            <Tab label={t('Tenant')} />
-            <Tab label={t('Contract')} />
-            <Tab label={t('Billing')} />
-          </Tabs>
-          <TabPanel value={tabSelected} index={0}>
-            <Typography variant="h5">
-              {t('Tenant')}
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabSelected} index={1}>
-            <Typography variant="h5">
-              {t('Contract')}
-            </Typography>
-          </TabPanel>
-          <TabPanel value={tabSelected} index={2}>
-            <Typography variant="h5">
-              {t('Billing information')}
-            </Typography>
-          </TabPanel>
+          <Paper>
+            <Tabs
+              variant="scrollable"
+              value={tabSelected}
+              onChange={onTabChange}
+              aria-label="Vertical tabs example"
+            >
+              <Tab label={t('Tenant')} />
+              <Tab label={t('Contract')} />
+              <Tab label={t('Billing')} />
+            </Tabs>
+            <TabPanel value={tabSelected} index={0}>
+              <Typography variant="h5">
+                {t('Tenant')}
+              </Typography>
+            </TabPanel>
+            <TabPanel value={tabSelected} index={1}>
+              <Typography variant="h5">
+                {t('Contract')}
+              </Typography>
+            </TabPanel>
+            <TabPanel value={tabSelected} index={2}>
+              <Typography variant="h5">
+                {t('Billing information')}
+              </Typography>
+            </TabPanel>
+          </Paper>
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>

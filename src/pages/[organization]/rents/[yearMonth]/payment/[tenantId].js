@@ -200,9 +200,10 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                           </Grid>
                         </Grid>
                         { payments.length > 1 && (
-                          <Box pb={1} display="flex" justifyContent="flex-end">
+                          <Box pb={2} display="flex" justifyContent="flex-end">
                             <Button
-                              variant="contained"
+                              // variant="contained"
+                              color="primary"
                               size="small"
                               onClick={() => arrayHelpers.remove(index)}
                             >
@@ -213,17 +214,18 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                       </Box>
                     ))}
                     <Box display="flex" justifyContent="space-between">
+                      <SubmitButton
+                        size="small"
+                        label={!isSubmitting ? t('Save') : t('Saving')}
+                      />
                       <Button
-                        variant="contained"
+                        // variant="contained"
+                        color="primary"
                         size="small"
                         onClick={() => arrayHelpers.push(emptyPayment)}
                       >
                         {t('Add payment')}
                       </Button>
-                      <SubmitButton
-                        size="small"
-                        label={!isSubmitting ? t('Save') : t('Saving')}
-                      />
                     </Box>
                   </div>
                 )}
@@ -242,12 +244,10 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
-              <Box align="right">
-                <SubmitButton
-                  size="small"
-                  label={!isSubmitting ? t('Save') : t('Saving')}
-                />
-              </Box>
+              <SubmitButton
+                size="small"
+                label={!isSubmitting ? t('Save') : t('Saving')}
+              />
             </FormSection>
 
             <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
@@ -263,12 +263,10 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
-              <Box align="right">
-                <SubmitButton
-                  size="small"
-                  label={!isSubmitting ? t('Save') : t('Saving')}
-                />
-              </Box>
+              <SubmitButton
+                size="small"
+                label={!isSubmitting ? t('Save') : t('Saving')}
+              />
             </FormSection>
 
             <FormSection label={t('Internal description')} defaultExpanded={!!initialValues.description}>
@@ -279,12 +277,10 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 multiline
                 rows={3}
               />
-              <Box align="right">
-                <SubmitButton
-                  size="small"
-                  label={!isSubmitting ? t('Save') : t('Saving')}
-                />
-              </Box>
+              <SubmitButton
+                size="small"
+                label={!isSubmitting ? t('Save') : t('Saving')}
+              />
             </FormSection>
             <Box
               pt={2}
