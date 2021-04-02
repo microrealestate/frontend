@@ -5,21 +5,26 @@ import User from './User'
 import Organization from './Organization'
 import Rent from './Rent'
 import Tenant from './Tenant';
+import Property from './Property';
 import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
+
+import { i18n } from '../utils/i18n';
 
 export default class Store {
   user = new User();
   organization = new Organization();
   rent = new Rent();
   tenant = new Tenant();
+  property = new Property();
 
   constructor() {
     makeObservable(this, {
       user: observable,
       organization: observable,
       rent: observable,
-      tenant: observable
+      tenant: observable,
+      property: observable
     });
 
     let refreshTokenHandle;
@@ -56,16 +61,25 @@ export default class Store {
     );
     reaction(
       () => this.organization.selected,
-      organization => {
+      async organization => {
         setApiHeaders({
           accessToken: this.user.token,
           organizationId: organization ? organization._id : undefined
         });
+        moment.locale(this.organization.selected.locale || 'en');
+        await i18n.changeLanguage(this.organization.selected.locale || 'en');
+      }
+    );
+    reaction(
+      () => this.organization.selected?.locale,
+      async locale => {
+        moment.locale(locale || 'en');
+        await i18n.changeLanguage(locale || 'en');
       }
     );
   }
 
-  _hydrate(initialData) {
+  hydrate(initialData) {
     if (!initialData) {
       return;
     }
@@ -80,6 +94,9 @@ export default class Store {
         items: []
       },
       tenant = {
+        items: []
+      },
+      property = {
         items: []
       }
     } = initialData;
@@ -109,5 +126,9 @@ export default class Store {
     this.tenant.items = tenant.items;
     this.tenant.selected = tenant.selected;
     this.tenant.filters = tenant.filters;
+
+    this.property.items = property.items;
+    this.property.selected = property.selected;
+    this.property.filters = property.filters;
   }
 }

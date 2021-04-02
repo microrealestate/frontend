@@ -72,10 +72,10 @@ const Header = withTranslation()(({ t, rent, onEdit }) => {
 //     const amount = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
 //     return [
 //       t('Remaining {{amount}}', {
-//         amount: numberFormat(locale, currency, amount)
+//         amount: formatNumber(locale, currency, amount)
 //       }),
 //       t('Paid {{amount}}', {
-//         amount: numberFormat(locale, currency, amount)
+//         amount: formatNumber(locale, currency, amount)
 //       })
 //     ][tooltipItem.index];
 //   }

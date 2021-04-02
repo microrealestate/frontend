@@ -2,7 +2,7 @@ import { useObserver } from 'mobx-react-lite'
 import { useContext, useState } from 'react'
 import getConfig from 'next/config';
 import { withTranslation } from 'next-i18next'
-import { Paper, Tab, Tabs, Typography } from '@material-ui/core'
+import { Paper, Tab, Tabs } from '@material-ui/core'
 
 import Page from '../../components/Page'
 import { withAuthentication } from '../../components/Authentication'
@@ -80,28 +80,16 @@ const Settings = withTranslation()(({ t }) => {
           <Tab label={t('Notifications')} />
         </Tabs>
         <TabPanel value={tabSelected} index={0}>
-          <Typography variant="h5">
-            {t('Landlord information')}
-            <Landlord submitFullWidth={false} onSubmit={onSubmit} />
-          </Typography>
+          <Landlord onSubmit={onSubmit} />
         </TabPanel>
         <TabPanel value={tabSelected} index={1}>
-          <Typography variant="h5">
-            {t('Billing information')}
-            <OrganizationBilling onSubmit={onSubmit} />
-          </Typography>
+          <OrganizationBilling onSubmit={onSubmit} />
         </TabPanel>
         <TabPanel value={tabSelected} index={2}>
-          <Typography variant="h5">
-            {t('Manage access')}
-            <OrganizationMembers onSubmit={onSubmit} />
-          </Typography>
+          <OrganizationMembers onSubmit={onSubmit} />
         </TabPanel>
         <TabPanel value={tabSelected} index={3}>
-          <Typography variant="h5">
-            {t('Notifications')}
-            <OrganizationNotification onSubmit={onSubmit} />
-          </Typography>
+          <OrganizationNotification onSubmit={onSubmit} />
         </TabPanel>
       </Paper>
     </Page>

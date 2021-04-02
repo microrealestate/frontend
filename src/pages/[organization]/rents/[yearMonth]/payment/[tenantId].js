@@ -3,7 +3,6 @@ import moment from 'moment';
 import { Children, useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
-import { useRouter } from 'next/router';
 import { withTranslation } from 'next-i18next';
 import { FieldArray, Form, Formik } from 'formik';
 import * as Yup from 'yup';
@@ -61,11 +60,37 @@ const FormSection = ({ label, children, ...props }) => {
   );
 }
 
+const validationSchema = Yup.object().shape({
+  payments: Yup.array().of(
+    Yup.object().shape({
+      amount: Yup.number().min(0),
+      date: Yup.mixed().when('amount', {
+        is: val => val > 0,
+        then: Yup.date().required()
+      }),
+      type: Yup.string().required(),
+      reference: Yup.mixed().when('type', {
+        is: val => val !== 'cash',
+        then: Yup.string().required()
+      })
+    })).min(1),
+  extracharge: Yup.number().min(0),
+  noteextracharge: Yup.mixed().when('extracharge', {
+    is: val => val > 0,
+    then: Yup.string().required(),
+  }),
+  promo: Yup.number().min(0),
+  notepromo: Yup.mixed().when('promo', {
+    is: val => val > 0,
+    then: Yup.string().required(),
+  }),
+  description: Yup.string()
+});
+
 const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
 
-const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
+const PaymentForm = withTranslation()(({ t, rent }) => {
   const store = useContext(StoreContext);
-  const router = useRouter();
 
   const onSubmit = async (values, actions) => {
     // clone to avoid changing the form fields
@@ -75,6 +100,9 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
     clonedValues.payments = clonedValues.payments.filter(({ amount }) => amount > 0).map(payment => {
       // convert moment into string for the DB
       payment.date = payment.date.format('DD/MM/YYYY');
+      if (payment.type === 'cash') {
+        delete payment.reference;
+      }
       return payment;
     });
     clonedValues.month = rent.month;
@@ -100,15 +128,11 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
     }
   }
 
-  const onClose = async () => {
-    await router.push(backPath);
-  }
-
   const initialValues = {
     payments: rent.payments.length ? rent.payments.map(({ amount, date, type, reference }) => {
       return {
         amount: amount === 0 ? '' : amount,
-        date: date ? moment(date, 'DD/MM/YYYY') : undefined,
+        date: date ? moment(date, 'DD/MM/YYYY') : null,
         type: type,
         reference: reference || ''
       }
@@ -119,33 +143,6 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
     notepromo: rent.notepromo || '',
     description: rent.description || ''
   };
-
-  const validationSchema = Yup.object().shape({
-    payments: Yup.array().of(
-      Yup.object().shape({
-        amount: Yup.number().min(0),
-        date: Yup.mixed().when('amount', {
-          is: val => val > 0,
-          then: Yup.date().required()
-        }),
-        type: Yup.string().required(),
-        reference: Yup.mixed().when('type', {
-          is: val => val !== 'cash',
-          then: Yup.string().required()
-        })
-      })),
-    extracharge: Yup.number().min(0),
-    noteextracharge: Yup.mixed().when('extracharge', {
-      is: val => val > 0,
-      then: Yup.string().required(),
-    }),
-    promo: Yup.number().min(0),
-    notepromo: Yup.mixed().when('promo', {
-      is: val => val > 0,
-      then: Yup.string().required(),
-    }),
-    description: Yup.string()
-  });
 
   return (
     <Formik
@@ -175,6 +172,8 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                             <DateField
                               label={t('Date')}
                               name={`payments[${index}].date`}
+                              minDate={store.rent._period.startOf('month').toISOString()}
+                              maxDate={store.rent._period.endOf('month').toISOString()}
                             />
                           </Grid>
                         </Grid>
@@ -191,13 +190,14 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                               ]}
                             />
                           </Grid>
-
-                          <Grid item xs={6}>
-                            <FormTextField
-                              label={t('Reference')}
-                              name={`payments[${index}].reference`}
-                            />
-                          </Grid>
+                          {(payments[index].type !== 'cash') && (
+                            <Grid item xs={6}>
+                              <FormTextField
+                                label={t('Reference')}
+                                name={`payments[${index}].reference`}
+                              />
+                            </Grid>
+                          )}
                         </Grid>
                         { payments.length > 1 && (
                           <Box pb={2} display="flex" justifyContent="flex-end">
@@ -282,17 +282,6 @@ const PaymentForm = withTranslation()(({ t, rent, backPath }) => {
                 label={!isSubmitting ? t('Save') : t('Saving')}
               />
             </FormSection>
-            <Box
-              pt={2}
-            >
-              <Button
-                variant="contained"
-                size="large"
-                onClick={onClose}
-              >
-                {t('Close')}
-              </Button>
-            </Box>
           </Form>
         )
       }}
@@ -449,7 +438,7 @@ const RentPayment = withTranslation()(({ t }) => {
           <Box mr={1.5}>
             <FullScreenDialogButton
               variant="contained"
-              buttonLabel={t('Payments history')}
+              buttonLabel={t('Payments')}
               startIcon={<HistoryIcon />}
               dialogTitle={t('Payments history')}
               cancelButtonLabel={t('Close')}
@@ -468,9 +457,9 @@ const RentPayment = withTranslation()(({ t }) => {
       }
     >
       <RequestError error={error} />
-      <Grid container spacing={10}>
+      <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
-          <PaymentForm rent={store.rent.selected} backPath={backPath} />
+          <PaymentForm rent={store.rent.selected} />
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>
@@ -541,12 +530,12 @@ const RentPayment = withTranslation()(({ t }) => {
                   )}
                 </List>
               ) : (
-                  <Typography
-                    color="textSecondary"
-                  >
-                    {t('No documents sent')}
-                  </Typography>
-                )}
+                <Typography
+                  color="textSecondary"
+                >
+                  {t('No documents sent')}
+                </Typography>
+              )}
             </DashboardCard>
           </Grid>
         </Hidden>
@@ -558,23 +547,24 @@ const RentPayment = withTranslation()(({ t }) => {
 RentPayment.getInitialProps = async (context) => {
   console.log('RentPayment.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
+  const tenantId = isServer() ? context.query.tenantId : store.rent.selected._id;
 
   if (isServer()) {
-    const { yearMonth, tenantId } = context.query;
+    const { yearMonth } = context.query;
     const rentPeriod = moment(yearMonth, 'YYYY.MM', true);
     if (!rentPeriod.isValid()) {
       return { error: { statusCode: 404 } };
     }
 
     store.rent.setPeriod(rentPeriod);
-    const response = await store.rent.fetchOneTenantRent(tenantId);
-    if (response.status !== 200) {
-      // TODO check error code to show a more detail error message
-      return { error: { statusCode: 500 } };
-    }
-
-    store.rent.setSelected(response.data);
   }
+
+  const { status, data } = await store.rent.fetchOneTenantRent(tenantId);
+  if (status !== 200) {
+    return { error: { statusCode: status } };
+  }
+
+  store.rent.setSelected(data);
 
   const props = {
     initialState: {

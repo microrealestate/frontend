@@ -218,6 +218,7 @@ const RentTable = withTranslation()(({ t }) => {
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
+                  color="default"
                   indeterminate={selected.length > 0 && selected.length < selectableRentNum}
                   checked={filteredRents.length > 0 && selected.length === selectableRentNum}
                   onChange={onSelectAllClick}
@@ -241,6 +242,7 @@ const RentTable = withTranslation()(({ t }) => {
                   <TableCell padding="checkbox">
                     {rent.occupant.hasContactEmails ? (
                       <Checkbox
+                        color="default"
                         checked={isItemSelected}
                         onChange={event => onSelectClick(event, rent._id)}
                         inputProps={{ 'aria-labelledby': rent.occupant.name }}

@@ -1,11 +1,12 @@
-import { Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, SelectField } from '../Form';
+import { FormSection } from '../Form';
 import { withTranslation } from '../../utils/i18n';
 
-
 const OrganizationNotification = withTranslation()(({ t, onSubmit }) => {
-    return null;
+    return (
+        <FormSection label={t('Notifications')}>
+
+        </FormSection>
+    );
 });
 
 export default OrganizationNotification;

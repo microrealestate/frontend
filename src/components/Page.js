@@ -1,7 +1,7 @@
 import { useState, useContext, cloneElement, useEffect } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import getConfig from 'next/config';
-import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography } from '@material-ui/core';
+import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography, Grid } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 import { withTranslation } from '../utils/i18n';
@@ -111,19 +111,19 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
               position="sticky"
             >
               <Toolbar>
-                <Box
-                  display="flex"
+                <Grid container
                   alignItems="center"
-                  justifyContent="space-between"
-                  width="100%"
+                  justify="space-between"
+                  wrap="nowrap"
+                  spacing={5}
                 >
-                  <Box>
-                    {PrimaryToolbar && PrimaryToolbar}
-                  </Box>
-                  <Box ml={PrimaryToolbar ? 5 : 0} flexGrow={1} whiteSpace="nowrap">
-                    {SecondaryToolbar && SecondaryToolbar}
-                  </Box>
-                </Box>
+                  <Grid item>
+                    {PrimaryToolbar}
+                  </Grid>
+                  <Grid item>
+                    {SecondaryToolbar}
+                  </Grid>
+                </Grid>
               </Toolbar>
             </AppBar>
           </ElevationScroll>

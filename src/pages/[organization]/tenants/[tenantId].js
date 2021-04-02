@@ -3,10 +3,14 @@ import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
-import { Box, Breadcrumbs, Divider, Grid, Hidden, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Breadcrumbs, Button, Divider, Grid, Hidden, Paper, Tab, Tabs, Tooltip, Typography, withStyles } from '@material-ui/core';
 import HistoryIcon from '@material-ui/icons/History';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import SubjectIcon from '@material-ui/icons/Subject';
+import DeleteIcon from '@material-ui/icons/Delete';
+import StopIcon from '@material-ui/icons/Stop';
+import WarningIcon from '@material-ui/icons/ReportProblemOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import Page from '../../../components/Page'
 import { withAuthentication } from '../../../components/Authentication'
@@ -19,6 +23,14 @@ import PaymentHistory from '../../../components/PaymentHistory';
 import { TabPanel } from '../../../components/Tabs';
 import { CardRow, DashboardCard } from '../../../components/Cards';
 import { NumberFormat } from '../../../utils/numberformat';
+import TenantForm from '../../../components/TenantForms/TenantForm';
+import BillingForm from '../../../components/TenantForms/BillingForm';
+import LeaseContractForm from '../../../components/TenantForms/LeaseContractForm';
+import Alert from '@material-ui/lab/Alert';
+import AlertTitle from '@material-ui/lab/AlertTitle';
+import { useRouter } from 'next/router';
+import ConfirmDialog from '../../../components/ConfirmDialog';
+import TerminateLeaseDialog from '../../../components/TenantForms/TerminateLeaseDialog';
 
 const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
@@ -33,8 +45,17 @@ const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
   );
 });
 
-const ContractOverview = withTranslation()(({ t, tenant }) => {
-  return (
+const WarningTypography = withStyles(theme => {
+  return {
+    root: {
+      color: theme.palette.warning.dark
+    }
+  };
+})(Typography);
+
+const ContractOverview = withTranslation()(({ t }) => {
+  const store = useContext(StoreContext);
+  return useObserver(() => (
     <>
       <CardRow>
         <Typography
@@ -47,7 +68,7 @@ const ContractOverview = withTranslation()(({ t, tenant }) => {
           color="textSecondary"
           noWrap
         >
-          {tenant.contract}
+          {store.tenant.selected.contract}
         </Typography>
       </CardRow>
       <CardRow>
@@ -57,41 +78,54 @@ const ContractOverview = withTranslation()(({ t, tenant }) => {
         >
           {t('Status')}
         </Typography>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {tenant.terminated ? t('Terminated') : t('In progress')}
-        </Typography>
+        {store.tenant.selected.terminated ? (
+          <WarningTypography
+            color="textSecondary"
+            noWrap
+          >
+            {t('Terminated')}
+          </WarningTypography>
+        ) : (
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {t('In progress')}
+          </Typography>
+        )}
       </CardRow>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Start date')}
-        </Typography>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {moment(tenant.beginDate, 'DD/MM/YYYY').format('L')}
-        </Typography>
-      </CardRow>
-      <CardRow>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('End date')}
-        </Typography>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {moment(tenant.terminationDate || tenant.endDate, 'DD/MM/YYYY').format('L')}
-        </Typography>
-      </CardRow>
+      {store.tenant.selected.beginDate && (
+        <CardRow>
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {t('Start date')}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').format('L')}
+          </Typography>
+        </CardRow>
+      )}
+      {(store.tenant.selected.terminationDate || store.tenant.selected.endDate) && (
+        <CardRow>
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {t('End date')}
+          </Typography>
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {moment(store.tenant.selected.terminationDate || store.tenant.selected.endDate, 'DD/MM/YYYY').format('L')}
+          </Typography>
+        </CardRow>
+      )}
       <CardRow>
         <Typography
           color="textSecondary"
@@ -101,18 +135,19 @@ const ContractOverview = withTranslation()(({ t, tenant }) => {
         </Typography>
         <NumberFormat
           color="textSecondary"
-          value={tenant.guaranty}
+          value={store.tenant.selected.guaranty}
           noWrap
         />
       </CardRow>
     </>
-  );
+  ));
 });
 
-const RentOverview = withTranslation()(({ t, tenant }) => {
-  return (
+const RentOverview = withTranslation()(({ t }) => {
+  const store = useContext(StoreContext);
+  return useObserver(() => (
     <>
-      <NumberFormat align="right" variant="h5" value={tenant.total} />
+      <NumberFormat align="right" variant="h5" value={store.tenant.selected.total} />
       <Box py={1}>
         <Divider />
       </Box>
@@ -125,7 +160,7 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
         </Typography>
         <NumberFormat
           color="textSecondary"
-          value={tenant.rental}
+          value={store.tenant.selected.rental}
           noWrap
         />
       </CardRow>
@@ -138,7 +173,7 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
         </Typography>
         <NumberFormat
           color="textSecondary"
-          value={tenant.expenses}
+          value={store.tenant.selected.expenses}
           noWrap
         />
       </CardRow>
@@ -151,11 +186,11 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
         </Typography>
         <NumberFormat
           color="textSecondary"
-          value={tenant.discount ? tenant.discount * -1 : tenant.discount}
+          value={store.tenant.selected.discount ? store.tenant.selected.discount * -1 : store.tenant.selected.discount}
           noWrap
         />
       </CardRow>
-      {tenant.isVat && (
+      {store.tenant.selected.isVat && (
         <>
           <Box pb={1}>
             <Divider />
@@ -169,7 +204,7 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
             </Typography>
             <NumberFormat
               color="textSecondary"
-              value={tenant.preTaxTotal}
+              value={store.tenant.selected.preTaxTotal}
               noWrap
             />
           </CardRow>
@@ -178,11 +213,11 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
               color="textSecondary"
               noWrap
             >
-              {t('V.A.T.')}
+              {t('VAT')}
             </Typography>
             <NumberFormat
               color="textSecondary"
-              value={tenant.vat}
+              value={store.tenant.selected.vat}
               noWrap
             />
           </CardRow>
@@ -200,31 +235,120 @@ const RentOverview = withTranslation()(({ t, tenant }) => {
         </Typography>
         <NumberFormat
           color="textSecondary"
-          value={tenant.total}
+          value={store.tenant.selected.total}
           noWrap
         />
       </CardRow>
 
     </>
-  );
+  ));
 });
 
 const Tenant = withTranslation()(({ t }) => {
   console.log('Tenant functional component')
   const store = useContext(StoreContext);
+  const router = useRouter();
+  const [readOnly, setReadOnly] = useState(!!(store.tenant.selected.terminated || store.tenant.selected.properties?.length));
   const [error, setError] = useState('');
+
   const [tabSelected, setTabSelected] = useState(0);
+  const [openTerminateLease, setOpenTerminateLease] = useState(false);
+  const [openConfirmDeleteTenant, setOpenConfirmDeleteTenant] = useState(false);
+  const [openConfirmEditTenant, setOpenConfirmEditTenant] = useState(false);
 
   const onTabChange = (event, newValue) => {
     setTabSelected(newValue);
   };
 
-  //TODO manage errors
-
   let backPath = `/${store.organization.selected.name}/tenants`;
   if (store.tenant.filters.searchText || store.tenant.filters.status) {
     backPath = `${backPath}?search=${encodeURIComponent(store.tenant.filters.searchText)}&status=${encodeURIComponent(store.tenant.filters.status)}`
   }
+
+  const onOpenTerminateLease = () => {
+    setOpenTerminateLease(true);
+  }
+
+  const onConfirmDeleteTenant = () => {
+    setOpenConfirmDeleteTenant(true);
+  }
+
+  const onDeleteTenant = async () => {
+    setError('');
+
+    const { status } = await store.tenant.delete([store.tenant.selected._id]);
+    if (status !== 200) {
+      switch (status) {
+        case 422:
+          return setError(t('Tenant cannot be deleted because some rents have been paid.'));
+        case 404:
+          return setError(t('Tenant does not exist.'));
+        case 403:
+          return setError(t('You are not allowed to delete the tenant.'))
+        default:
+          return setError(t('Something went wrong'));
+      };
+    }
+
+    await router.push(backPath);
+  }
+
+  const onConfirmEditTenant = () => {
+    setOpenConfirmEditTenant(true);
+  }
+
+  const onEditTenant = async () => {
+    setReadOnly(false);
+  }
+
+  const onSubmit = async (tenantPart) => {
+    let tenant = toJS(store.tenant.selected);
+
+    tenant.properties = tenant.properties || [];
+    tenant = {
+      isCompany: false,
+      isVat: false,
+      ...tenant,
+      properties: tenant.properties.map(({ propertyId, entryDate, exitDate }) => ({ propertyId, entryDate, exitDate })),
+      ...tenantPart
+    }
+
+    setError('');
+
+    if (tenant._id) {
+      const { status, data } = await store.tenant.update(tenant);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Tenant name is missing.'));
+          case 403:
+            return setError(t('You are not allowed to update the tenant.'))
+          default:
+            return setError(t('Something went wrong'));
+        };
+      }
+      store.tenant.setSelected(data);
+    } else {
+      const { status, data } = await store.tenant.create(tenant);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Tenant name is missing.'));
+          case 403:
+            return setError(t('You are not allowed to create a tenant.'))
+          case 409:
+            return setError(t('The tenant already exists.'))
+          default:
+            return setError(t('Something went wrong'));
+        };
+      }
+      store.tenant.setSelected(data);
+      await router.push(`/${store.organization.selected.name}/tenants/${data._id}`);
+    }
+  }
+
+  const showTerminateLeaseButton = !!(store.tenant.selected.beginDate && store.tenant.selected.endDate && !store.tenant.selected.terminationDate);
+  const disableEditButton = !(!!store.tenant.selected.properties?.length && readOnly);
 
   return useObserver(() => (
     <Page
@@ -232,24 +356,65 @@ const Tenant = withTranslation()(({ t }) => {
         <BreadcrumbBar backPath={backPath} />
       }
       SecondaryToolbar={
-        <Box display="flex" width="100%" align="right">
-          <Box mr={1.5}>
-            <FullScreenDialogButton
+        <Grid container spacing={2}>
+          <Grid item>
+            <Button
               variant="contained"
-              buttonLabel={t('Payments history')}
-              startIcon={<HistoryIcon />}
-              dialogTitle={t('Payments history')}
-              cancelButtonLabel={t('Close')}
-              showCancel
+              startIcon={<EditIcon />}
+              onClick={onConfirmEditTenant}
+              disabled={disableEditButton}
             >
-              <PaymentHistory tenantId={store.tenant.selected._id} />
-            </FullScreenDialogButton>
-          </Box>
-        </Box>
+              {t('Edit')}
+            </Button>
+          </Grid>
+          {showTerminateLeaseButton && (
+            <Grid item>
+              <Button
+                variant="contained"
+                startIcon={<StopIcon />}
+                onClick={onOpenTerminateLease}
+                disabled={store.tenant.selected.terminated}
+              >
+                {t('Terminate')}
+              </Button>
+            </Grid>
+          )}
+          <Grid item>
+            <Tooltip title={store.tenant.selected.hasPayments ? t('This tenant cannot be deleted because some payments have been recorded.') : ''}>
+              <span>
+                <Button
+                  variant="contained"
+                  startIcon={<DeleteIcon />}
+                  onClick={onConfirmDeleteTenant}
+                  disabled={store.tenant.selected.hasPayments}
+                >
+                  {t('Delete')}
+                </Button>
+              </span>
+            </Tooltip>
+          </Grid>
+          <Grid item>
+            <Tooltip title={!store.tenant.selected.hasPayments ? t('No payments have been recorded so far.') : ''}>
+              <span>
+                <FullScreenDialogButton
+                  variant="contained"
+                  buttonLabel={t('Payments')}
+                  startIcon={<HistoryIcon />}
+                  dialogTitle={t('Payments history')}
+                  cancelButtonLabel={t('Close')}
+                  showCancel
+                  disabled={!store.tenant.selected.hasPayments}
+                >
+                  <PaymentHistory tenantId={store.tenant.selected._id} />
+                </FullScreenDialogButton>
+              </span>
+            </Tooltip>
+          </Grid>
+        </Grid>
       }
     >
-      <RequestError error={error} />
-      <Grid container spacing={10}>
+      < RequestError error={error} />
+      <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
           <Paper>
             <Tabs
@@ -259,45 +424,84 @@ const Tenant = withTranslation()(({ t }) => {
               aria-label="Vertical tabs example"
             >
               <Tab label={t('Tenant')} />
-              <Tab label={t('Contract')} />
+              <Tab label={t('Lease')} />
               <Tab label={t('Billing')} />
             </Tabs>
             <TabPanel value={tabSelected} index={0}>
-              <Typography variant="h5">
-                {t('Tenant')}
-              </Typography>
+              <TenantForm tenant={store.tenant.selected} onSubmit={onSubmit} readOnly={readOnly} />
             </TabPanel>
             <TabPanel value={tabSelected} index={1}>
-              <Typography variant="h5">
-                {t('Contract')}
-              </Typography>
+              <LeaseContractForm tenant={store.tenant.selected} onSubmit={onSubmit} readOnly={readOnly} />
             </TabPanel>
             <TabPanel value={tabSelected} index={2}>
-              <Typography variant="h5">
-                {t('Billing information')}
-              </Typography>
+              <BillingForm tenant={store.tenant.selected} onSubmit={onSubmit} readOnly={readOnly} />
             </TabPanel>
           </Paper>
         </Grid>
-        <Hidden smDown>
-          <Grid item md={4}>
-            <Box pb={2}>
+        {!!store.tenant.selected.properties && (
+          <Hidden smDown>
+            <Grid item md={4}>
+              <Box pb={2}>
+                <DashboardCard
+                  Icon={SubjectIcon}
+                  title={t('Lease')}
+                >
+                  <ContractOverview />
+                </DashboardCard>
+              </Box>
               <DashboardCard
-                Icon={SubjectIcon}
-                title={t('Contract')}
+                Icon={ReceiptIcon}
+                title={t('Rental')}
               >
-                <ContractOverview tenant={store.tenant.selected} />
+                <RentOverview />
               </DashboardCard>
-            </Box>
-            <DashboardCard
-              Icon={ReceiptIcon}
-              title={t('Rental')}
-            >
-              <RentOverview tenant={store.tenant.selected} />
-            </DashboardCard>
-          </Grid>
-        </Hidden>
+            </Grid>
+          </Hidden>
+        )}
       </Grid>
+      <TerminateLeaseDialog
+        open={openTerminateLease}
+        setOpen={setOpenTerminateLease}
+      />
+      <ConfirmDialog
+        open={openConfirmEditTenant}
+        setOpen={setOpenConfirmEditTenant}
+        onConfirm={onEditTenant}
+      >
+        <Box display="flex" alignItems="center">
+          <Box pr={1}>
+            <WarningIcon fontSize="large" color="secondary" />
+          </Box>
+          <Typography variant="h6">
+          {store.tenant.selected.terminated ? t('Lease terminated on {{terminationDate}}', {
+            terminationDate: moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY').format('LL')
+          }) : t('Lease is in progress')}
+          </Typography>
+        </Box>
+        <Box py={2}>
+          <Typography variant="body2">
+            {t('Modifying this information might break the contract signed with the tenant.')}
+          </Typography>
+        </Box>
+          <Typography variant="body2">
+            {t('Continue editing?')}
+          </Typography>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={openConfirmDeleteTenant}
+        setOpen={setOpenConfirmDeleteTenant}
+        onConfirm={onDeleteTenant}
+      >
+        <Box display="flex" alignItems="center">
+          <Box pr={1}>
+            <WarningIcon fontSize="large" color="secondary" />
+          </Box>
+          <Typography variant="h6">{t('Are you sure to definitely remove this tenant?')}</Typography>
+        </Box>
+        <Box py={2}>
+          <Typography variant="h6" align="center">{store.tenant.selected.name}</Typography>
+        </Box>
+      </ConfirmDialog>
     </Page>
   ))
 });
@@ -305,17 +509,26 @@ const Tenant = withTranslation()(({ t }) => {
 Tenant.getInitialProps = async (context) => {
   console.log('Tenant.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
+  const tenantId = isServer() ? context.query.tenantId : (store.tenant.selected._id || 'new');
 
-  if (isServer()) {
-    const { tenantId } = context.query;
+  if (tenantId !== 'new') {
+    const [tenantResponse, propertiesResponse] = await Promise.all([
+      store.tenant.fetchOne(tenantId),
+      store.property.fetch()
+    ]);
 
-    const response = await store.tenant.fetchOne(tenantId);
-    if (response.status !== 200) {
+    if ([tenantResponse.status, propertiesResponse.status].every(status => status !== 200)) {
       // TODO check error code to show a more detail error message
       return { error: { statusCode: 500 } };
     }
 
-    store.tenant.setSelected(response.data);
+    store.tenant.setSelected(tenantResponse.data);
+  } else {
+    const { status } = await store.property.fetch();
+    if (status !== 200) {
+      return { error: { statusCode: status } };
+    }
+    store.tenant.setSelected({});
   }
 
   const props = {

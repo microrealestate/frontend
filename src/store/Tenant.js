@@ -15,7 +15,10 @@ export default class Tenant {
       setSelected: action,
       setFilters: action,
       fetch: flow,
-      fetchOne: flow
+      fetchOne: flow,
+      create: flow,
+      update: flow,
+      delete: flow
     });
   }
 
@@ -100,4 +103,42 @@ export default class Tenant {
       return { status: error.response.status };
     }
   }
+
+  *create(tenant) {
+    try {
+      const response = yield useApiFetch().post(`/tenants`, tenant);
+      const createdTenant = response.data;
+      this.items.push(createdTenant);
+
+      return { status: 200, data: createdTenant };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
+
+  *update(tenant) {
+    try {
+      const response = yield useApiFetch().patch(`/tenants/${tenant._id}`, tenant);
+      const updatedTenant = response.data;
+      const index = this.items.findIndex(item => item._id === tenant._id);
+      if (index > -1) {
+        this.items.splice(index, 1, updatedTenant);
+        if (this.selected._id === updatedTenant._id) {
+          this.selected = this.items[index];
+        }
+      }
+      return { status: 200, data: updatedTenant };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
+
+  *delete(ids) {
+    try {
+      yield useApiFetch().delete(`/tenants/${ids.join(',')}`);
+      return { status: 200 };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
 }

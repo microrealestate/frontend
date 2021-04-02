@@ -1,37 +1,37 @@
 import ErrorPage from 'next/error';
-import moment from 'moment';
-import { useContext } from 'react';
+import getConfig from 'next/config';
+import { useContext, useEffect } from 'react';
 import { useObserver } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
-
 import { isServer, redirect } from '../utils';
-import { i18n } from '../utils/i18n';
-// import { buildFetchError } from '../utils/fetch';
 
-const changeLocaleCurency = async (locale = 'en', currency = 'EUR') => {
-    moment.locale(locale);
-    await i18n.changeLanguage(locale);
-};
+const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
+
 
 export function withAuthentication(PageComponent) {
     const WithAuth = (pageProps) => {
         console.log('WithAuth functional component')
         const store = useContext(StoreContext);
+
+        useEffect(() => {
+            if (pageProps.error?.statusCode === 403) {
+                window.location.assign(`${BASE_PATH}/signin`);
+            }
+        }, []);
+
         if (pageProps.error) {
+            if (pageProps.error.statusCode === 403) {
+                return null;
+            }
+
             return (
-                <>
-                    <ErrorPage statusCode={pageProps.error.statusCode} />
-                    {/* <pre>
-                        {JSON.stringify(pageProps.error.error, null, 1)}
-                    </pre> */}
-                </>
+                <ErrorPage statusCode={pageProps.error.statusCode} />
             );
         }
 
         return useObserver(() => {
-            changeLocaleCurency(store.user.locale, store.user.currency);
             return store.user.signedIn ? <PageComponent {...pageProps} /> : null;
         });
     };
@@ -83,13 +83,12 @@ export function withAuthentication(PageComponent) {
                         );
                     }
                     if (!store.organization.selected) {
-                        return  {
+                        return {
                             error: {
                                 statusCode: 404
                             }
                         };
                     }
-                    await changeLocaleCurency(store.organization.selected.locale, store.organization.selected.currency);
                 }
             } catch (error) {
                 if (error.response?.status === 403) {
@@ -98,7 +97,7 @@ export function withAuthentication(PageComponent) {
                     return {};
                 }
                 console.error(error)
-                return  {
+                return {
                     error: {
                         statusCode: 500,
                         //error: buildFetchError(error)
@@ -107,7 +106,15 @@ export function withAuthentication(PageComponent) {
             }
         }
 
-        return PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: toJS(store) } };
+        const initialProps = PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: toJS(store) } };
+
+        if (isServer() && initialProps.error?.statusCode === 403) {
+            console.log('current refresh token invalid redirecting to /signin')
+            redirect(context, '/signin');
+            return {};
+        }
+
+        return initialProps;
     }
     return WithAuth;
 }

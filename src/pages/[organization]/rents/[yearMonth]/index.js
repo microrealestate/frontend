@@ -167,10 +167,9 @@ Rents.getInitialProps = async (context) => {
     store.rent.setFilters({ searchText: search, status });
   }
 
-  const response = await store.rent.fetch();
-  if (response.status !== 200) {
-    // TODO check error code to show a more detail error message
-    return { error: { statusCode: 500 } };
+  const { status } = await store.rent.fetch();
+  if (status !== 200) {
+    return { error: { statusCode: status } };
   }
 
   return {

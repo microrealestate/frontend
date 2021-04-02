@@ -1,4 +1,5 @@
 
+import { toJS } from 'mobx';
 import { useStaticRendering } from 'mobx-react-lite'
 import { createContext, useEffect, useState } from 'react'
 import { isServer } from '../utils';
@@ -16,11 +17,12 @@ function getStoreInstance(initialData) {
   if (!_store) {
     console.log('create store')
     _store = new Store();
-    _store._hydrate(initialData);
+    _store.hydrate(initialData);
     if (process.env.NODE_ENV === 'development') {
       window.__store = _store;
     }
   }
+
   return _store;
 }
 

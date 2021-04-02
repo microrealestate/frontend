@@ -52,15 +52,17 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
         <>
           <Box pb={4}>
             <Typography variant="h5">{tenant.occupant.name}</Typography>
-            <Typography
-              color="textSecondary"
-              variant="body2"
-            >
-              {t('Contract from {{beginDate}} to {{endDate}}', {
-                beginDate: moment(tenant.occupant.beginDate, 'DD/MM/YYYY').format('L'),
-                endDate: moment(tenant.occupant.endDate, 'DD/MM/YYYY').format('L'),
-              })}
-            </Typography>
+            {tenant.occupant.beginDate && tenant.occupant.endDate && (
+              <Typography
+                color="textSecondary"
+                variant="body2"
+              >
+                {t('Contract from {{beginDate}} to {{endDate}}', {
+                  beginDate: moment(tenant.occupant.beginDate, 'DD/MM/YYYY').format('L'),
+                  endDate: moment(tenant.occupant.endDate, 'DD/MM/YYYY').format('L'),
+                })}
+              </Typography>
+            )}
           </Box>
           <Paper variant="outlined" square>
             <Table stickyHeader aria-label="payments history table" >
@@ -92,7 +94,7 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
                         {rent.promo > 0 && <NumberFormat variant="body1" value={rent.promo} />}
                       </TableCell>
                       <TableCell align="right">
-                        {rent.payment > 0 && <NumberFormat variant="body1" value={rent.payment} withColor/>}
+                        {rent.payment > 0 && <NumberFormat variant="body1" value={rent.payment} withColor />}
                       </TableCell>
                       <TableCell align="right">
                         <NumberFormat variant="body1" value={rent.newBalance} />

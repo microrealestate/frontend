@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useObserver } from 'mobx-react-lite'
 import { toJS } from 'mobx';
-import { Avatar, Box, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
+import { Avatar, Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
 import OfficeIcon from '@material-ui/icons/HomeWork';
 import ParkingIcon from '@material-ui/icons/LocalParking';
 import MailboxIcon from '@material-ui/icons/MarkunreadMailbox';
@@ -15,6 +15,8 @@ import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 import { useRouter } from 'next/router';
+import NewTenantDialog from '../../../components/TenantForms/NewTenantDialog';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {
@@ -28,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 const Properties = ({ tenant }) => {
   return (
     <Box display="flex" height="100%" alignItems="center" flexWrap="wrap">
-      {tenant.properties.map(({ property }, index) => {
+      {tenant.properties?.map(({ property }, index) => {
         let Icon = OfficeIcon;
         switch (property.type) {
           case 'office':
@@ -153,10 +155,21 @@ const TenantList = withTranslation()(({ t }) => {
 
 const Tenants = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
+  const [openNewTenantDialog, setOpenNewTenantDialog] = useState(false);
+  const router = useRouter();
 
   const onSearch = (status, searchText) => {
     store.tenant.setFilters({ status, searchText });
   };
+
+  const onNewTenant = () => {
+    setOpenNewTenantDialog(true);
+  }
+
+  const onCreateTenant = async (tenant) => {
+    store.tenant.setSelected(tenant);
+    await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
+  }
 
   return useObserver(() => (
     <Page
@@ -166,19 +179,36 @@ const Tenants = withTranslation()(({ t }) => {
         </Typography>
       }
       SecondaryToolbar={
-        <SearchFilterBar
-          filters={[
-            { id: '', label: t('All') },
-            { id: 'inprogress', label: t('In progress') },
-            { id: 'stopped', label: t('Terminated') },
+        <Box display="flex">
+          <Box mr={1} flexGrow={1}>
+            <SearchFilterBar
+              filters={[
+                { id: '', label: t('All') },
+                { id: 'inprogress', label: t('In progress') },
+                { id: 'stopped', label: t('Terminated') },
 
-          ]}
-          defaultValue={store.tenant.filters}
-          onSearch={onSearch}
-        />
+              ]}
+              defaultValue={store.tenant.filters}
+              onSearch={onSearch}
+            />
+          </Box>
+          <Box >
+            <Button
+              variant="contained"
+              onClick={onNewTenant}
+            >
+              {t('New tenant')}
+            </Button>
+          </Box>
+        </Box>
       }
     >
       <TenantList />
+      <NewTenantDialog
+        open={openNewTenantDialog}
+        setOpen={setOpenNewTenantDialog}
+        onConfirm={onCreateTenant}
+      />
     </Page>
   ))
 });
@@ -187,10 +217,9 @@ Tenants.getInitialProps = async (context) => {
   console.log('Tenants.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
 
-  const response = await store.tenant.fetch();
-  if (response.status !== 200) {
-    // TODO check error code to show a more detail error message
-    return { error: { statusCode: 500 } };
+  const { status } = await store.tenant.fetch();
+  if (status !== 200) {
+    return { error: { statusCode: status } };
   }
 
   return {

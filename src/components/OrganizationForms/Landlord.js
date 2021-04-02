@@ -1,6 +1,6 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, SelectField } from '../Form';
+import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, SelectField, FormSection } from '../Form';
 import cc from 'currency-codes';
 import getSymbolFromCurrency from 'currency-symbol-map'
 import { useContext } from 'react';
@@ -25,7 +25,8 @@ const validationSchema = Yup.object().shape({
     ein: Yup.mixed().when('isCompany', {
         is: 'true',
         then: Yup.string().required()
-    })
+    }),
+    capital: Yup.number().moreThan(0).required()
 });
 
 const currencies = cc.data.reduce((acc, { code, currency }) => {
@@ -48,9 +49,11 @@ const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, on
         locale: store.organization.selected?.locale || '',
         currency: store.organization.selected?.currency || '',
         isCompany: store.organization.selected?.isCompany ? 'true' : 'false',
+        legalRepresentative: store.organization.selected?.companyInfo?.legalRepresentative || '',
         legalStructure: store.organization.selected?.companyInfo?.legalStructure || '',
         company: store.organization.selected?.companyInfo?.name || '',
         ein: store.organization.selected?.companyInfo?.ein || '',
+        capital: store.organization.selected?.companyInfo?.capital || ''
     };
 
     const _onSubmit = async (settings, actions) => {
@@ -66,7 +69,9 @@ const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, on
                 ...store.organization.selected.companyInfo,
                 name: settings.company,
                 ein: settings.ein,
-                legalStructure: settings.legalStructure
+                legalRepresentative: settings.legalRepresentative,
+                legalStructure: settings.legalStructure,
+                capital: settings.capital
             }
         }
 
@@ -84,7 +89,7 @@ const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, on
             {({ values, isSubmitting }) => {
                 return (
                     <Form autoComplete="off">
-                        <Box paddingBottom={4}>
+                        <FormSection label={t('Landlord information')}>
                             <FormTextField
                                 label={t('Organization/Landlord name')}
                                 name="name"
@@ -112,8 +117,6 @@ const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, on
                                 ]}
                                 onlyRoles={allowedRoles}
                             />
-                        </Box>
-                        <Box>
                             <RadioFieldGroup
                                 aria-label="organization type"
                                 label={t('The organization/landlord belongs to')}
@@ -122,33 +125,41 @@ const Landlord = withTranslation()(({ t, submitLabel, submitFullWidth = true, on
                                 <RadioField value="false" label={t('A personal account')} onlyRoles={allowedRoles} />
                                 <RadioField value="true" label={t('A business or an institution')} onlyRoles={allowedRoles} />
                             </RadioFieldGroup>
-                        </Box>
-                        {values.isCompany === 'true' && (
-                            <Box>
-                                <FormTextField
-                                    label={t('Legal structure')}
-                                    name="legalStructure"
-                                    onlyRoles={allowedRoles}
-                                />
-                                <FormTextField
-                                    label={t('Name of business or institution')}
-                                    name="company"
-                                    onlyRoles={allowedRoles}
-                                />
-                                <FormTextField
-                                    label={t('Employer Identification Number')}
-                                    name="ein"
-                                    onlyRoles={allowedRoles}
-                                />
-                            </Box>
-                        )}
-                        <Box paddingTop={4}>
-                            <SubmitButton
-                                size="large"
-                                label={!isSubmitting ? t('Save') : t('Saving')}
-                                onlyRoles={allowedRoles}
-                            />
-                        </Box>
+                            {values.isCompany === 'true' && (
+                                <>
+                                    <FormTextField
+                                        label={t('Legal representative')}
+                                        name="legalRepresentative"
+                                        onlyRoles={allowedRoles}
+                                    />
+                                    <FormTextField
+                                        label={t('Legal structure')}
+                                        name="legalStructure"
+                                        onlyRoles={allowedRoles}
+                                    />
+                                    <FormTextField
+                                        label={t('Name of business or institution')}
+                                        name="company"
+                                        onlyRoles={allowedRoles}
+                                    />
+                                    <FormTextField
+                                        label={t('Employer Identification Number')}
+                                        name="ein"
+                                        onlyRoles={allowedRoles}
+                                    />
+                                    <FormTextField
+                                        label={t('Capital')}
+                                        name="capital"
+                                        onlyRoles={allowedRoles}
+                                    />
+                                </>
+                            )}
+                        </FormSection>
+                        <SubmitButton
+                            size="large"
+                            label={!isSubmitting ? t('Save') : t('Saving')}
+                            onlyRoles={allowedRoles}
+                        />
                     </Form>
                 )
             }}

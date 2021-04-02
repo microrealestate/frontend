@@ -3,9 +3,9 @@ import SearchIcon from '@material-ui/icons/Search';
 import { Box, TextField, InputAdornment } from '@material-ui/core';
 import { withTranslation } from 'next-i18next';
 import { useState, useEffect } from 'react';
-import ToggleMenu  from './ToggleMenu';
+import ToggleMenu from './ToggleMenu';
 
-const SearchFilterBar = withTranslation()(({ t, filters, onSearch, defaultValue = { status: '', searchText: ''} }) => {
+const SearchFilterBar = withTranslation()(({ t, filters, onSearch, defaultValue = { status: '', searchText: '' } }) => {
     const [filter, setFilter] = useState(defaultValue.status);
     const [searchText, setSearchText] = useState(defaultValue.searchText);
 
@@ -20,6 +20,8 @@ const SearchFilterBar = withTranslation()(({ t, filters, onSearch, defaultValue 
         <Box display="flex" alignItems="center">
             <Box flexGrow={1}>
                 <TextField
+                    // fullWidth
+                    // size="medium"
                     placeholder={t('Search')}
                     defaultValue={defaultValue.searchText}
                     InputProps={{
@@ -31,7 +33,7 @@ const SearchFilterBar = withTranslation()(({ t, filters, onSearch, defaultValue 
                     }}
                     onChange={event => setSearchText(event.target.value || '')}
                     style={{
-                        width: "100%"
+                        width: '400px'
                     }}
                 />
             </Box>

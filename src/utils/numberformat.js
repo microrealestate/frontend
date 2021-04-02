@@ -2,7 +2,7 @@ import { Typography, withStyles } from "@material-ui/core";
 import { useContext } from 'react';
 import { StoreContext } from '../store';
 
-export const numberFormat = (locale, currency, value) => {
+export const formatNumber = (locale, currency, value) => {
   return Intl.NumberFormat(locale || 'en', {
     style: 'currency',
     currency: currency || 'EUR',
@@ -10,17 +10,19 @@ export const numberFormat = (locale, currency, value) => {
   }).format(value);
 };
 
-export const useNumberFormat = value => {
+export const useFormatNumber = () => {
   const store = useContext(StoreContext);
 
-  return numberFormat(
+  return value => (formatNumber(
     store.organization.selected.locale,
     store.organization.selected.currency,
     value
-  );
+  ));
 };
 
 export const NumberFormat = (({ value, withColor, ...props }) => {
+  const formatNumber = useFormatNumber();
+
   const StyledTypography = withStyles(theme => {
     const classes = {};
     if (withColor && value !== 0) {
@@ -36,7 +38,7 @@ export const NumberFormat = (({ value, withColor, ...props }) => {
       noWrap
       {...props}
     >
-      {useNumberFormat(value)}
+      {formatNumber(value)}
     </StyledTypography>
   );
 });

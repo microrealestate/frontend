@@ -1,22 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
-import _ from 'lodash';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { FormTextField, SubmitButton, SelectField } from '../Form';
+import { withTranslation } from 'next-i18next';
+import { useObserver } from 'mobx-react-lite';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import { withTranslation } from 'next-i18next';
-import { StoreContext } from '../../store';
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, MenuItem, Paper, Select, TableHead, TextField, Typography } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { RestrictButton, RestrictIconButton } from '../RestrictedComponents';
 import PersonIcon from '@material-ui/icons/Person';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import WarningIcon from '@material-ui/icons/Warning';
+import { RestrictButton, RestrictIconButton } from '../RestrictedComponents';
+import { FormTextField, SubmitButton, SelectField, FormSection } from '../Form';
+import { StoreContext } from '../../store';
 import ConfirmDialog from '../ConfirmDialog';
-import { useObserver } from 'mobx-react-lite';
 
 const roles = [
   'administrator',
@@ -157,7 +156,7 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
   }
 
   return useObserver(() => (
-    <>
+    <FormSection label={t('Manage access')}>
       <Box py={2}>
         <FormDialog members={store.organization.selected?.members} onSubmit={onAddMember} />
       </Box>
@@ -186,13 +185,13 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
                     {isRegistered ? (
                       <Typography noWrap>{member.name}</Typography>
                     ) : (
-                        <Box color="warning.dark" display="flex" alignItems="center">
-                          <WarningIcon fontSize="small" />
-                          <Box pl={1}>
-                            <Typography noWrap>{t('User not registered')}</Typography>
-                          </Box>
+                      <Box color="warning.dark" display="flex" alignItems="center">
+                        <WarningIcon fontSize="small" />
+                        <Box pl={1}>
+                          <Typography noWrap>{t('User not registered')}</Typography>
                         </Box>
-                      )}
+                      </Box>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Typography noWrap>{member.email}</Typography>
@@ -201,16 +200,15 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
                     {isCurrentUser || !store.user.isAdministrator ? (
                       <Typography noWrap>{t(member.role)}</Typography>
                     ) : (
-                        <Select
-                          defaultValue={member.role}
-                          onChange={event => onRoleChange(event.target.value, member)}
-                          displayEmpty
-                          disabled={!!updating}
-                        >
-                          {roles.map(role => <MenuItem key={role} value={role}>{t(role)}</MenuItem>)}
-                        </Select>
-
-                      )}
+                      <Select
+                        defaultValue={member.role}
+                        onChange={event => onRoleChange(event.target.value, member)}
+                        displayEmpty
+                        disabled={!!updating}
+                      >
+                        {roles.map(role => <MenuItem key={role} value={role}>{t(role)}</MenuItem>)}
+                      </Select>
+                    )}
                   </TableCell>
                   <TableCell>
                     {!isCurrentUser && (
@@ -240,7 +238,7 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
           </Box>
         </ConfirmDialog>
       </Paper>
-    </>
+    </FormSection>
   ));
 });
 

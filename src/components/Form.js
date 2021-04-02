@@ -1,13 +1,14 @@
 import moment from 'moment';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox } from '@material-ui/core';
+import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox, Typography, Divider, Box, Grid, TextField } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
+import { withTranslation } from '../utils/i18n';
 
-export const CheckboxField = RestrictedComponent(({ label, ...props }) => {
+export const CheckboxField = RestrictedComponent(({ label, disabled, ...props }) => {
   const [field] = useField(props);
   const { isSubmitting } = useFormikContext();
 
@@ -15,17 +16,19 @@ export const CheckboxField = RestrictedComponent(({ label, ...props }) => {
     <FormControlLabel
       control={
         <Checkbox
+          color="default"
+          checked={field.value}
           {...props}
           {...field}
         />
       }
       label={label}
-      disabled={isSubmitting}
+      disabled={disabled || isSubmitting}
     />
   )
 });
 
-export const FormTextField = RestrictedComponent(({ label, ...props }) => {
+export const FormTextField = RestrictedComponent(({ label, disabled, ...props }) => {
   const [displayPassword, showPassword] = useState(false);
   const [field, meta] = useField(props);
   const { isSubmitting } = useFormikContext();
@@ -58,7 +61,7 @@ export const FormTextField = RestrictedComponent(({ label, ...props }) => {
             </IconButton>
           </InputAdornment>
         ) : null}
-        disabled={isSubmitting}
+        disabled={disabled || isSubmitting}
         {...props}
         {...field}
         type={(props.type === 'password' && displayPassword) ? 'text' : props.type}
@@ -68,7 +71,7 @@ export const FormTextField = RestrictedComponent(({ label, ...props }) => {
   );
 });
 
-export const SelectField = RestrictedComponent(({ label, value: inialValue, values = [], ...props }) => {
+export const SelectField = RestrictedComponent(({ label, value: inialValue, values = [], disabled, ...props }) => {
   const [field, meta] = useField(props);
   const [value, setValue] = useState(inialValue);
   const { isSubmitting } = useFormikContext();
@@ -77,6 +80,7 @@ export const SelectField = RestrictedComponent(({ label, value: inialValue, valu
   const handleChange = (event) => {
     setValue(event.target.value);
   };
+
   return (
     <FormControl
       margin="normal"
@@ -86,13 +90,13 @@ export const SelectField = RestrictedComponent(({ label, value: inialValue, valu
       <Select
         value={value}
         onChange={handleChange}
-        disabled={isSubmitting}
+        disabled={disabled || isSubmitting}
         error={hasError}
         {...props}
         {...field}
       >
-        {values.map(({ id, label, value }) => (
-          <MenuItem key={id} value={value}>{label}</MenuItem>
+        {values.map(({ id, value, label, disabled: disabledMenu }) => (
+          <MenuItem key={id} value={value} disabled={disabledMenu}>{label}</MenuItem>
         ))}
       </Select>
       {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
@@ -105,39 +109,39 @@ export const RadioFieldGroup = ({ children, label, ...props }) => {
   const hasError = !!(meta.touched && meta.error);
 
   return (
-    <FormControl component="fieldset" error={hasError}>
-      <FormLabel component="legend">{label}</FormLabel>
-      <RadioGroup
-        {...props}
-        {...field}
-      >
-        {children}
-      </RadioGroup>
-      {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
-    </FormControl>
+    <Box pt={2}>
+      <FormControl component="fieldset" error={hasError}>
+        <FormLabel component="legend">{label}</FormLabel>
+        <RadioGroup
+          {...props}
+          {...field}
+        >
+          {children}
+        </RadioGroup>
+        {hasError && <FormHelperText error={hasError}>{meta.error}</FormHelperText>}
+      </FormControl>
+    </Box>
   );
 };
 
-export const RadioField = ({onlyRoles, ...props}) => {
+export const RadioField = ({ onlyRoles, disabled, ...props }) => {
   const { isSubmitting } = useFormikContext();
 
   const RestrictedRadio = RestrictedComponent(Radio);
   return (
     <FormControlLabel
       control={
-        <RestrictedRadio color="default" disabled={isSubmitting} onlyRoles={onlyRoles}/>
+        <RestrictedRadio color="default" disabled={disabled || isSubmitting} onlyRoles={onlyRoles} />
       }
       {...props}
     />
   );
 };
 
-export const DateField = RestrictedComponent((props) => {
-  const [field, meta, helper] = useField(props.name);
-  const { isSubmitting } = useFormikContext();
+export const DateField = RestrictedComponent(({ disabled, ...props }) => {
+  const [field, meta] = useField(props.name);
+  const { setFieldValue, setFieldTouched, handleBlur, isSubmitting } = useFormikContext();
   const hasError = !!(meta.touched && meta.error);
-
-  field.onChange = date => helper.setValue(date);
 
   return (
     <FormControl
@@ -145,20 +149,57 @@ export const DateField = RestrictedComponent((props) => {
       fullWidth
     >
       <KeyboardDatePicker
-        // clearable
+        name={field.name}
+        value={field.value}
+        format={moment.localeData().longDateFormat('L')}
         error={hasError}
         helperText={hasError ? meta.error : ''}
-        placeholder={moment().format('L')}
-        format={moment.localeData().longDateFormat('L')}
-        disabled={isSubmitting}
+        onChange={date => {
+          setFieldValue(field.name, date)
+          setFieldTouched(field.name, true);
+        }}
         autoOk
-        variant="inline"
+        disabled={disabled || isSubmitting}
+        TextFieldComponent={(textProps) => (
+          <TextField
+            {...textProps}
+            onBlur={handleBlur}
+          />
+        )}
         {...props}
-        {...field}
       />
     </FormControl>
   )
 });
+
+const defaultMinDate = moment('1900-01-01', 'YYYY-MM-DD');
+const defaultMaxDate = moment('2100-01-01', 'YYYY-MM-DD');
+export const DateRangeField = ({ beginName, endName, beginLabel, endLabel, minDate, maxDate, disabled }) => {
+  const [beginField] = useField(beginName);
+
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
+        <DateField
+          label={beginLabel}
+          name={beginName}
+          minDate={(minDate || defaultMinDate).toISOString()}
+          maxDate={(maxDate || defaultMaxDate).toISOString()}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <DateField
+          label={endLabel}
+          name={endName}
+          minDate={(beginField.value || minDate || defaultMinDate).toISOString()}
+          maxDate={(maxDate || defaultMaxDate).toISOString()}
+          disabled={disabled}
+        />
+      </Grid>
+    </Grid>
+  );
+}
 
 export const SubmitButton = ({ label, ...props }) => {
   const { isValid, isSubmitting } = useFormikContext();
@@ -175,3 +216,112 @@ export const SubmitButton = ({ label, ...props }) => {
     </RestrictButton>
   );
 };
+
+export const FormSection = ({ label, children }) => {
+
+  return (
+    <Box pb={4}>
+      <Typography variant="h5">{label}</Typography>
+      <Box pt={2} pb={1}>
+        <Divider />
+      </Box>
+      {children}
+    </Box>
+  );
+};
+
+export const ContactForm = withTranslation()(({ t, contactName, emailName, phone1Name, phone2Name, onlyRoles, disabled }) => {
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <FormTextField
+          label={t('Contact')}
+          name={contactName || "contact"}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <FormTextField
+          label={t('Email')}
+          name={emailName || "email"}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <FormTextField
+          label={t('Phone 1')}
+          name={phone1Name || "phone1"}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+
+        <FormTextField
+          label={t('Phone 2')}
+          name={phone2Name || "phone2"}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+    </Grid>
+  );
+});
+
+export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <FormTextField
+          label={t('Street')}
+          name="street1"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <FormTextField
+          label={t('Street')}
+          name="street2"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <FormTextField
+          label={t('Zip code')}
+          name="zipCode"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <FormTextField
+          label={t('City')}
+          name="city"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+
+        <FormTextField
+          label={t('State')}
+          name="state"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <FormTextField
+          label={t('Country')}
+          name="country"
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+    </Grid>
+  );
+});
