@@ -69,7 +69,6 @@ export const useAuthApiFetch = (cookie) => {
     }
 
     const { serverRuntimeConfig } = getConfig();
-    console.log(JSON.stringify(cookie, null, 1))
     authApiFetch = axios.create({
         baseURL: serverRuntimeConfig.API_URL,
         headers: { cookie },
