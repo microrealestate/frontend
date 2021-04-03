@@ -22,12 +22,10 @@ const Demonstrationbar = withTranslation()(({ t }) => {
 
 const MainToolbar = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  const [anchorEl, setAnchorEl] = useState();
 
   const signOut = async event => {
     event.preventDefault();
     await store.user.signOut();
-    setAnchorEl(null);
     window.location.assign(`${BASE_PATH}/signin`);
   };
 
