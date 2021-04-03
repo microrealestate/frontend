@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
 import { Box, Breadcrumbs, Button, Divider, Grid, Hidden, Paper, Tab, Tabs, Tooltip, Typography, withStyles } from '@material-ui/core';
@@ -26,8 +26,6 @@ import { NumberFormat } from '../../../utils/numberformat';
 import TenantForm from '../../../components/TenantForms/TenantForm';
 import BillingForm from '../../../components/TenantForms/BillingForm';
 import LeaseContractForm from '../../../components/TenantForms/LeaseContractForm';
-import Alert from '@material-ui/lab/Alert';
-import AlertTitle from '@material-ui/lab/AlertTitle';
 import { useRouter } from 'next/router';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import TerminateLeaseDialog from '../../../components/TenantForms/TerminateLeaseDialog';
@@ -55,7 +53,7 @@ const WarningTypography = withStyles(theme => {
 
 const ContractOverview = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  return useObserver(() => (
+  return (
     <>
       <CardRow>
         <Typography
@@ -140,12 +138,12 @@ const ContractOverview = withTranslation()(({ t }) => {
         />
       </CardRow>
     </>
-  ));
+  );
 });
 
 const RentOverview = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  return useObserver(() => (
+  return (
     <>
       <NumberFormat align="right" variant="h5" value={store.tenant.selected.total} />
       <Box py={1}>
@@ -241,10 +239,10 @@ const RentOverview = withTranslation()(({ t }) => {
       </CardRow>
 
     </>
-  ));
+  );
 });
 
-const Tenant = withTranslation()(({ t }) => {
+const Tenant = withTranslation()(observer(({ t }) => {
   console.log('Tenant functional component')
   const store = useContext(StoreContext);
   const router = useRouter();
@@ -350,7 +348,7 @@ const Tenant = withTranslation()(({ t }) => {
   const showTerminateLeaseButton = !!(store.tenant.selected.beginDate && store.tenant.selected.endDate && !store.tenant.selected.terminationDate);
   const disableEditButton = !(!!store.tenant.selected.properties?.length && readOnly);
 
-  return useObserver(() => (
+  return (
     <Page
       PrimaryToolbar={
         <BreadcrumbBar backPath={backPath} />
@@ -503,8 +501,8 @@ const Tenant = withTranslation()(({ t }) => {
         </Box>
       </ConfirmDialog>
     </Page>
-  ))
-});
+  )
+}));
 
 Tenant.getInitialProps = async (context) => {
   console.log('Tenant.getInitialProps')

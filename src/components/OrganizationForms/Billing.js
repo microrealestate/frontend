@@ -1,10 +1,10 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { observer } from 'mobx-react-lite';
 import { AddressField, ContactForm, FormSection, FormTextField, SubmitButton } from '../Form';
 import { useContext } from 'react';
 import { StoreContext } from '../../store';
 import { withTranslation } from '../../utils/i18n';
-import { useObserver } from 'mobx-react-lite';
 
 const validationSchema = Yup.object().shape({
   vatNumber: Yup.string(),
@@ -22,7 +22,7 @@ const validationSchema = Yup.object().shape({
   country: Yup.string().required()
 });
 
-const OrganizationBilling = withTranslation()(({ t, onSubmit }) => {
+const OrganizationBilling = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = {
@@ -70,7 +70,7 @@ const OrganizationBilling = withTranslation()(({ t, onSubmit }) => {
 
   const allowedRoles = ['administrator'];
 
-  return useObserver(() => (
+  return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
@@ -118,7 +118,7 @@ const OrganizationBilling = withTranslation()(({ t, onSubmit }) => {
         )
       }}
     </Formik>
-  ));
-});
+  );
+}));
 
 export default OrganizationBilling;

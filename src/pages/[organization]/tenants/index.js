@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { Avatar, Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
 import OfficeIcon from '@material-ui/icons/HomeWork';
@@ -71,7 +71,7 @@ const TenantList = withTranslation()(({ t }) => {
     await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
   }
 
-  return useObserver(() => (
+  return (
     <List
       component="nav"
       aria-labelledby="tenant-list"
@@ -150,10 +150,10 @@ const TenantList = withTranslation()(({ t }) => {
         )
       })}
     </List>
-  ));
+  );
 });
 
-const Tenants = withTranslation()(({ t }) => {
+const Tenants = withTranslation()(observer(({ t }) => {
   const store = useContext(StoreContext);
   const [openNewTenantDialog, setOpenNewTenantDialog] = useState(false);
   const router = useRouter();
@@ -171,7 +171,7 @@ const Tenants = withTranslation()(({ t }) => {
     await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
   }
 
-  return useObserver(() => (
+  return (
     <Page
       PrimaryToolbar={
         <Typography color="textSecondary" variant="h5" noWrap>
@@ -210,8 +210,8 @@ const Tenants = withTranslation()(({ t }) => {
         onConfirm={onCreateTenant}
       />
     </Page>
-  ))
-});
+  )
+}));
 
 Tenants.getInitialProps = async (context) => {
   console.log('Tenants.getInitialProps')

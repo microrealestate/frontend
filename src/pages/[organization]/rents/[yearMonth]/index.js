@@ -1,6 +1,6 @@
-import { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite'
-import { reaction, toJS } from 'mobx';
+import { useContext } from 'react';
+import { observer } from 'mobx-react-lite'
+import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import moment from 'moment';
 import { Box, Grid, Hidden, Typography } from '@material-ui/core';
@@ -41,7 +41,7 @@ const PeriodToolbar = withTranslation()(({ t, onChange }) => {
   );
 });
 
-const Rents = withTranslation()(({ t }) => {
+const Rents = withTranslation()(observer(({ t }) => {
   console.log('Rents functional component')
   const store = useContext(StoreContext);
   const router = useRouter();
@@ -69,7 +69,7 @@ const Rents = withTranslation()(({ t }) => {
     await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}/payment/${rent.occupant._id}`);
   };
 
-  return useObserver(() => (
+  return (
     <Page
       PrimaryToolbar={
         <PeriodToolbar onChange={onPeriodChange} />
@@ -150,8 +150,8 @@ const Rents = withTranslation()(({ t }) => {
         ))}
       </Grid>
     </Page>
-  ));
-});
+  );
+}));
 
 Rents.getInitialProps = async (context) => {
   console.log('Rents.getInitialProps')

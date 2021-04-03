@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config'
 import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
@@ -26,7 +26,7 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required()
 });
 
-const SignIn = withTranslation()(({ t }) => {
+const SignIn = withTranslation()(observer(({ t }) => {
   console.log('Signin functional component')
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
@@ -69,7 +69,7 @@ const SignIn = withTranslation()(({ t }) => {
     }
   };
 
-  return useObserver(() => !store.user.signedIn ? (
+  return !store.user.signedIn ? (
     <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
@@ -129,7 +129,7 @@ const SignIn = withTranslation()(({ t }) => {
         </Box>
       )}
     </Page>
-  ) : null);
-});
+  ) : null;
+}));
 
 export default SignIn;

@@ -85,7 +85,7 @@ export default class Tenant {
 
       this.items = response.data;
       if (this.selected._id) {
-        this.selected = this.items.find(item => item._id === this.selected._id) || {};
+        this.setSelected(this.items.find(item => item._id === this.selected._id) || {});
       }
       return { status: 200, data: response.data };
     } catch (error) {
@@ -123,9 +123,9 @@ export default class Tenant {
       const index = this.items.findIndex(item => item._id === tenant._id);
       if (index > -1) {
         this.items.splice(index, 1, updatedTenant);
-        if (this.selected._id === updatedTenant._id) {
-          this.selected = this.items[index];
-        }
+      }
+      if (this.selected._id === updatedTenant._id) {
+        this.setSelected(updatedTenant);
       }
       return { status: 200, data: updatedTenant };
     } catch (error) {

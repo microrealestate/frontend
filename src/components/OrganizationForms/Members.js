@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { withTranslation } from 'next-i18next';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -118,7 +118,7 @@ const FormDialog = withTranslation()(({ t, members = [], onSubmit }) => {
   );
 });
 
-const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
+const OrganizationMembers = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
   const [memberToRemove, setMemberToRemove] = useState(false);
   const [updating, setUpdating] = useState();
@@ -155,7 +155,7 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
     setUpdating();
   }
 
-  return useObserver(() => (
+  return (
     <FormSection label={t('Manage access')}>
       <Box py={2}>
         <FormDialog members={store.organization.selected?.members} onSubmit={onAddMember} />
@@ -239,7 +239,7 @@ const OrganizationMembers = withTranslation()(({ t, onSubmit }) => {
         </ConfirmDialog>
       </Paper>
     </FormSection>
-  ));
-});
+  );
+}));
 
 export default OrganizationMembers;

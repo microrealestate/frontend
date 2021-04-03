@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { Children, useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
 import { FieldArray, Form, Formik } from 'formik';
@@ -89,7 +89,7 @@ const validationSchema = Yup.object().shape({
 
 const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
 
-const PaymentForm = withTranslation()(({ t, rent }) => {
+const PaymentForm = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
 
   const onSubmit = async (values, actions) => {
@@ -105,9 +105,9 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
       }
       return payment;
     });
-    clonedValues.month = rent.month;
-    clonedValues.year = rent.year;
-    clonedValues._id = rent._id;
+    clonedValues.month = store.rent.selected.month;
+    clonedValues.year = store.rent.selected.year;
+    clonedValues._id = store.rent.selected._id;
     try {
       await store.rent.pay(clonedValues);
 
@@ -129,7 +129,7 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
   }
 
   const initialValues = {
-    payments: rent.payments.length ? rent.payments.map(({ amount, date, type, reference }) => {
+    payments: store.rent.selected.payments.length ? store.rent.selected.payments.map(({ amount, date, type, reference }) => {
       return {
         amount: amount === 0 ? '' : amount,
         date: date ? moment(date, 'DD/MM/YYYY') : null,
@@ -137,11 +137,11 @@ const PaymentForm = withTranslation()(({ t, rent }) => {
         reference: reference || ''
       }
     }) : [emptyPayment],
-    extracharge: rent.extracharge !== 0 ? rent.extracharge : '',
-    noteextracharge: rent.noteextracharge || '',
-    promo: rent.promo !== 0 ? rent.promo : '',
-    notepromo: rent.notepromo || '',
-    description: rent.description || ''
+    extracharge: store.rent.selected.extracharge !== 0 ? store.rent.selected.extracharge : '',
+    noteextracharge: store.rent.selected.noteextracharge || '',
+    promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
+    notepromo: store.rent.selected.notepromo || '',
+    description: store.rent.selected.description || ''
   };
 
   return (
@@ -310,8 +310,9 @@ const _rentDetails = rent => {
   };
 };
 
-export const PaymentBalance = withTranslation()(({ t, rent }) => {
-  const rentDetails = _rentDetails(rent);
+export const PaymentBalance = withTranslation()(({ t }) => {
+  const store = useContext(StoreContext);
+  const rentDetails = _rentDetails(store.rent.selected);
 
   return (
     <>
@@ -412,11 +413,11 @@ export const PaymentBalance = withTranslation()(({ t, rent }) => {
         />
       </CardRow>
     </>
-  )
+  );
 });
 
 
-const RentPayment = withTranslation()(({ t }) => {
+const RentPayment = withTranslation()(observer(({ t }) => {
   console.log('RentPayment functional component')
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
@@ -428,7 +429,7 @@ const RentPayment = withTranslation()(({ t }) => {
     backPath = `${backPath}?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
   }
 
-  return useObserver(() => (
+  return (
     <Page
       PrimaryToolbar={
         <BreadcrumbBar backPath={backPath} />
@@ -459,7 +460,7 @@ const RentPayment = withTranslation()(({ t }) => {
       <RequestError error={error} />
       <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
-          <PaymentForm rent={store.rent.selected} />
+          <PaymentForm />
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>
@@ -473,7 +474,7 @@ const RentPayment = withTranslation()(({ t }) => {
                 </Box>
                 <Divider />
                 <Box pt={1}>
-                  <PaymentBalance rent={store.rent.selected} />
+                  <PaymentBalance />
                 </Box>
               </DashboardCard>
             </Box>
@@ -541,8 +542,8 @@ const RentPayment = withTranslation()(({ t }) => {
         </Hidden>
       </Grid>
     </Page>
-  ))
-});
+  );
+}));
 
 RentPayment.getInitialProps = async (context) => {
   console.log('RentPayment.getInitialProps')

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
@@ -23,7 +23,7 @@ const validationSchema = Yup.object().shape({
     .required()
 });
 
-const ForgotPassword = withTranslation()(({ t }) => {
+const ForgotPassword = withTranslation()(observer(({ t }) => {
   console.log('ForgotPassword functional component')
   const store = useContext(StoreContext);
   const [emailSent, setEmailSent] = useState('');
@@ -57,7 +57,7 @@ const ForgotPassword = withTranslation()(({ t }) => {
     router.push('/signin');
   };
 
-  return useObserver(() => (
+  return (
     <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
@@ -130,7 +130,7 @@ const ForgotPassword = withTranslation()(({ t }) => {
         )}
       </Paper>
     </Page>
-  ));
-});
+  );
+}));
 
 export default ForgotPassword;

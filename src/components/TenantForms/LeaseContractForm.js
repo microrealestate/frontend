@@ -1,7 +1,7 @@
 import moment from 'moment';
 import * as Yup from 'yup';
 import { useContext } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { Box, Button, Grid } from '@material-ui/core';
 import { FieldArray, Form, Formik, validateYupSchema, yupToFormErrors } from 'formik';
 import { FormTextField, SubmitButton, FormSection, DateField, DateRangeField, SelectField } from '../Form';
@@ -45,7 +45,7 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
-const LeaseContractForm = withTranslation()(({ t, readOnly, onSubmit }) => {
+const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
   const store = useContext(StoreContext);
   const formatNumber = useFormatNumber();
 
@@ -108,7 +108,7 @@ const LeaseContractForm = withTranslation()(({ t, readOnly, onSubmit }) => {
     });
   }
 
-  return useObserver(() => (
+  return (
     <Formik
       initialValues={initialValues}
       validate={(value) => {
@@ -228,7 +228,7 @@ const LeaseContractForm = withTranslation()(({ t, readOnly, onSubmit }) => {
         )
       }}
     </Formik>
-  ));
-});
+  );
+}));
 
 export default LeaseContractForm;

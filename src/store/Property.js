@@ -48,7 +48,7 @@ export default class Property {
 
       this.items = response.data;
       if (this.selected._id) {
-        this.selected = this.items.find(item => item._id === this.selected._id) || {};
+        this.setSelected(this.items.find(item => item._id === this.selected._id) || {});
       }
       return { status: 200, data: response.data };
     } catch (error) {

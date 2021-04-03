@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
@@ -25,7 +25,7 @@ const validationSchema = Yup.object().shape({
     .oneOf([Yup.ref('password'), null], 'Passwords must match') // TODO translate this
 });
 
-const ResetPassword = withTranslation()(({ t }) => {
+const ResetPassword = withTranslation()(observer(({ t }) => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -62,7 +62,7 @@ const ResetPassword = withTranslation()(({ t }) => {
     router.push('/signin');
   };
 
-  return useObserver(() => (
+  return (
     <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
@@ -117,7 +117,7 @@ const ResetPassword = withTranslation()(({ t }) => {
         </Box>
       </Paper>
     </Page>
-  ));
-});
+  );
+}));
 
 export default ResetPassword;

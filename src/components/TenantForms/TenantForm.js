@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import { useContext } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { Box, Button } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import { FormTextField, SubmitButton, RadioFieldGroup, RadioField, FormSection, AddressField, ContactForm } from '../Form';
@@ -40,7 +40,7 @@ const validationSchema = Yup.object().shape({
 
 const emptyContact = { contact: '', email: '', phone1: '', phone2: '' };
 
-const TenantForm = withTranslation()(({ t, readOnly, onSubmit }) => {
+const TenantForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = {
@@ -92,7 +92,7 @@ const TenantForm = withTranslation()(({ t, readOnly, onSubmit }) => {
     });
   }
 
-  return useObserver(() => (
+  return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
@@ -197,7 +197,7 @@ const TenantForm = withTranslation()(({ t, readOnly, onSubmit }) => {
         )
       }}
     </Formik>
-  ));
-});
+  );
+}));
 
 export default TenantForm;

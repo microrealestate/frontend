@@ -1,11 +1,11 @@
 
 import { toJS } from 'mobx';
-import { useStaticRendering } from 'mobx-react-lite'
+import { enableStaticRendering } from 'mobx-react-lite'
 import { createContext, useEffect, useState } from 'react'
 import { isServer } from '../utils';
 import Store from './Store';
 
-useStaticRendering(isServer());
+enableStaticRendering(isServer());
 
 let _store;
 

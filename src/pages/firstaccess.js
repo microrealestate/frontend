@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import getConfig from 'next/config'
 import { useRouter } from 'next/router';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Typography, Box, Paper } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
@@ -15,7 +15,7 @@ import { isServer, redirect } from '../utils';
 import RequestError from '../components/RequestError';
 import Landlord from '../components/OrganizationForms/Landlord';
 
-const FirstAccess = withTranslation()(({ t }) => {
+const FirstAccess = withTranslation()(observer(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
   const [error, setError] = useState('');
   const store = useContext(StoreContext);
@@ -49,7 +49,7 @@ const FirstAccess = withTranslation()(({ t }) => {
     }
   };
 
-  return useObserver(() => (
+  return (
     <Page
       PrimaryToolbar={
         <IconTypography
@@ -81,8 +81,8 @@ const FirstAccess = withTranslation()(({ t }) => {
         </Box>
       </Paper>
     </Page>
-  ));
-});
+  );
+}));
 
 
 FirstAccess.getInitialProps = async (context) => {

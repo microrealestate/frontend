@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
 import { withTranslation } from "../utils/i18n";
@@ -262,8 +262,8 @@ const Steps = withTranslation()(({ t, rent }) => {
   );
 });
 
-const RentCard = withTranslation()(({ t, rent, onEdit }) => {
-  return useObserver(() => (
+const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
+  return (
     <Card>
       <CardContent>
         <Header rent={rent} />
@@ -290,7 +290,7 @@ const RentCard = withTranslation()(({ t, rent, onEdit }) => {
         </CardRow>
       </CardActions>
     </Card>
-  ));
-});
+  );
+}));
 
 export default RentCard;

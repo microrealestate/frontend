@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { observable, action, flow, computed, makeObservable } from 'mobx';
+import { observable, action, flow, computed, makeObservable, toJS } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 export default class Rent {
   selected = {};
@@ -108,7 +108,7 @@ export default class Rent {
 
       this.items = response.data.rents;
       if (this.selected._id) {
-        this.selected = this.items.find(item => item._id === this.selected._id) || {};
+        this.setSelected(this.items.find(item => item._id === this.selected._id) || {});
       }
       return { status: 200, data: response.data };
     } catch (error) {
@@ -146,9 +146,9 @@ export default class Rent {
       const index = this.items.findIndex(item => item._id === payment._id);
       if (index > -1) {
         this.items.splice(index, 1, rent);
-        if (this.selected._id === payment._id) {
-          this.selected = this.items[index];
-        }
+      }
+      if (this.selected._id === payment._id) {
+        this.setSelected(rent);
       }
       return 200;
     } catch (error) {

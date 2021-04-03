@@ -1,5 +1,5 @@
 import { useState, useContext, cloneElement, useEffect } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
 import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography, Grid } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
@@ -67,11 +67,13 @@ const ElevationScroll = ({ children }) => {
   });
 };
 
-const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
+const Page = observer(({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
   console.log('Page functional component')
   const store = useContext(StoreContext);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const displayToolbars = store.user.signedIn;
 
   useEffect(() => {
     const routeChangeStart = (url, { shallow }) => {
@@ -94,52 +96,48 @@ const Page = ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) =
     }
   }, []);
 
-  return useObserver(() => {
-    const displayToolbars = store.user.signedIn;
-
-    return (
-      <>
-        <Demonstrationbar />
-        {displayToolbars && (
-          <Toolbar>
-            <MainToolbar />
-          </Toolbar>
-        )}
-        { !loading && (PrimaryToolbar || SecondaryToolbar) && (
-          <ElevationScroll>
-            <AppBar
-              position="sticky"
-            >
-              <Toolbar>
-                <Grid container
-                  alignItems="center"
-                  justify="space-between"
-                  wrap="nowrap"
-                  spacing={5}
-                >
-                  <Grid item>
-                    {PrimaryToolbar}
-                  </Grid>
-                  <Grid item>
-                    {SecondaryToolbar}
-                  </Grid>
-                </Grid>
-              </Toolbar>
-            </AppBar>
-          </ElevationScroll>
-        )}
-        <Box mt={(!loading && (PrimaryToolbar || SecondaryToolbar)) ? 4 : 0}>
-          <Container
-            maxWidth={maxWidth}
+  return (
+    <>
+      <Demonstrationbar />
+      {displayToolbars && (
+        <Toolbar>
+          <MainToolbar />
+        </Toolbar>
+      )}
+      { !loading && (PrimaryToolbar || SecondaryToolbar) && (
+        <ElevationScroll>
+          <AppBar
+            position="sticky"
           >
-            {loading || store.appLoading ? (
-              <Loading />
-            ) : children}
-          </Container>
-        </Box>
-      </>
-    )
-  });
-};
+            <Toolbar>
+              <Grid container
+                alignItems="center"
+                justify="space-between"
+                wrap="nowrap"
+                spacing={5}
+              >
+                <Grid item>
+                  {PrimaryToolbar}
+                </Grid>
+                <Grid item>
+                  {SecondaryToolbar}
+                </Grid>
+              </Grid>
+            </Toolbar>
+          </AppBar>
+        </ElevationScroll>
+      )}
+      <Box mt={(!loading && (PrimaryToolbar || SecondaryToolbar)) ? 4 : 0}>
+        <Container
+          maxWidth={maxWidth}
+        >
+          {loading || store.appLoading ? (
+            <Loading />
+          ) : children}
+        </Container>
+      </Box>
+    </>
+  );
+});
 
 export default Page;

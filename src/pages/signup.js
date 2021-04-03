@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import ErrorPage from 'next/error';
 import { useRouter } from 'next/router';
 import getConfig from 'next/config'
@@ -36,7 +36,7 @@ const validationSchema = Yup.object().shape({
     .required()
 });
 
-const SignUp = withTranslation()(({ t, pageError }) => {
+const SignUp = withTranslation()(observer(({ t, pageError }) => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -72,7 +72,7 @@ const SignUp = withTranslation()(({ t, pageError }) => {
     }
   };
 
-  return useObserver(() => (
+  return (
     <Page maxWidth="sm">
       <Box mt={10} mb={5}>
         <Box align="center">
@@ -133,8 +133,8 @@ const SignUp = withTranslation()(({ t, pageError }) => {
         </Paper>
       </Box>
     </Page>
-  ));
-});
+  );
+}));
 
 SignUp.getInitialProps = async (context) => {
   console.log('SignUp.getInitialProps')

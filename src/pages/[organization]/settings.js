@@ -1,4 +1,4 @@
-import { useObserver } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import { useContext, useState } from 'react'
 import getConfig from 'next/config';
 import { withTranslation } from 'next-i18next'
@@ -16,7 +16,7 @@ import { StoreContext } from '../../store'
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
-const Settings = withTranslation()(({ t }) => {
+const Settings = withTranslation()(observer(({ t }) => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
   const [tabSelected, setTabSelected] = useState(0);
@@ -64,7 +64,7 @@ const Settings = withTranslation()(({ t }) => {
     }
   }
 
-  return useObserver(() => (
+  return (
     <Page>
       <RequestError error={error} />
       <Paper>
@@ -93,8 +93,8 @@ const Settings = withTranslation()(({ t }) => {
         </TabPanel>
       </Paper>
     </Page>
-  ))
-});
+  );
+}));
 
 export default withAuthentication(Settings);
 

@@ -1,11 +1,11 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { useContext } from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { CheckboxField, FormSection, FormTextField, RadioField, RadioFieldGroup, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
 import { withTranslation } from '../../utils/i18n';
-import { Box, Grid } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 
 const validationSchema = Yup.object().shape({
   reference: Yup.string().required(),
@@ -17,7 +17,7 @@ const validationSchema = Yup.object().shape({
   discount: Yup.number().min(0)
 });
 
-const Billing = withTranslation()(({ t, readOnly, onSubmit }) => {
+const Billing = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = {
@@ -36,7 +36,7 @@ const Billing = withTranslation()(({ t, readOnly, onSubmit }) => {
     });
   }
 
-  return useObserver(() => (
+  return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
@@ -82,7 +82,7 @@ const Billing = withTranslation()(({ t, readOnly, onSubmit }) => {
         )
       }}
     </Formik>
-  ));
-});
+  );
+}));
 
 export default Billing;
