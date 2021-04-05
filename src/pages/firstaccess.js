@@ -4,16 +4,14 @@ import { useRouter } from 'next/router';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Typography, Box, Paper } from '@material-ui/core';
-import LocationCityIcon from '@material-ui/icons/LocationCity';
 
 import { withTranslation } from '../utils/i18n';
 import { withAuthentication } from '../components/Authentication';
 import { getStoreInstance, StoreContext } from '../store';
 import Page from '../components/Page';
-import IconTypography from '../components/IconTypography';
 import { isServer, redirect } from '../utils';
 import RequestError from '../components/RequestError';
-import Landlord from '../components/OrganizationForms/Landlord';
+import Landlord from '../components/OrganizationForms/LandlordForm';
 
 const FirstAccess = withTranslation()(observer(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();
@@ -51,17 +49,6 @@ const FirstAccess = withTranslation()(observer(({ t }) => {
 
   return (
     <Page
-      PrimaryToolbar={
-        <IconTypography
-          Icon={LocationCityIcon}
-          fontSize="large"
-          variant="h5"
-          color="textSecondary"
-          noWrap
-        >
-          {APP_NAME}
-        </IconTypography>
-      }
       maxWidth="sm"
     >
       <Box paddingTop={2} paddingBottom={2}>
