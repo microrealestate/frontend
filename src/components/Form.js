@@ -1,32 +1,12 @@
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox, Typography, Divider, Box, Grid, TextField } from '@material-ui/core';
+import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox, Typography, Divider, Box, Grid, TextField, Switch } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 import { withTranslation } from '../utils/i18n';
-
-export const CheckboxField = RestrictedComponent(({ label, disabled, ...props }) => {
-  const [field] = useField(props);
-  const { isSubmitting } = useFormikContext();
-
-  return (
-    <FormControlLabel
-      control={
-        <Checkbox
-          color="default"
-          checked={field.value}
-          {...props}
-          {...field}
-        />
-      }
-      label={label}
-      disabled={disabled || isSubmitting}
-    />
-  )
-});
 
 export const FormTextField = RestrictedComponent(({ label, disabled, ...props }) => {
   const [displayPassword, showPassword] = useState(false);
@@ -137,6 +117,46 @@ export const RadioField = ({ onlyRoles, disabled, ...props }) => {
     />
   );
 };
+
+export const CheckboxField = RestrictedComponent(({ label, disabled, ...props }) => {
+  const [field] = useField(props);
+  const { isSubmitting } = useFormikContext();
+
+  return (
+    <FormControlLabel
+      control={
+        <Checkbox
+          color="default"
+          checked={field.value}
+          {...props}
+          {...field}
+        />
+      }
+      label={label}
+      disabled={disabled || isSubmitting}
+    />
+  )
+});
+
+export const SwitchField = RestrictedComponent(({ label, disabled, ...props }) => {
+  const [field] = useField(props);
+  const { isSubmitting } = useFormikContext();
+
+  return (
+    <FormControlLabel
+      control={
+        <Switch
+          color="default"
+          checked={field.value}
+          {...props}
+          {...field}
+        />
+      }
+      label={label}
+      disabled={disabled || isSubmitting}
+    />
+  )
+});
 
 export const DateField = RestrictedComponent(({ disabled, ...props }) => {
   const [field, meta] = useField(props.name);

@@ -6,14 +6,15 @@ import Organization from './Organization'
 import Rent from './Rent'
 import Tenant from './Tenant';
 import Property from './Property';
+import Lease from './Lease';
 import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
-
 import { i18n } from '../utils/i18n';
 
 export default class Store {
   user = new User();
   organization = new Organization();
+  leaseType = new Lease();
   rent = new Rent();
   tenant = new Tenant();
   property = new Property();
@@ -22,6 +23,7 @@ export default class Store {
     makeObservable(this, {
       user: observable,
       organization: observable,
+      leaseType: observable,
       rent: observable,
       tenant: observable,
       property: observable
@@ -90,6 +92,9 @@ export default class Store {
       organization = {
         items: []
       },
+      leaseType = {
+        items: []
+      },
       rent = {
         items: []
       },
@@ -110,6 +115,8 @@ export default class Store {
 
     this.organization.items = organization.items;
     this.organization.selected = organization.selected;
+
+    this.leaseType.items = leaseType.items;
 
     this.rent.items = rent.items;
     this.rent.selected = rent.selected;

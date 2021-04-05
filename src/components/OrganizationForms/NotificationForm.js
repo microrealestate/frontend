@@ -1,7 +1,7 @@
 import { FormSection } from '../Form';
 import { withTranslation } from '../../utils/i18n';
 
-const OrganizationNotification = withTranslation()(({ t, onSubmit }) => {
+const NotificationForm = withTranslation()(({ t, onSubmit }) => {
     return (
         <FormSection label={t('Notifications')}>
 
@@ -9,4 +9,4 @@ const OrganizationNotification = withTranslation()(({ t, onSubmit }) => {
     );
 });
 
-export default OrganizationNotification;
+export default NotificationForm;

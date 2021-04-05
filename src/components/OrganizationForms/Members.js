@@ -118,7 +118,7 @@ const FormDialog = withTranslation()(({ t, members = [], onSubmit }) => {
   );
 });
 
-const OrganizationMembers = withTranslation()(observer(({ t, onSubmit }) => {
+const Members = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
   const [memberToRemove, setMemberToRemove] = useState(false);
   const [updating, setUpdating] = useState();
@@ -242,4 +242,4 @@ const OrganizationMembers = withTranslation()(observer(({ t, onSubmit }) => {
   );
 }));
 
-export default OrganizationMembers;
+export default Members;

@@ -1,3 +1,4 @@
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite'
 import { useContext, useState } from 'react'
 import getConfig from 'next/config';
@@ -6,13 +7,15 @@ import { Paper, Tab, Tabs } from '@material-ui/core'
 
 import Page from '../../components/Page'
 import { withAuthentication } from '../../components/Authentication'
-import Landlord from '../../components/OrganizationForms/Landlord';
-import OrganizationBilling from '../../components/OrganizationForms/Billing'
-import OrganizationMembers from '../../components/OrganizationForms/Members'
-import OrganizationNotification from '../../components/OrganizationForms/Notification'
+import LandlordForm from '../../components/OrganizationForms/LandlordForm';
+import BillingForm from '../../components/OrganizationForms/BillingForm'
+import Members from '../../components/OrganizationForms/Members'
+import LeaseTypes from '../../components/OrganizationForms/LeaseTypes'
+import NotificationForm from '../../components/OrganizationForms/NotificationForm'
 import RequestError from '../../components/RequestError'
 import { TabPanel } from '../../components/Tabs';
-import { StoreContext } from '../../store'
+import { getStoreInstance, StoreContext } from '../../store'
+import { isServer } from '../../utils';
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
@@ -76,25 +79,45 @@ const Settings = withTranslation()(observer(({ t }) => {
         >
           <Tab label={t('Landlord')} />
           <Tab label={t('Billing')} />
+          <Tab label={t('Lease types')} />
           <Tab label={t('Manage access')} />
           <Tab label={t('Notifications')} />
         </Tabs>
         <TabPanel value={tabSelected} index={0}>
-          <Landlord onSubmit={onSubmit} />
+          <LandlordForm onSubmit={onSubmit} />
         </TabPanel>
         <TabPanel value={tabSelected} index={1}>
-          <OrganizationBilling onSubmit={onSubmit} />
+          <BillingForm onSubmit={onSubmit} />
         </TabPanel>
         <TabPanel value={tabSelected} index={2}>
-          <OrganizationMembers onSubmit={onSubmit} />
+          <LeaseTypes setError={setError}/>
         </TabPanel>
         <TabPanel value={tabSelected} index={3}>
-          <OrganizationNotification onSubmit={onSubmit} />
+          <Members onSubmit={onSubmit} />
+        </TabPanel>
+        <TabPanel value={tabSelected} index={4}>
+          <NotificationForm onSubmit={onSubmit} />
         </TabPanel>
       </Paper>
     </Page>
   );
 }));
+
+Settings.getInitialProps = async (context) => {
+  console.log('Settings.getInitialProps')
+  const store = isServer() ? context.store : getStoreInstance();
+
+  const { status } = await store.leaseType.fetch();
+  if (status !== 200) {
+    return { error: { statusCode: status } };
+  }
+
+  return {
+    initialState: {
+      store: toJS(store)
+    }
+  };
+};
 
 export default withAuthentication(Settings);
 

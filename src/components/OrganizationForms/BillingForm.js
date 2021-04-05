@@ -22,7 +22,7 @@ const validationSchema = Yup.object().shape({
   country: Yup.string().required()
 });
 
-const OrganizationBilling = withTranslation()(observer(({ t, onSubmit }) => {
+const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = {
@@ -121,4 +121,4 @@ const OrganizationBilling = withTranslation()(observer(({ t, onSubmit }) => {
   );
 }));
 
-export default OrganizationBilling;
+export default BillingForm;

@@ -1,6 +1,6 @@
 import moment from 'moment';
 import * as Yup from 'yup';
-import { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Grid } from '@material-ui/core';
 import { FieldArray, Form, Formik, validateYupSchema, yupToFormErrors } from 'formik';
@@ -10,7 +10,7 @@ import { withTranslation } from '../../utils/i18n';
 import { useFormatNumber } from '../../utils/numberformat';
 
 const validationSchema = Yup.object().shape({
-  contract: Yup.string().required(),
+  leaseId: Yup.string().required(),
   beginDate: Yup.date().required(),
   endDate: Yup.date().required(),
   terminationDate: Yup.date().min(Yup.ref('beginDate')).max(Yup.ref('endDate')).nullable(),
@@ -56,7 +56,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
   };
 
   const initialValues = {
-    contract: store.tenant.selected?.contract,
+    leaseId: store.tenant.selected?.leaseId,
     beginDate: store.tenant.selected?.beginDate ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY') : null,
     endDate: store.tenant.selected?.endDate ? moment(store.tenant.selected.endDate, 'DD/MM/YYYY') : null,
     terminated: !!store.tenant.selected?.terminationDate,
@@ -72,7 +72,15 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
     guarantyPayback: store.tenant.selected?.guarantyPayback
   };
 
-  const availableProperties = (selectedPropertyId) => {
+  const availableLeases = useMemo(() => {
+    return store.leaseType.items.map(({ _id, name, active }) => ({
+      id: _id, value: _id, label: name, disabled: !active
+    }))
+  }, [store.leaseType.items]);
+
+  const availableProperties = useMemo(() => {
+    const currentProperties = store.tenant.selected?.properties ? store.tenant.selected.properties.map(({ propertyId }) => propertyId) : [];
+
     return [
       { id: 'none', label: '', value: '' },
       ...store.property.items.map(({ _id, name, status, price, occupantLabel }) => ({
@@ -81,16 +89,16 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
         label: t('{{name}} ({{rentAmount}} - {{status}})', {
           name,
           rentAmount: formatNumber(price),
-          status: status === 'occupied' ? t('occupied by {{tenantName}}', { tenantName: occupantLabel }) : t('vacant')
+          status: status === 'occupied' ? (!currentProperties.includes(_id) ? t('occupied by {{tenantName}}', { tenantName: occupantLabel }) : t('occupied by current tenant')) : t('vacant')
         }),
         //disabled: selectedPropertyId !== _id && status === 'occupied'
       }))
     ];
-  };
+  }, [store.property.items]);
 
   const _onSubmit = async lease => {
     await onSubmit({
-      contract: lease.contract,
+      leaseId: lease.leaseId,
       beginDate: lease.beginDate?.format('DD/MM/YYYY'),
       endDate: lease.endDate?.format('DD/MM/YYYY'),
       terminationDate: lease.terminationDate?.format('DD/MM/YYYY'),
@@ -141,10 +149,11 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                 />
               </FormSection>
             )}
-            <FormSection label={t('Contract')}>
-              <FormTextField
-                label={t('Contract type')}
-                name="contract"
+            <FormSection label={t('Lease')}>
+              <SelectField
+                label={t('Lease Type')}
+                name="leaseId"
+                values={availableLeases}
                 disabled={readOnly}
               />
               <DateRangeField
@@ -165,14 +174,14 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                 name="properties"
                 render={arrayHelpers => (
                   <div>
-                    {values.properties.map((property, index) => (
-                      <Box key={index}>
+                    {React.Children.toArray(values.properties.map((property, index) => (
+                      <>
                         <Grid container spacing={2}>
                           <Grid item xs={12}>
                             <SelectField
                               label={t('Property')}
                               name={`properties[${index}]._id`}
-                              values={availableProperties(values?.properties?.[index]._id)}
+                              values={availableProperties}
                               disabled={readOnly}
                             />
                           </Grid>
@@ -200,8 +209,8 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                             </Button>
                           </Box>
                         )}
-                      </Box>
-                    ))}
+                      </>
+                    )))}
                     {!readOnly && (
                       <Box display="flex" justifyContent="space-between">
                         <Button

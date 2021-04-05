@@ -40,7 +40,7 @@ const currencies = cc.data.reduce((acc, { code, currency }) => {
   return acc
 }, []).sort((c1, c2) => c1.currency.localeCompare(c2.currency));
 
-const Landlord = withTranslation()(observer(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
+const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = {
@@ -166,4 +166,4 @@ const Landlord = withTranslation()(observer(({ t, submitLabel, submitFullWidth =
   );
 }));
 
-export default Landlord;
+export default LandlordForm;

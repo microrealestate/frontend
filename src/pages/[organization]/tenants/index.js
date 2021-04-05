@@ -16,7 +16,6 @@ import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 import { useRouter } from 'next/router';
 import NewTenantDialog from '../../../components/TenantForms/NewTenantDialog';
-import ConfirmDialog from '../../../components/ConfirmDialog';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {

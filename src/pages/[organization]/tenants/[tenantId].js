@@ -392,7 +392,7 @@ const Tenant = withTranslation()(observer(({ t }) => {
             </Tooltip>
           </Grid>
           <Grid item>
-            <Tooltip title={!store.tenant.selected.hasPayments ? t('No payments have been recorded so far.') : ''}>
+            <Tooltip title={!!!store.tenant.selected.properties ? t('Contract details not filled.') : ''}>
               <span>
                 <FullScreenDialogButton
                   variant="contained"
@@ -401,7 +401,7 @@ const Tenant = withTranslation()(observer(({ t }) => {
                   dialogTitle={t('Payments history')}
                   cancelButtonLabel={t('Close')}
                   showCancel
-                  disabled={!store.tenant.selected.hasPayments}
+                  disabled={!!!store.tenant.selected.properties}
                 >
                   <PaymentHistory tenantId={store.tenant.selected._id} />
                 </FullScreenDialogButton>
@@ -422,7 +422,7 @@ const Tenant = withTranslation()(observer(({ t }) => {
               aria-label="Vertical tabs example"
             >
               <Tab label={t('Tenant')} />
-              <Tab label={t('Lease')} />
+              <Tab label={t('Contract')} />
               <Tab label={t('Billing')} />
             </Tabs>
             <TabPanel value={tabSelected} index={0}>
@@ -471,9 +471,9 @@ const Tenant = withTranslation()(observer(({ t }) => {
             <WarningIcon fontSize="large" color="secondary" />
           </Box>
           <Typography variant="h6">
-          {store.tenant.selected.terminated ? t('Lease terminated on {{terminationDate}}', {
-            terminationDate: moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY').format('LL')
-          }) : t('Lease is in progress')}
+            {store.tenant.selected.terminated ? t('Lease terminated on {{terminationDate}}', {
+              terminationDate: moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY').format('LL')
+            }) : t('Lease is in progress')}
           </Typography>
         </Box>
         <Box py={2}>
@@ -481,9 +481,9 @@ const Tenant = withTranslation()(observer(({ t }) => {
             {t('Modifying this information might break the contract signed with the tenant.')}
           </Typography>
         </Box>
-          <Typography variant="body2">
-            {t('Continue editing?')}
-          </Typography>
+        <Typography variant="body2">
+          {t('Continue editing?')}
+        </Typography>
       </ConfirmDialog>
       <ConfirmDialog
         open={openConfirmDeleteTenant}
@@ -507,27 +507,21 @@ const Tenant = withTranslation()(observer(({ t }) => {
 Tenant.getInitialProps = async (context) => {
   console.log('Tenant.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
-  const tenantId = isServer() ? context.query.tenantId : (store.tenant.selected._id || 'new');
+  const tenantId = isServer() ? context.query.tenantId : store.tenant.selected._id;
 
-  if (tenantId !== 'new') {
-    const [tenantResponse, propertiesResponse] = await Promise.all([
-      store.tenant.fetchOne(tenantId),
-      store.property.fetch()
-    ]);
+  const responses = await Promise.all([
+    store.tenant.fetchOne(tenantId),
+    store.property.fetch(),
+    store.leaseType.fetch()
+  ]);
 
-    if ([tenantResponse.status, propertiesResponse.status].every(status => status !== 200)) {
-      // TODO check error code to show a more detail error message
-      return { error: { statusCode: 500 } };
-    }
+  const statuses = responses.map(({ status }) => status);
 
-    store.tenant.setSelected(tenantResponse.data);
-  } else {
-    const { status } = await store.property.fetch();
-    if (status !== 200) {
-      return { error: { statusCode: status } };
-    }
-    store.tenant.setSelected({});
+  if (statuses.every(status => status !== 200)) {
+    return { error: { statusCode: statuses.find(status => status !== 200) } };
   }
+
+  store.tenant.setSelected(responses[0].data);
 
   const props = {
     initialState: {
