@@ -46,12 +46,11 @@ export default class Tenant {
 
         // Search match contact
         if (!found) {
-          found = !!contacts
-            .map(({ contact = '', email = '', phone = '' }) => ({
-              contact: contact.replace(regExp, '').toLowerCase(),
-              email: email.toLowerCase(),
-              phone: phone.replace(regExp, '')
-            }))
+          found = !!contacts?.map(({ contact = '', email = '', phone = '' }) => ({
+            contact: contact.replace(regExp, '').toLowerCase(),
+            email: email.toLowerCase(),
+            phone: phone.replace(regExp, '')
+          }))
             .filter(({ contact, email, phone }) => (
               contact.indexOf(cleanedSearchText) != -1 ||
               email.indexOf(cleanedSearchText) != -1 ||
@@ -62,10 +61,9 @@ export default class Tenant {
 
         // Search match property name
         if (!found) {
-          found = !!properties
-            .filter(({ property: { name } }) => (
-              name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) != -1
-            ))
+          found = !!properties?.filter(({ property: { name } }) => (
+            name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) != -1
+          ))
             .length;
         }
         return found;

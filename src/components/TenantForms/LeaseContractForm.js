@@ -1,6 +1,6 @@
 import moment from 'moment';
 import * as Yup from 'yup';
-import React, { useContext, useMemo } from 'react';
+import { Children, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Grid } from '@material-ui/core';
 import { FieldArray, Form, Formik, validateYupSchema, yupToFormErrors } from 'formik';
@@ -8,6 +8,7 @@ import { FormTextField, SubmitButton, FormSection, DateField, DateRangeField, Se
 import { StoreContext } from '../../store';
 import { withTranslation } from '../../utils/i18n';
 import { useFormatNumber } from '../../utils/numberformat';
+import { toJS } from 'mobx';
 
 const validationSchema = Yup.object().shape({
   leaseId: Yup.string().required(),
@@ -45,42 +46,47 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
+const emptyProperty = {
+  _id: '',
+  entryDate: null,
+  exitDate: null
+};
+
 const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
   const store = useContext(StoreContext);
+  const [contractDuration, setContractDuration] = useState();
+
   const formatNumber = useFormatNumber();
 
-  const emptyProperty = {
-    _id: '',
-    entryDate: null,
-    exitDate: null
-  };
-
-  const initialValues = {
-    leaseId: store.tenant.selected?.leaseId,
-    beginDate: store.tenant.selected?.beginDate ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY') : null,
-    endDate: store.tenant.selected?.endDate ? moment(store.tenant.selected.endDate, 'DD/MM/YYYY') : null,
-    terminated: !!store.tenant.selected?.terminationDate,
-    terminationDate: store.tenant.selected?.terminationDate ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY') : null,
-    properties: store.tenant.selected?.properties?.length ? store.tenant.selected.properties.map(property => {
+  const initialValues =
+    useMemo(() => {
+      console.log(toJS(store.tenant.selected))
       return {
-        _id: property.property._id,
-        entryDate: property.entryDate ? moment(property.entryDate, 'DD/MM/YYYY') : null,
-        exitDate: property.exitDate ? moment(property.exitDate, 'DD/MM/YYYY') : null
+        leaseId: store.tenant.selected?.leaseId || '',
+        beginDate: store.tenant.selected?.beginDate ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').startOf('day') : null,
+        endDate: store.tenant.selected?.endDate ? moment(store.tenant.selected.endDate, 'DD/MM/YYYY').endOf('day') : null,
+        terminated: !!store.tenant.selected?.terminationDate,
+        terminationDate: store.tenant.selected?.terminationDate ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY').endOf('day') : null,
+        properties: store.tenant.selected?.properties?.length ? store.tenant.selected.properties.map(property => {
+          return {
+            _id: property.property._id,
+            entryDate: property.entryDate ? moment(property.entryDate, 'DD/MM/YYYY') : null,
+            exitDate: property.exitDate ? moment(property.exitDate, 'DD/MM/YYYY') : null
+          }
+        }) : [emptyProperty],
+        guaranty: store.tenant.selected?.guaranty,
+        guarantyPayback: store.tenant.selected?.guarantyPayback
       }
-    }) : [emptyProperty],
-    guaranty: store.tenant.selected?.guaranty,
-    guarantyPayback: store.tenant.selected?.guarantyPayback
-  };
+    }, [store.tenant.selected]);
 
   const availableLeases = useMemo(() => {
     return store.leaseType.items.map(({ _id, name, active }) => ({
       id: _id, value: _id, label: name, disabled: !active
-    }))
+    }));
   }, [store.leaseType.items]);
 
   const availableProperties = useMemo(() => {
     const currentProperties = store.tenant.selected?.properties ? store.tenant.selected.properties.map(({ propertyId }) => propertyId) : [];
-
     return [
       { id: 'none', label: '', value: '' },
       ...store.property.items.map(({ _id, name, status, price, occupantLabel }) => ({
@@ -125,12 +131,21 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
         } catch (err) {
           return yupToFormErrors(err); //for rendering validation errors
         }
-
         return {};
       }}
       onSubmit={_onSubmit}
     >
-      {({ values, isSubmitting }) => {
+      {({ values, isSubmitting, handleChange }) => {
+        const onLeaseTypeChange = evt => {
+          const leaseType = store.leaseType.items.find(({ _id }) => _id === evt.target.value);
+          if (leaseType && leaseType.numberOfTerms) {
+            setContractDuration(moment.duration(leaseType.numberOfTerms, leaseType.timeRange));
+          } else {
+            setContractDuration();
+          }
+          handleChange(evt);
+        };
+
         return (
           <Form autoComplete="off">
             {values.terminated && (
@@ -154,6 +169,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                 label={t('Lease Type')}
                 name="leaseId"
                 values={availableLeases}
+                onChange={onLeaseTypeChange}
                 disabled={readOnly}
               />
               <DateRangeField
@@ -161,6 +177,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                 beginName="beginDate"
                 endLabel={t('End date')}
                 endName="endDate"
+                duration={contractDuration}
                 disabled={readOnly}
               />
               <FormTextField
@@ -174,7 +191,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                 name="properties"
                 render={arrayHelpers => (
                   <div>
-                    {React.Children.toArray(values.properties.map((property, index) => (
+                    {Children.toArray(values.properties.map((property, index) => (
                       <>
                         <Grid container spacing={2}>
                           <Grid item xs={12}>

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox, Typography, Divider, Box, Grid, TextField, Switch } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
@@ -51,15 +51,10 @@ export const FormTextField = RestrictedComponent(({ label, disabled, ...props })
   );
 });
 
-export const SelectField = RestrictedComponent(({ label, value: inialValue, values = [], disabled, ...props }) => {
+export const SelectField = RestrictedComponent(({ label, values = [], disabled, children, ...props }) => {
   const [field, meta] = useField(props);
-  const [value, setValue] = useState(inialValue);
   const { isSubmitting } = useFormikContext();
   const hasError = !!(meta.touched && meta.error);
-
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
 
   return (
     <FormControl
@@ -68,12 +63,10 @@ export const SelectField = RestrictedComponent(({ label, value: inialValue, valu
     >
       <InputLabel htmlFor={props.name} error={hasError}>{label}</InputLabel>
       <Select
-        value={value}
-        onChange={handleChange}
         disabled={disabled || isSubmitting}
         error={hasError}
-        {...props}
         {...field}
+        {...props}
       >
         {values.map(({ id, value, label, disabled: disabledMenu }) => (
           <MenuItem key={id} value={value} disabled={disabledMenu}>{label}</MenuItem>
@@ -194,8 +187,19 @@ export const DateField = RestrictedComponent(({ disabled, ...props }) => {
 
 const defaultMinDate = moment('1900-01-01', 'YYYY-MM-DD');
 const defaultMaxDate = moment('2100-01-01', 'YYYY-MM-DD');
-export const DateRangeField = ({ beginName, endName, beginLabel, endLabel, minDate, maxDate, disabled }) => {
+export const DateRangeField = ({ beginName, endName, beginLabel, endLabel, minDate, maxDate, duration, disabled }) => {
+  const { setFieldValue } = useFormikContext();
   const [beginField] = useField(beginName);
+  const [endField] = useField(endName);
+
+  useEffect(() => {
+    if (duration && beginField.value) {
+      const newEndDate = moment(beginField.value.startOf('day')).add(duration).subtract(1, 'second');
+      if (!newEndDate.isSame(endField.value)) {
+        setFieldValue(endName, newEndDate, true);
+      }
+    }
+  }, [duration, beginField.value])
 
   return (
     <Grid container spacing={2}>
@@ -214,7 +218,7 @@ export const DateRangeField = ({ beginName, endName, beginLabel, endLabel, minDa
           name={endName}
           minDate={(beginField.value || minDate || defaultMinDate).toISOString()}
           maxDate={(maxDate || defaultMaxDate).toISOString()}
-          disabled={disabled}
+          disabled={disabled || !!duration}
         />
       </Grid>
     </Grid>
