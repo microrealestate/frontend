@@ -14,13 +14,13 @@ import { isServer } from '../../../../utils';
 import { withTranslation } from '../../../../utils/i18n';
 import SendIcon from '@material-ui/icons/Send';
 import Page from '../../../../components/Page';
-import RentCard from '../../../../components/RentCard';
+import RentCard from '../../../../components/rents/RentCard';
 
 import MonthPicker from '../../../../components/MonthPicker';
 import { PageCard } from '../../../../components/Cards';
 import { NumberFormat } from '../../../../utils/numberformat';
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
-import RentTable from '../../../../components/RentTable';
+import RentTable from '../../../../components/rents/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
 
 const PeriodToolbar = withTranslation()(({ t, onChange }) => {

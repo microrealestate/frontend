@@ -20,11 +20,11 @@ import { DateField, FormTextField, SelectField, SubmitButton } from '../../../..
 import { CardRow, DashboardCard } from '../../../../../components/Cards';
 import { NumberFormat } from '../../../../../utils/numberformat';
 import Link from '../../../../../components/Link';
-import SendRentEmailMenu from '../../../../../components/SendRentEmailMenu';
+import SendRentEmailMenu from '../../../../../components/rents/SendRentEmailMenu';
 import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
 import RequestError from '../../../../../components/RequestError';
 import DownloadLink from '../../../../../components/DownloadLink';
-import PaymentHistory from '../../../../../components/PaymentHistory';
+import RentHistory from '../../../../../components/rents/RentHistory';
 
 const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
@@ -442,13 +442,13 @@ const RentPayment = withTranslation()(observer(({ t }) => {
           <Box mr={1.5}>
             <FullScreenDialogButton
               variant="contained"
-              buttonLabel={t('Payments')}
+              buttonLabel={t('Rents')}
               startIcon={<HistoryIcon />}
-              dialogTitle={t('Payments history')}
+              dialogTitle={t('Rents history')}
               cancelButtonLabel={t('Close')}
               showCancel
             >
-              <PaymentHistory tenantId={store.rent.selected.occupant._id} />
+              <RentHistory tenantId={store.rent.selected.occupant._id} />
             </FullScreenDialogButton>
           </Box>
           <SendRentEmailMenu

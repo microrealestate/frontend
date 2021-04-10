@@ -1,18 +1,18 @@
 import moment from 'moment';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { withTranslation } from 'next-i18next';
 import { Box, Paper, Typography } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { withTranslation } from 'next-i18next';
-import { StoreContext } from '../store';
-import { NumberFormat } from '../utils/numberformat';
-import RequestError from './RequestError';
-import Loading from './Loading';
+import { StoreContext } from '../../store';
+import { NumberFormat } from '../../utils/numberformat';
+import RequestError from '../RequestError';
+import Loading from '../Loading';
 
-const PaymentHistory = withTranslation()(({ t, tenantId }) => {
+const RentHistory = withTranslation()(({ t, tenantId }) => {
   const store = useContext(StoreContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -65,7 +65,7 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
             )}
           </Box>
           <Paper variant="outlined" square>
-            <Table stickyHeader aria-label="payments history table" >
+            <Table stickyHeader aria-label="rents history table" >
               <TableHead>
                 <TableRow>
                   <TableCell><Typography>{t('Period')}</Typography></TableCell>
@@ -112,4 +112,4 @@ const PaymentHistory = withTranslation()(({ t, tenantId }) => {
   )
 });
 
-export default PaymentHistory;
+export default RentHistory;

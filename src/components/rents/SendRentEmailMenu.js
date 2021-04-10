@@ -3,8 +3,8 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { CircularProgress } from '@material-ui/core';
-import { withTranslation } from '../utils/i18n';
-import { StoreContext } from '../store';
+import { withTranslation } from '../../utils/i18n';
+import { StoreContext } from '../../store';
 
 const SendRentEmailMenu = withTranslation()(({ t, i18n, tReady, period, tenantIds, onError, ...buttonProps }) => {
   const store = useContext(StoreContext);

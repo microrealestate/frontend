@@ -19,7 +19,7 @@ import { isServer } from '../../../utils';
 import Link from '../../../components/Link';
 import FullScreenDialogButton from '../../../components/FullScreenDialogButton';
 import RequestError from '../../../components/RequestError';
-import PaymentHistory from '../../../components/PaymentHistory';
+import RentHistory from '../../../components/rents/RentHistory';
 import { TabPanel } from '../../../components/Tabs';
 import { CardRow, DashboardCard } from '../../../components/Cards';
 import { NumberFormat } from '../../../utils/numberformat';
@@ -399,14 +399,14 @@ const Tenant = withTranslation()(observer(({ t }) => {
               <span>
                 <FullScreenDialogButton
                   variant="contained"
-                  buttonLabel={t('Payments')}
+                  buttonLabel={t('Rents')}
                   startIcon={<HistoryIcon />}
-                  dialogTitle={t('Payments history')}
+                  dialogTitle={t('Rents history')}
                   cancelButtonLabel={t('Close')}
                   showCancel
                   disabled={!!!store.tenant.selected.properties}
                 >
-                  <PaymentHistory tenantId={store.tenant.selected._id} />
+                  <RentHistory tenantId={store.tenant.selected._id} />
                 </FullScreenDialogButton>
               </span>
             </Tooltip>

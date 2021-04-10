@@ -4,13 +4,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
-import { withTranslation } from "../utils/i18n";
-import { NumberFormat } from "../utils/numberformat";
-import DownloadLink from './DownloadLink';
+import { withTranslation } from "../../utils/i18n";
+import { NumberFormat } from "../../utils/numberformat";
+import DownloadLink from '../DownloadLink';
+import { CardRow } from '../Cards';
 import SendRentEmailMenu from './SendRentEmailMenu';
-import { CardRow } from './Cards';
 
-import { useStyles } from '../styles/components/RentCards.styles';
+import { useStyles } from '../../styles/components/RentCards.styles';
 
 const SuccessChip = withStyles((theme) => ({
   root: {
