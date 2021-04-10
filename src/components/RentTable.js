@@ -24,10 +24,10 @@ const TableToolbar = memo(withTranslation()(({ t, selected = [], onSend = () => 
 
   const onClick = useCallback(async docName => {
     setSendingEmail({
-      rentcall: document === 'rentcall' ? 'sending' : 'disabled',
-      rentcall_reminder: document === 'rentcall_reminder' ? 'sending' : 'disabled',
-      rentcall_last_reminder: document === 'rentcall_last_reminder' ? 'sending' : 'disabled',
-      invoice: document === 'invoice' ? 'sending' : 'disabled'
+      rentcall: docName === 'rentcall' ? 'sending' : 'disabled',
+      rentcall_reminder: docName === 'rentcall_reminder' ? 'sending' : 'disabled',
+      rentcall_last_reminder: docName === 'rentcall_last_reminder' ? 'sending' : 'disabled',
+      invoice: docName === 'invoice' ? 'sending' : 'disabled'
     });
 
     await onSend(docName);
