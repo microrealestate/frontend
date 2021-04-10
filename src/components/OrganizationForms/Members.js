@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { withTranslation } from 'next-i18next';
@@ -24,33 +24,35 @@ const roles = [
 
 const allowedRoles = [roles[0]];
 
-const FormDialog = withTranslation()(({ t, members = [], onSubmit }) => {
-  const store = useContext(StoreContext);
+const initialValues = {
+  email: '',
+  role: roles[1]
+}
 
+const FormDialog = memo(withTranslation()(({ t, members = [], onSubmit }) => {
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = useCallback(() => {
     setOpen(true);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  }, []);
 
-  const _onSubmit = async (member) => {
+  const _onSubmit = useCallback(async (member) => {
     await onSubmit(member);
     handleClose();
-  }
+  }, [onSubmit]);
 
-  const initialValues = {
-    email: '',
-    role: roles[1]
-  }
-
-  const validationSchema = Yup.object().shape({
+  const validationSchema = useMemo(() => Yup.object().shape({
     email: Yup.string().email().notOneOf(members.map(({ email }) => email)).required(),
     role: Yup.string().required()
-  });
+  }), [members]);
+
+  const roleValues = useMemo(() => roles.map(role => (
+    { id: role, label: t(role), value: role }
+  )), []);
 
   return (
     <>
@@ -92,9 +94,7 @@ const FormDialog = withTranslation()(({ t, members = [], onSubmit }) => {
                         <SelectField
                           label={t('Role')}
                           name="role"
-                          values={roles.map(role => (
-                            { id: role, label: t(role), value: role }
-                          ))}
+                          values={roleValues}
                         />
                       </Grid>
                     </Grid>
@@ -116,14 +116,14 @@ const FormDialog = withTranslation()(({ t, members = [], onSubmit }) => {
       </Dialog>
     </>
   );
-});
+}));
 
 const Members = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
   const [memberToRemove, setMemberToRemove] = useState(false);
   const [updating, setUpdating] = useState();
 
-  const onAddMember = async member => {
+  const onAddMember = useCallback(async member => {
     const updatedMembers = [
       ...store.organization.selected.members,
       member
@@ -131,18 +131,18 @@ const Members = withTranslation()(observer(({ t, onSubmit }) => {
     await onSubmit({
       members: updatedMembers
     });
-  }
+  }, [onSubmit])
 
-  const removeMember = async member => {
+  const removeMember = useCallback(async member => {
     setUpdating(member);
     const updatedMembers = store.organization.selected.members.filter(({ email }) => email !== member.email);
     await onSubmit({
       members: updatedMembers
     });
     setUpdating();
-  }
+  }, [onSubmit])
 
-  const onRoleChange = async (role, member) => {
+  const onRoleChange = useCallback(async (role, member) => {
     setUpdating(member);
     const updatedMembers = store.organization.selected.members.filter(({ email }) => email !== member.email);
     updatedMembers.push({
@@ -153,7 +153,7 @@ const Members = withTranslation()(observer(({ t, onSubmit }) => {
       members: updatedMembers
     });
     setUpdating();
-  }
+  }, [onSubmit])
 
   return (
     <FormSection label={t('Manage access')}>

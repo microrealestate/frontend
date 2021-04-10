@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -14,17 +14,17 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const FullScreenDialogButton = withTranslation()(({ t, i18n, tReady, dialogTitle, buttonLabel, saveButtonLabel, cancelButtonLabel, showSave, showCancel, children, ...props }) => {
     const [open, setOpen] = React.useState(false);
 
-    const handleClickOpen = () => {
+    const handleClickOpen = useCallback(() => {
         setOpen(true);
-    };
+    }, []);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setOpen(false);
-    };
+    }, []);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
         setOpen(false);
-    };
+    }, []);
 
     return (
         <>

@@ -312,7 +312,7 @@ const _rentDetails = rent => {
 
 export const PaymentBalance = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  const rentDetails = useMemo(() =>_rentDetails(store.rent.selected), []);
+  const rentDetails = useMemo(() =>_rentDetails(store.rent.selected), [store.rent.selected]);
 
   return (
     <>

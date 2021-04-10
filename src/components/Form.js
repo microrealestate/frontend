@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useField, useFormikContext } from 'formik';
 import { Select, MenuItem, CircularProgress, FormLabel, RadioGroup, Radio, Input, InputLabel, FormControl, FormControlLabel, FormHelperText, InputAdornment, IconButton, Checkbox, Typography, Divider, Box, Grid, TextField, Switch } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
@@ -14,13 +14,13 @@ export const FormTextField = RestrictedComponent(({ label, disabled, ...props })
   const { isSubmitting } = useFormikContext();
   const hasError = !!(meta.touched && meta.error);
 
-  const handleClickShowPassword = () => {
-    showPassword(!displayPassword);
-  };
+  const handleClickShowPassword = useCallback(() => {
+    showPassword(displayPassword => !displayPassword);
+  }, []);
 
-  const handleMouseDownPassword = event => {
+  const handleMouseDownPassword = useCallback(event => {
     event.preventDefault();
-  };
+  }, []);
 
   return (
     <FormControl

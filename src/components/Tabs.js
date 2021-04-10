@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { Box, Divider } from '@material-ui/core'
 
-export const TabPanel = (props) => {
+export const TabPanel = memo((props) => {
   const { children, value, index, ...other } = props;
 
   return value === index ? (
@@ -11,4 +12,4 @@ export const TabPanel = (props) => {
       </Box>
     </>
   ) : null;
-};
+});

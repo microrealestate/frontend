@@ -202,7 +202,7 @@ const Steps = withTranslation()(({ t, rent }) => {
       receiptSentText,
       lastPayment
     };
-  }, []);
+  }, [rent.emailStatus, rent.payments]);
 
   return (
     <>

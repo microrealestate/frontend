@@ -1,4 +1,4 @@
-import { useState, useContext, cloneElement, useEffect, memo } from 'react';
+import { useState, useContext, cloneElement, useEffect, memo, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
 import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography, Grid } from '@material-ui/core';
@@ -23,11 +23,11 @@ const Demonstrationbar = withTranslation()(({ t }) => {
 const MainToolbar = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
 
-  const signOut = async event => {
+  const signOut = useCallback(async event => {
     event.preventDefault();
     await store.user.signOut();
     window.location.assign(`${BASE_PATH}/signin`);
-  };
+  }, []);
 
   return (
     <Box width="100%" display="flex" alignItems="center" justifyContent="space-between">

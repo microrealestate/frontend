@@ -1,10 +1,12 @@
 import { downloadDocument } from '../utils/fetch';
 import VerticalAlignBottomIcon from '@material-ui/icons/VerticalAlignBottom';
 import { Box, IconButton, Link, Tooltip, Typography } from '@material-ui/core';
+import { memo, useCallback } from 'react';
 
 
 const DownloadLink = ({ label, tooltipText, url, withIcon = false, documentName, ...props }) => {
-    const onClick = () => downloadDocument(url, documentName);
+    const onClick = useCallback(() => downloadDocument(url, documentName), []);
+
     return (
         <>
             {withIcon && tooltipText && (
@@ -35,4 +37,4 @@ const DownloadLink = ({ label, tooltipText, url, withIcon = false, documentName,
     )
 }
 
-export default DownloadLink;
+export default memo(DownloadLink);

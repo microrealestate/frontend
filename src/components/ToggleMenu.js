@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -9,19 +9,19 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedOption, setSelectedOption] = useState(value);
 
-  const handleClick = (event) => {
+  const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const onClick = option => {
+  const onClick = useCallback(option => {
     setSelectedOption(option);
     onChange(option)
     handleClose();
-  }
+  }, [onChange]);
 
   // useEffect(() => {
   //     onChange(selectedOption);
@@ -56,4 +56,4 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
   );
 };
 
-export default ToggleMenu;
+export default memo(ToggleMenu);

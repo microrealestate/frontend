@@ -1,7 +1,7 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { withTranslation } from 'next-i18next';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -36,20 +36,20 @@ const FormDialog = withTranslation()(({ t, open, setOpen, onSubmit }) => {
     }
   }, [open])
 
-  const handleClickOpen = () => {
+  const handleClickOpen = useCallback(() => {
     setOpen(initialValues);
-  };
+  }, [setOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  }, [setOpen]);
 
-  const _onSubmit = async (leaseType) => {
+  const _onSubmit = useCallback(async (leaseType) => {
     await onSubmit(leaseType);
     handleClose();
-  }
+  }, [onSubmit]);
 
-  const validationSchema = Yup.object().shape({
+  const validationSchema = useMemo(() => Yup.object().shape({
     name: Yup.string().notOneOf(
       store.leaseType.items
         .filter(({ name }) => open?.name !== name)
@@ -59,7 +59,7 @@ const FormDialog = withTranslation()(({ t, open, setOpen, onSubmit }) => {
     numberOfTerms: Yup.number().integer().min(0),
     timeRange: Yup.string().required(),
     active: Yup.boolean().required()
-  });
+  }), [store.leaseType.items]);
 
   return (
     <>
@@ -91,11 +91,11 @@ const FormDialog = withTranslation()(({ t, open, setOpen, onSubmit }) => {
                     </DialogContentText>
                   )}
                   {!addMode && values.usedByTenants && (
-                    <DialogContentText>
-                      <Box color="warning.dark">
+                    <Box color="warning.dark">
+                      <Typography>
                         {t('This lease is currently used in tenant contracts, only name and description fields can be updated')}
-                      </Box>
-                    </DialogContentText>
+                      </Typography>
+                    </Box>
                   )}
                   <Box minHeight={100} minWidth={500}>
                     <Grid container spacing={1}>
@@ -155,7 +155,7 @@ const LeaseTypes = withTranslation()(observer(({ t, setError }) => {
   const [leaseTypeToEdit, setLeaseTypeToEdit] = useState(false);
   const [leaseTypeToRemove, setLeaseTypeToRemove] = useState(false);
 
-  const onAddUpdateLeaseType = async leaseType => {
+  const onAddUpdateLeaseType = useCallback(async leaseType => {
     setError('');
 
     let status;
@@ -181,9 +181,9 @@ const LeaseTypes = withTranslation()(observer(({ t, setError }) => {
           return setError(t('Something went wrong'));
       };
     }
-  }
+  }, [setError]);
 
-  const onRemoveLeaseType = async leaseType => {
+  const onRemoveLeaseType = useCallback(async leaseType => {
     const { status } = await store.leaseType.delete([leaseType._id]);
     if (status !== 200) {
       switch (status) {
@@ -195,9 +195,9 @@ const LeaseTypes = withTranslation()(observer(({ t, setError }) => {
           return setError(t('Something went wrong'));
       };
     }
-  }
+  }, [setError]);
 
-  const onLeaseTypeChange = async (active, leaseType) => {
+  const onLeaseTypeChange = useCallback(async (active, leaseType) => {
     leaseType.active = active;
     const { status } = await store.leaseType.update(leaseType);
 
@@ -215,7 +215,7 @@ const LeaseTypes = withTranslation()(observer(({ t, setError }) => {
           return setError(t('Something went wrong'));
       };
     }
-  }
+  }, [setError]);
 
   return (
     <FormSection label={t('Manage lease types')}>

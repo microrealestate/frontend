@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, useMemo, useCallback } from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -16,8 +16,7 @@ import { ListItemIcon } from '@material-ui/core';
 import { StoreContext } from '../store';
 import { useRouter } from 'next/router';
 
-const Nav = withTranslation()((props) => {
-    const { t } = props;
+const Nav = withTranslation()(({ t }) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [openDebounced, setOpenDebounced] = useState(false);
@@ -27,7 +26,7 @@ const Nav = withTranslation()((props) => {
     const router = useRouter();
     const { pathname, query: { organization } } = router;
 
-    const menuItems = [
+    const menuItems = useMemo(() => [
         {
             key: 'dashboard',
             value: t('Dashboard'),
@@ -64,19 +63,18 @@ const Nav = withTranslation()((props) => {
             pathname: '/settings',
             icon: <SettingsIcon />
         }
-    ];
+    ], []);
 
     useEffect(() => {
         timerRef.current = setTimeout(() => setOpenDebounced(open), 1000);
         return () => timerRef.current && clearTimeout(timerRef.current);
     }, [open]);
 
-
-    const handleMenuClick = menuItem => {
+    const handleMenuClick = useCallback(menuItem => {
         timerRef.current && clearTimeout(timerRef.current);
         const pathname = menuItem.pathname.replace('[yearMonth]', store.rent.period);
         router.push(`/${organization}${pathname}`);
-    };
+    }, []);
 
     return (
         <Drawer
@@ -86,7 +84,7 @@ const Nav = withTranslation()((props) => {
         >
             <List className={classes.list}>
                 {menuItems.map(item => {
-                    const isSelected = pathname.indexOf(item.pathname) !== -1;
+                    const isSelected = useMemo(() => pathname.indexOf(item.pathname) !== -1, [pathname]);
                     return (
                         <ListItem
                             className={`${classes.item} ${isSelected ? classes.itemSelected : ''}`}

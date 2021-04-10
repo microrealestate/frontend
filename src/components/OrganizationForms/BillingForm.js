@@ -2,7 +2,7 @@ import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { observer } from 'mobx-react-lite';
 import { AddressField, ContactForm, FormSection, FormTextField, SubmitButton } from '../Form';
-import { useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { StoreContext } from '../../store';
 import { withTranslation } from '../../utils/i18n';
 
@@ -22,10 +22,12 @@ const validationSchema = Yup.object().shape({
   country: Yup.string().required()
 });
 
+const allowedRoles = ['administrator'];
+
 const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
-  const initialValues = {
+  const initialValues = useMemo(() => ({
     vatNumber: store.organization.selected?.companyInfo?.vatNumber || '',
     bankName: store.organization.selected?.bankInfo?.name || '',
     iban: store.organization.selected?.bankInfo?.iban || '',
@@ -39,9 +41,9 @@ const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
     zipCode: store.organization.selected?.addresses?.[0].zipCode || '',
     state: store.organization.selected?.addresses?.[0].state || '',
     country: store.organization.selected?.addresses?.[0].country || ''
-  };
+  }), [store.organization.selected]);
 
-  const _onSubmit = async (billing, actions) => {
+  const _onSubmit = useCallback(async (billing, actions) => {
     await onSubmit({
       companyInfo: {
         ...store.organization.selected.companyInfo,
@@ -66,9 +68,7 @@ const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
         country: billing.country
       }]
     });
-  }
-
-  const allowedRoles = ['administrator'];
+  }, [onSubmit]);
 
   return (
     <Formik

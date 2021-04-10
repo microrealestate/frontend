@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite'
-import { useContext, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import getConfig from 'next/config';
 import { withTranslation } from 'next-i18next'
 import { Paper, Tab, Tabs } from '@material-ui/core'
@@ -11,7 +11,6 @@ import LandlordForm from '../../components/OrganizationForms/LandlordForm';
 import BillingForm from '../../components/OrganizationForms/BillingForm'
 import Members from '../../components/OrganizationForms/Members'
 import LeaseTypes from '../../components/OrganizationForms/LeaseTypes'
-import NotificationForm from '../../components/OrganizationForms/NotificationForm'
 import RequestError from '../../components/RequestError'
 import { TabPanel } from '../../components/Tabs';
 import { getStoreInstance, StoreContext } from '../../store'
@@ -24,11 +23,11 @@ const Settings = withTranslation()(observer(({ t }) => {
   const [error, setError] = useState('');
   const [tabSelected, setTabSelected] = useState(0);
 
-  const onTabChange = (event, newValue) => {
+  const onTabChange = useCallback((event, newValue) => {
     setTabSelected(newValue);
-  };
+  }, []);
 
-  const onSubmit = async (orgPart) => {
+  const onSubmit = useCallback(async (orgPart) => {
     if (!store.user.isAdministrator) {
       return;
     }
@@ -65,7 +64,7 @@ const Settings = withTranslation()(observer(({ t }) => {
     if (newName !== previousName) {
       window.location.assign(`${BASE_PATH}/${store.organization.selected.name}/settings`);
     }
-  }
+  }, []);
 
   return (
     <Page>
@@ -81,7 +80,6 @@ const Settings = withTranslation()(observer(({ t }) => {
           <Tab label={t('Billing')} />
           <Tab label={t('Lease types')} />
           <Tab label={t('Manage access')} />
-          <Tab label={t('Notifications')} />
         </Tabs>
         <TabPanel value={tabSelected} index={0}>
           <LandlordForm onSubmit={onSubmit} />
@@ -94,9 +92,6 @@ const Settings = withTranslation()(observer(({ t }) => {
         </TabPanel>
         <TabPanel value={tabSelected} index={3}>
           <Members onSubmit={onSubmit} />
-        </TabPanel>
-        <TabPanel value={tabSelected} index={4}>
-          <NotificationForm onSubmit={onSubmit} />
         </TabPanel>
       </Paper>
     </Page>

@@ -1,6 +1,6 @@
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import cc from 'currency-codes';
 import getSymbolFromCurrency from 'currency-symbol-map'
@@ -28,22 +28,37 @@ const validationSchema = Yup.object().shape({
   capital: Yup.number().moreThan(0).required()
 });
 
-const currencies = cc.data.reduce((acc, { code, currency }) => {
-  const symbol = getSymbolFromCurrency(code);
-  if (symbol) {
-    acc.push({
-      code,
-      currency,
-      symbol
-    })
-  }
-  return acc
-}, []).sort((c1, c2) => c1.currency.localeCompare(c2.currency));
+const currencies = [
+  { id: 'none', label: '', value: '' },
+  ...cc.data
+    .reduce((acc, { code, currency }) => {
+      const symbol = getSymbolFromCurrency(code);
+      if (symbol) {
+        acc.push({
+          code,
+          currency,
+          symbol
+        })
+      }
+      return acc
+    }, [])
+    .sort((c1, c2) => c1.currency.localeCompare(c2.currency))
+    .map(({ code, currency, symbol }) => (
+      { id: code, label: `${currency} (${symbol})`, value: code }
+    ))
+];
+
+const languages = [
+  { id: 'none', label: '', value: '' },
+  { id: 'pt-BR', label: 'Brasileiro', value: 'pt-BR' },
+  { id: 'en', label: 'English', value: 'en' },
+  { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
+];
 
 const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
   const store = useContext(StoreContext);
 
-  const initialValues = {
+  const initialValues = useMemo(() => ({
     name: store.organization.selected?.name,
     locale: store.organization.selected?.locale || '',
     currency: store.organization.selected?.currency || '',
@@ -53,9 +68,9 @@ const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWid
     company: store.organization.selected?.companyInfo?.name || '',
     ein: store.organization.selected?.companyInfo?.ein || '',
     capital: store.organization.selected?.companyInfo?.capital || ''
-  };
+  }), [store.organization.selected]);
 
-  const _onSubmit = async (settings, actions) => {
+  const _onSubmit = useCallback(async (settings, actions) => {
     const updatedSettings = {
       name: settings.name,
       isCompany: settings.isCompany === 'true',
@@ -75,9 +90,9 @@ const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWid
     }
 
     await onSubmit(updatedSettings);
-  }
+  }, [onSubmit]);
 
-  const allowedRoles = store.organization.items ? ['administrator'] : null;
+  const allowedRoles = useMemo(() => store.organization.items ? ['administrator'] : null, [store.organization.items]);
 
   return (
     <Formik
@@ -97,23 +112,13 @@ const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWid
               <SelectField
                 label={t('Language')}
                 name="locale"
-                values={[
-                  { id: 'none', label: '', value: '' },
-                  { id: 'pt-BR', label: 'Brasileiro', value: 'pt-BR' },
-                  { id: 'en', label: 'English', value: 'en' },
-                  { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
-                ]}
+                values={languages}
                 onlyRoles={allowedRoles}
               />
               <SelectField
                 label={t('Currency')}
                 name="currency"
-                values={[
-                  { id: 'none', label: '', value: '' },
-                  ...currencies.map(({ code, currency, symbol }) => (
-                    { id: code, label: `${currency} (${symbol})`, value: code }
-                  ))
-                ]}
+                values={currencies}
                 onlyRoles={allowedRoles}
               />
               <RadioFieldGroup

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Box, IconButton } from "@material-ui/core";
 import { DatePicker } from '@material-ui/pickers';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
@@ -8,20 +8,20 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 const MonthPicker = ({ value, onChange }) => {
     const [selectedPeriod, setSelectedPeriod] = useState(value);
 
-    const _onPeriodChange = period => {
+    const _onPeriodChange = useCallback(period => {
         setSelectedPeriod(period);
         onChange(period);
-    }
+    }, [onChange]);
 
-    const _onNextMonth = () => {
+    const _onNextMonth = useCallback(() => {
         const newPeriod = moment(selectedPeriod).add(1, 'months');
         _onPeriodChange(newPeriod);
-    }
+    }, [selectedPeriod, _onPeriodChange]);
 
-    const _onPreviousMonth = () => {
+    const _onPreviousMonth = useCallback(() => {
         const newPeriod = moment(selectedPeriod).subtract(1, 'months');
         _onPeriodChange(newPeriod);
-    }
+    }, [selectedPeriod, _onPeriodChange]);
 
     return (
         <Box display="flex" alignItems="center">
@@ -46,4 +46,4 @@ const MonthPicker = ({ value, onChange }) => {
     );
 }
 
-export default MonthPicker;
+export default memo(MonthPicker);
