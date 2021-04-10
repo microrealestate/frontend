@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
+import { memo, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
 import DoneIcon from '@material-ui/icons/Done';
@@ -22,7 +23,7 @@ const SuccessChip = withStyles((theme) => ({
   }
 }))(Chip);
 
-const Header = withTranslation()(({ t, rent, onEdit }) => {
+const Header = ({ rent }) => {
   const classes = useStyles();
   return (
     <>
@@ -50,7 +51,7 @@ const Header = withTranslation()(({ t, rent, onEdit }) => {
       </Box>
     </>
   )
-});
+};
 
 // const RentStatus = withTranslation()(({ t, rent }) => {
 //   const theme = useTheme();
@@ -126,54 +127,82 @@ const Header = withTranslation()(({ t, rent, onEdit }) => {
 const Steps = withTranslation()(({ t, rent }) => {
   const classes = useStyles();
 
-  const firstNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall;
-  const secondNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall_reminder;
-  const lastNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall_last_reminder;
-  const atLeastOneNoticeSent = firstNoticeSent || secondNoticeSent || lastNoticeSent;
-  const receiptSent = rent.emailStatus && rent.emailStatus.status.invoice;
-  const rentPaid = rent.newBalance >= 0 || rent.status === 'paid';
+  const {
+    firstNoticeSent,
+    secondNoticeSent,
+    lastNoticeSent,
+    atLeastOneNoticeSent,
+    receiptSent,
+    rentPaid,
+    firstNoticeSentText,
+    secondNoticeSentText,
+    lastNoticeSentText,
+    receiptSentText,
+    lastPayment
+  } = useMemo(() => {
+    const firstNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall;
+    const secondNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall_reminder;
+    const lastNoticeSent = rent.emailStatus && rent.emailStatus.status.rentcall_last_reminder;
+    const atLeastOneNoticeSent = firstNoticeSent || secondNoticeSent || lastNoticeSent;
+    const receiptSent = rent.emailStatus && rent.emailStatus.status.invoice;
+    const rentPaid = rent.newBalance >= 0 || rent.status === 'paid';
 
-  let firstNoticeSentText;
-  if (firstNoticeSent) {
-    const sentMoment = moment(rent.emailStatus.last.rentcall.sentDate);
-    firstNoticeSentText = t('1st notice sent on {{date}}', { date: sentMoment.format('LLL') });
-  }
+    let firstNoticeSentText;
+    if (firstNoticeSent) {
+      const sentMoment = moment(rent.emailStatus.last.rentcall.sentDate);
+      firstNoticeSentText = t('1st notice sent on {{date}}', { date: sentMoment.format('LLL') });
+    }
 
-  let secondNoticeSentText;
-  if (secondNoticeSent) {
-    const sentMoment = moment(rent.emailStatus.last.rentcall_reminder.sentDate);
-    secondNoticeSentText = t('2nd notice sent on {{date}}', { date: sentMoment.format('LLL') });
-  }
+    let secondNoticeSentText;
+    if (secondNoticeSent) {
+      const sentMoment = moment(rent.emailStatus.last.rentcall_reminder.sentDate);
+      secondNoticeSentText = t('2nd notice sent on {{date}}', { date: sentMoment.format('LLL') });
+    }
 
-  let lastNoticeSentText;
-  if (lastNoticeSent) {
-    const sentMoment = moment(rent.emailStatus.last.rentcall_last_reminder.sentDate);
-    lastNoticeSentText = t('Last notice sent on {{date}}', { date: sentMoment.format('LLL') });
-  }
+    let lastNoticeSentText;
+    if (lastNoticeSent) {
+      const sentMoment = moment(rent.emailStatus.last.rentcall_last_reminder.sentDate);
+      lastNoticeSentText = t('Last notice sent on {{date}}', { date: sentMoment.format('LLL') });
+    }
 
-  let receiptSentText;
-  if (receiptSent) {
-    const sentMoment = moment(rent.emailStatus.last.invoice.sentDate);
-    receiptSentText = t('Receipt sent on {{date}}', { date: sentMoment.format('LLL') });
-  }
+    let receiptSentText;
+    if (receiptSent) {
+      const sentMoment = moment(rent.emailStatus.last.invoice.sentDate);
+      receiptSentText = t('Receipt sent on {{date}}', { date: sentMoment.format('LLL') });
+    }
 
-  const filteredPayments = rent.payments
-    .filter(({ amount }) => amount > 0)
-    .sort((p1, p2) => {
-      const m1 = moment(p1.date, 'DD/MM/YYYY');
-      const m2 = moment(p2.date, 'DD/MM/YYYY');
+    const filteredPayments = rent.payments
+      .filter(({ amount }) => amount > 0)
+      .sort((p1, p2) => {
+        const m1 = moment(p1.date, 'DD/MM/YYYY');
+        const m2 = moment(p2.date, 'DD/MM/YYYY');
 
-      if (m1.isSame(m2)) {
-        return 0;
-      }
+        if (m1.isSame(m2)) {
+          return 0;
+        }
 
-      if (m1.isBefore(m2)) {
-        return 1;
-      }
-      return -1;
-    });
+        if (m1.isBefore(m2)) {
+          return 1;
+        }
+        return -1;
+      });
 
-  const lastPayment = filteredPayments?.[0];
+    const lastPayment = filteredPayments?.[0];
+
+    return {
+      firstNoticeSent,
+      secondNoticeSent,
+      lastNoticeSent,
+      atLeastOneNoticeSent,
+      receiptSent,
+      rentPaid,
+      firstNoticeSentText,
+      secondNoticeSentText,
+      lastNoticeSentText,
+      receiptSentText,
+      lastPayment
+    };
+  }, []);
 
   return (
     <>
@@ -182,21 +211,21 @@ const Steps = withTranslation()(({ t, rent }) => {
           <SuccessChip label={t('PAID')} icon={<DoneIcon />} />
         </Box>
       ) : (
-          <CardRow py={2}>
-            <Typography
-              color="textSecondary"
-              noWrap
-            >
-              {t('Remaining rent')}
-            </Typography>
-            <Box py={0.4} fontSize={16}>
-              <NumberFormat
-                variant="inherit"
-                value={rent.newBalance < 0 ? Math.abs(rent.newBalance) : 0}
-              />
-            </Box>
-          </CardRow>
-        )}
+        <CardRow py={2}>
+          <Typography
+            color="textSecondary"
+            noWrap
+          >
+            {t('Remaining rent')}
+          </Typography>
+          <Box py={0.4} fontSize={16}>
+            <NumberFormat
+              variant="inherit"
+              value={rent.newBalance < 0 ? Math.abs(rent.newBalance) : 0}
+            />
+          </Box>
+        </CardRow>
+      )}
       <Stepper
         activeStep={-1}
         nonLinear={true}
@@ -263,6 +292,10 @@ const Steps = withTranslation()(({ t, rent }) => {
 });
 
 const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
+  const _onEdit = useCallback(() => onEdit(rent), []);
+  const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
+  const tenantIds = useMemo(() => [rent.occupant._id], [rent.occupant._id]);
+
   return (
     <Card>
       <CardContent>
@@ -274,14 +307,14 @@ const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
       <CardActions>
         <CardRow width="100%">
           <SendRentEmailMenu
-            period={moment(rent.term, 'YYYYMMDDHH')}
-            tenantIds={[rent.occupant._id]}
+            period={period}
+            tenantIds={tenantIds}
             // onError={() => {}}
             size="small"
             color="primary"
           />
           <Button
-            onClick={() => onEdit(rent)}
+            onClick={_onEdit}
             size="small"
             color="primary"
           >
@@ -293,4 +326,4 @@ const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
   );
 }));
 
-export default RentCard;
+export default memo(RentCard);

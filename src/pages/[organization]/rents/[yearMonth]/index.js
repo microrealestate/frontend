@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
@@ -46,7 +46,7 @@ const Rents = withTranslation()(observer(({ t }) => {
   const store = useContext(StoreContext);
   const router = useRouter();
 
-  const onSearch = (status, searchText) => {
+  const onSearch = useCallback((status, searchText) => {
     let queryString = '';
     if (searchText || status) {
       queryString = `?search=${encodeURIComponent(searchText)}&status=${encodeURIComponent(status)}`
@@ -57,17 +57,24 @@ const Rents = withTranslation()(observer(({ t }) => {
       { shallow: true }
     );
     store.rent.setFilters({ status, searchText });
-  }
+  }, []);
 
-  const onPeriodChange = async period => {
+  const onPeriodChange = useCallback(async period => {
     store.rent.setPeriod(period);
     await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}`);
-  }
+  }, []);
 
-  const onEdit = async (rent) => {
+  const onEdit = useCallback(async (rent) => {
     store.rent.setSelected(rent);
     await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}/payment/${rent.occupant._id}`);
-  };
+  }, []);
+
+  const filters = useMemo(() => [
+    { id: '', label: t('All') },
+    { id: 'notpaid', label: t('Not paid') },
+    { id: 'partiallypaid', label: t('Partially paid') },
+    { id: 'paid', label: t('Paid') },
+  ], []);
 
   return (
     <Page
@@ -78,13 +85,7 @@ const Rents = withTranslation()(observer(({ t }) => {
         <Box display="flex" alignItems="center">
           <Box flexGrow={1} mr={5}>
             <SearchFilterBar
-              filters={[
-                { id: '', label: t('All') },
-                { id: 'notpaid', label: t('Not paid') },
-                { id: 'partiallypaid', label: t('Partially paid') },
-                { id: 'paid', label: t('Paid') },
-
-              ]}
+              filters={filters}
               defaultValue={store.rent.filters}
               onSearch={onSearch}
             />

@@ -1,4 +1,4 @@
-import { Children } from 'react';
+import { Children, memo, useMemo } from 'react';
 import { Box, Divider, Paper, Typography } from '@material-ui/core';
 import IconTypography from './IconTypography';
 
@@ -15,7 +15,7 @@ const _variantToBgColor = variant => {
   }
 };
 
-export const CardRow = ({ children, ...props }) => (
+export const CardRow = memo(({ children, ...props }) => (
   <Box display="flex" alignItems="center" {...props}>
     { Children.toArray(children).map((child, index) => (
       <Box key={index} flexGrow={index === 0 ? 1 : 0}>
@@ -23,15 +23,15 @@ export const CardRow = ({ children, ...props }) => (
       </Box>
     ))}
   </Box>
-);
+));
 
-export const PageCard = ({ variant, Icon, title, info, children}) => {
-
+export const PageCard = memo(({ variant, Icon, title, info, children}) => {
+  const bgColor = useMemo(() =>_variantToBgColor(variant), [variant]);
   return (
     <Paper>
       <Box
         p={1}
-        bgcolor={_variantToBgColor(variant)}
+        bgcolor={bgColor}
         color="primary.contrastText"
         style={{
           borderTopLeftRadius: 4,
@@ -49,9 +49,9 @@ export const PageCard = ({ variant, Icon, title, info, children}) => {
       </Box>
     </Paper>
   );
-};
+});
 
-export const DashboardCard = ({ variant, Icon, title, info, children }) => {
+export const DashboardCard = memo(({ variant, Icon, title, info, children }) => {
 
   return (
     <Paper style={{
@@ -84,4 +84,4 @@ export const DashboardCard = ({ variant, Icon, title, info, children }) => {
       </Box>
     </Paper>
   )
-};
+});

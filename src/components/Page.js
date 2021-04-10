@@ -1,4 +1,4 @@
-import { useState, useContext, cloneElement, useEffect } from 'react';
+import { useState, useContext, cloneElement, useEffect, memo } from 'react';
 import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
 import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography, Grid } from '@material-ui/core';
@@ -138,4 +138,4 @@ const Page = observer(({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 
   );
 });
 
-export default Page;
+export default memo(Page);

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useContext, useState } from 'react';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
@@ -30,7 +30,7 @@ import { useRouter } from 'next/router';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import TerminateLeaseDialog from '../../../components/TenantForms/TerminateLeaseDialog';
 
-const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
+const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
 
   return (
@@ -41,7 +41,7 @@ const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
       <Typography variant="h6" noWrap>{store.tenant.selected.name}</Typography>
     </Breadcrumbs>
   );
-});
+}));
 
 const WarningTypography = withStyles(theme => {
   return {
@@ -104,7 +104,7 @@ const ContractOverview = withTranslation()(({ t }) => {
             color="textSecondary"
             noWrap
           >
-            {moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').format('L')}
+            {useMemo(() => moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').format('L'), [])}
           </Typography>
         </CardRow>
       )}
@@ -120,7 +120,7 @@ const ContractOverview = withTranslation()(({ t }) => {
             color="textSecondary"
             noWrap
           >
-            {moment(store.tenant.selected.terminationDate || store.tenant.selected.endDate, 'DD/MM/YYYY').format('L')}
+            {useMemo(() => moment(store.tenant.selected.terminationDate || store.tenant.selected.endDate, 'DD/MM/YYYY').format('L'), [])}
           </Typography>
         </CardRow>
       )}
@@ -254,24 +254,27 @@ const Tenant = withTranslation()(observer(({ t }) => {
   const [openConfirmDeleteTenant, setOpenConfirmDeleteTenant] = useState(false);
   const [openConfirmEditTenant, setOpenConfirmEditTenant] = useState(false);
 
-  const onTabChange = (event, newValue) => {
+  const onTabChange = useCallback((event, newValue) => {
     setTabSelected(newValue);
-  };
+  }, []);
 
-  let backPath = `/${store.organization.selected.name}/tenants`;
-  if (store.tenant.filters.searchText || store.tenant.filters.status) {
-    backPath = `${backPath}?search=${encodeURIComponent(store.tenant.filters.searchText)}&status=${encodeURIComponent(store.tenant.filters.status)}`
-  }
+  const backPath = useMemo(() => {
+    let backPath = `/${store.organization.selected.name}/tenants`;
+    if (store.tenant.filters.searchText || store.tenant.filters.status) {
+      backPath = `${backPath}?search=${encodeURIComponent(store.tenant.filters.searchText)}&status=${encodeURIComponent(store.tenant.filters.status)}`
+    }
+    return backPath;
+  }, [store.organization.selected, store.tenant.filters]);
 
-  const onOpenTerminateLease = () => {
+  const onOpenTerminateLease = useCallback(() => {
     setOpenTerminateLease(true);
-  }
+  }, []);
 
-  const onConfirmDeleteTenant = () => {
+  const onConfirmDeleteTenant = useCallback(() => {
     setOpenConfirmDeleteTenant(true);
-  }
+  }, []);
 
-  const onDeleteTenant = async () => {
+  const onDeleteTenant = useCallback(async () => {
     setError('');
 
     const { status } = await store.tenant.delete([store.tenant.selected._id]);
@@ -289,17 +292,17 @@ const Tenant = withTranslation()(observer(({ t }) => {
     }
 
     await router.push(backPath);
-  }
+  }, []);
 
-  const onConfirmEditTenant = () => {
+  const onConfirmEditTenant = useCallback(() => {
     setOpenConfirmEditTenant(true);
-  }
+  }, []);
 
-  const onEditTenant = async () => {
+  const onEditTenant = useCallback(async () => {
     setReadOnly(false);
-  }
+  }, []);
 
-  const onSubmit = async (tenantPart) => {
+  const onSubmit = useCallback(async (tenantPart) => {
     let tenant = toJS(store.tenant.selected);
 
     tenant.properties = tenant.properties || [];
@@ -343,10 +346,10 @@ const Tenant = withTranslation()(observer(({ t }) => {
       store.tenant.setSelected(data);
       await router.push(`/${store.organization.selected.name}/tenants/${data._id}`);
     }
-  }
+  }, []);
 
-  const showTerminateLeaseButton = !!(store.tenant.selected.beginDate && store.tenant.selected.endDate && !store.tenant.selected.terminationDate);
-  const disableEditButton = !(!!store.tenant.selected.properties?.length && readOnly);
+  const showTerminateLeaseButton = useMemo(() => !!(store.tenant.selected.beginDate && store.tenant.selected.endDate && !store.tenant.selected.terminationDate), []);
+  const disableEditButton = useMemo(() => !(!!store.tenant.selected.properties?.length && readOnly), []);
 
   return (
     <Page

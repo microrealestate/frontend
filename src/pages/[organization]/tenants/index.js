@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { useContext, useState } from 'react';
+import { Children, useCallback, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { Avatar, Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
@@ -29,25 +29,28 @@ const useStyles = makeStyles((theme) => ({
 const Properties = ({ tenant }) => {
   return (
     <Box display="flex" height="100%" alignItems="center" flexWrap="wrap">
-      {tenant.properties?.map(({ property }, index) => {
-        let Icon = OfficeIcon;
-        switch (property.type) {
-          case 'office':
-            Icon = OfficeIcon;
-            break;
-          case 'parking':
-            Icon = ParkingIcon;
-            break;
-          case 'letterbox':
-            Icon = MailboxIcon;
-            break;
-          default:
-            Icon = OfficeIcon;
-            break;
-        }
+      {Children.toArray(tenant.properties?.map(({ property }) => {
+        const Icon = useMemo(() => {
+          let Icon = OfficeIcon;
+          switch (property.type) {
+            case 'office':
+              Icon = OfficeIcon;
+              break;
+            case 'parking':
+              Icon = ParkingIcon;
+              break;
+            case 'letterbox':
+              Icon = MailboxIcon;
+              break;
+            default:
+              Icon = OfficeIcon;
+              break;
+          }
+          return Icon;
+        });
 
         return (
-          <Box key={index} m={0.5}>
+          <Box m={0.5}>
             <Chip
               icon={<Icon />}
               label={property.name}
@@ -55,7 +58,7 @@ const Properties = ({ tenant }) => {
             />
           </Box>
         );
-      })}
+      }))}
     </Box>
   );
 }
@@ -65,10 +68,10 @@ const TenantList = withTranslation()(({ t }) => {
   const router = useRouter();
   const classes = useStyles();
 
-  const onEdit = async tenant => {
+  const onEdit = useCallback(async tenant => {
     store.tenant.setSelected(tenant);
     await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
-  }
+  });
 
   return (
     <List
@@ -76,7 +79,7 @@ const TenantList = withTranslation()(({ t }) => {
       aria-labelledby="tenant-list"
     >
       {store.tenant.filteredItems.map(tenant => {
-        const avatar = tenant.name
+        const avatar = useMemo(() => tenant.name
           .split(' ')
           .reduce((acc, w, index) => {
             if (index < 2) {
@@ -86,7 +89,7 @@ const TenantList = withTranslation()(({ t }) => {
           }, [])
           .filter(n => !!n)
           .map(n => n[0])
-          .join('');
+          .join(''), []);
 
         return (
           <Paper key={tenant._id}>
@@ -95,7 +98,7 @@ const TenantList = withTranslation()(({ t }) => {
               style={{
                 marginBottom: 20
               }}
-              onClick={() => onEdit(tenant)}
+              onClick={useCallback(() => onEdit(tenant), [])}
             >
               <Hidden smDown>
                 <ListItemAvatar>
@@ -115,7 +118,7 @@ const TenantList = withTranslation()(({ t }) => {
                           color="textSecondary"
                           component="div"
                         >
-                          {_.startCase(_.capitalize(tenant.manager))}
+                          {useMemo(() => _.startCase(_.capitalize(tenant.manager)), [])}
                         </Typography>
                       )}
                       <Typography
@@ -157,18 +160,18 @@ const Tenants = withTranslation()(observer(({ t }) => {
   const [openNewTenantDialog, setOpenNewTenantDialog] = useState(false);
   const router = useRouter();
 
-  const onSearch = (status, searchText) => {
+  const onSearch = useCallback((status, searchText) => {
     store.tenant.setFilters({ status, searchText });
-  };
+  }, []);
 
-  const onNewTenant = () => {
+  const onNewTenant = useCallback(() => {
     setOpenNewTenantDialog(true);
-  }
+  }, []);
 
-  const onCreateTenant = async (tenant) => {
+  const onCreateTenant = useCallback(async (tenant) => {
     store.tenant.setSelected(tenant);
     await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
-  }
+  }, []);
 
   return (
     <Page

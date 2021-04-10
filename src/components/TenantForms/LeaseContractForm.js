@@ -60,7 +60,6 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
 
   const initialValues =
     useMemo(() => {
-      console.log(toJS(store.tenant.selected))
       return {
         leaseId: store.tenant.selected?.leaseId || '',
         beginDate: store.tenant.selected?.beginDate ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').startOf('day') : null,

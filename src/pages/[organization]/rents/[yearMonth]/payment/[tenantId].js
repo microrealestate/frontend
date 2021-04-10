@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Children, useContext, useState } from 'react';
+import { Children, memo, useCallback, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
@@ -26,7 +26,7 @@ import RequestError from '../../../../../components/RequestError';
 import DownloadLink from '../../../../../components/DownloadLink';
 import PaymentHistory from '../../../../../components/PaymentHistory';
 
-const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
+const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
 
   return (
@@ -37,9 +37,9 @@ const BreadcrumbBar = withTranslation()(({ t, backPath }) => {
       <Typography variant="h6" noWrap>{store.rent.selected.occupant.name}</Typography>
     </Breadcrumbs>
   );
-});
+}));
 
-const FormSection = ({ label, children, ...props }) => {
+const FormSection = memo(({ label, children, ...props }) => {
   return (
     <Accordion {...props}>
       <AccordionSummary
@@ -58,7 +58,7 @@ const FormSection = ({ label, children, ...props }) => {
       </AccordionDetails>
     </Accordion>
   );
-}
+});
 
 const validationSchema = Yup.object().shape({
   payments: Yup.array().of(
@@ -92,7 +92,7 @@ const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' }
 const PaymentForm = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
 
-  const onSubmit = async (values, actions) => {
+  const onSubmit = useCallback(async (values, actions) => {
     // clone to avoid changing the form fields
     const clonedValues = _.cloneDeep(values);
 
@@ -126,9 +126,9 @@ const PaymentForm = withTranslation()(({ t }) => {
     } catch (error) {
       console.error(error);
     }
-  }
+  });
 
-  const initialValues = {
+  const initialValues = useMemo(() => ({
     payments: store.rent.selected.payments.length ? store.rent.selected.payments.map(({ amount, date, type, reference }) => {
       return {
         amount: amount === 0 ? '' : amount,
@@ -142,7 +142,7 @@ const PaymentForm = withTranslation()(({ t }) => {
     promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
     notepromo: store.rent.selected.notepromo || '',
     description: store.rent.selected.description || ''
-  };
+  }), [store.rent.selected]);
 
   return (
     <Formik
@@ -159,8 +159,8 @@ const PaymentForm = withTranslation()(({ t }) => {
                 name="payments"
                 render={arrayHelpers => (
                   <div>
-                    {payments.map((payment, index) => (
-                      <Box key={index}>
+                    {Children.toArray(payments.map((payment, index) => (
+                      <>
                         <Grid container spacing={2}>
                           <Grid item xs={6}>
                             <FormTextField
@@ -211,8 +211,8 @@ const PaymentForm = withTranslation()(({ t }) => {
                             </Button>
                           </Box>
                         )}
-                      </Box>
-                    ))}
+                      </>
+                    )))}
                     <Box display="flex" justifyContent="space-between">
                       <SubmitButton
                         size="small"
@@ -312,7 +312,7 @@ const _rentDetails = rent => {
 
 export const PaymentBalance = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  const rentDetails = _rentDetails(store.rent.selected);
+  const rentDetails = useMemo(() =>_rentDetails(store.rent.selected), []);
 
   return (
     <>
@@ -424,10 +424,13 @@ const RentPayment = withTranslation()(observer(({ t }) => {
 
   //TODO manage errors
 
-  let backPath = `/${store.organization.selected.name}/rents/${store.rent.period}`;
-  if (store.rent.filters.searchText || store.rent.filters.status) {
-    backPath = `${backPath}?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
-  }
+  const backPath = useMemo(() => {
+    let backPath = `/${store.organization.selected.name}/rents/${store.rent.period}`;
+    if (store.rent.filters.searchText || store.rent.filters.status) {
+      backPath = `${backPath}?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
+    }
+    return backPath;
+  }, []);
 
   return (
     <Page
