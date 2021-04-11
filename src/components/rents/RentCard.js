@@ -2,8 +2,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import { memo, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Button, Card, CardActions, CardContent, Chip, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, withStyles } from "@material-ui/core";
-import DoneIcon from '@material-ui/icons/Done';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from "recharts";
+import { Box, Button, Card, CardActions, CardContent, Divider, Step, StepConnector, StepLabel, Stepper, Tooltip, Typography, useTheme } from "@material-ui/core";
 import { withTranslation } from "../../utils/i18n";
 import { NumberFormat } from "../../utils/numberformat";
 import DownloadLink from '../DownloadLink';
@@ -11,17 +11,6 @@ import { CardRow } from '../Cards';
 import SendRentEmailMenu from './SendRentEmailMenu';
 
 import { useStyles } from '../../styles/components/RentCards.styles';
-
-const SuccessChip = withStyles((theme) => ({
-  root: {
-    fontWeight: 'bold',
-    color: theme.palette.common.white,
-    backgroundColor: theme.palette.success.main
-  },
-  icon: {
-    color: theme.palette.common.white
-  }
-}))(Chip);
 
 const Header = ({ rent }) => {
   const classes = useStyles();
@@ -53,76 +42,77 @@ const Header = ({ rent }) => {
   )
 };
 
-// const RentStatus = withTranslation()(({ t, rent }) => {
-//   const theme = useTheme();
-//   const { organization: { selected: { locale, currency } } } = useContext(StoreContext);
-//   const rentDetails = _rentDetails(rent);
-//   let data = [
-//     rentDetails.newBalance < 0 ? Math.abs(rentDetails.newBalance) : 0,
-//     rentDetails.payment
-//   ];
+const RentBar = memo(withTranslation()(({ t, rent }) => {
+  const theme = useTheme();
 
-//   if (rentDetails.totalAmount <= 0) {
-//     data = [
-//       0,
-//       Math.abs(rentDetails.rent)
-//     ]
-//   }
+  const data = useMemo(() => {
+    const leftToPayInBalance = rent.balance - rent.payment;
+    const leftToPayInCurrentRent = leftToPayInBalance < 0 ? rent.totalWithoutBalanceAmount + leftToPayInBalance : rent.totalWithoutBalanceAmount;
+    return [
+      {
+        name: '',
+        payment: rent.payment,
+        balance: leftToPayInBalance > 0 ? leftToPayInBalance : 0,
+        currentRent: leftToPayInCurrentRent > 0 ? leftToPayInCurrentRent : 0
+      }
+    ];
+  }, [rent.payment, rent.totalWithoutBalanceAmount, rent.balance])
 
-//   const labelFunc = (tooltipItem, data) => {
-//     const amount = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
-//     return [
-//       t('Remaining {{amount}}', {
-//         amount: formatNumber(locale, currency, amount)
-//       }),
-//       t('Paid {{amount}}', {
-//         amount: formatNumber(locale, currency, amount)
-//       })
-//     ][tooltipItem.index];
-//   }
+  const remainingRentToPay = useMemo(() => rent.newBalance < 0 ? Math.abs(rent.newBalance) : 0, [rent.newBalance]);
 
-//   return (
-//     <>
-//       <CardRow pb={1.5}>
-//         <Typography
-//           color="textSecondary"
-//           noWrap
-//         >
-//           {t('Remaining payment')}
-//         </Typography>
-//         <Box py={0.4} fontSize={18}>
-//           <NumberFormat
-//             variant="inherit"
-//             value={rentDetails.newBalance < 0 ? Math.abs(rentDetails.newBalance) : 0}
-//           />
-//         </Box>
-//       </CardRow>
-//       <Doughnut data={{
-//         datasets: [{
-//           data,
-//           backgroundColor: [
-//             hexToRgb(theme.palette.warning.main),
-//             hexToRgb(theme.palette.success.main),
-//           ]
-//         }]
-//       }}
-//         options={{
-//           animation: {
-//             duration: 0 // general animation time
-//           },
-//           legend: {
-//             display: false
-//           },
-//           tooltips: {
-//             callbacks: {
-//               label: labelFunc
-//             }
-//           }
-//         }}
-//       />
-//     </>
-//   );
-// });
+  return (
+    <>
+     <Tooltip
+        title={
+          <Box width={200}>
+            <CardRow>
+              <Typography>{t('Balance')}</Typography>
+              <NumberFormat value={rent.balance} />
+            </CardRow>
+            <CardRow pt={1}>
+              <Typography>{t('Rent')}</Typography>
+              <NumberFormat value={rent.totalWithoutBalanceAmount} />
+            </CardRow>
+            <CardRow py={1}>
+              <Typography>{t('Total')}</Typography>
+              <NumberFormat value={rent.totalToPay} />
+            </CardRow>
+            <CardRow>
+              <Typography>{t('Payment')}</Typography>
+              <NumberFormat value={rent.payment} />
+            </CardRow>
+          </Box>
+        }
+      >
+        <span>
+      <ResponsiveContainer height={50}>
+        <BarChart layout="vertical" stackOffset="sign" data={data}>
+          <XAxis type="number" hide={true} axisLine={false} domain={['dataMin', 'dataMax']} />
+          <YAxis dataKey="name" hide={true} type="category" />
+          <Bar isAnimationActive={false} dataKey="payment" stackId="a" fill={theme.palette.success.main} background={{ fill: theme.palette.grey[200] }} />
+          <Bar isAnimationActive={false} dataKey="balance" stackId="a" fill={theme.palette.warning.dark} />
+          <Bar isAnimationActive={false} dataKey="currentRent" stackId="a" fill={theme.palette.warning.main} />
+        </BarChart>
+      </ResponsiveContainer>
+      </span>
+      </Tooltip>
+      <CardRow pb={2}>
+        <Typography
+          color="textSecondary"
+          noWrap
+        >
+          {t('Left to pay')}
+        </Typography>
+        <Box py={0.4} fontSize={16}>
+          <NumberFormat
+            variant="inherit"
+            value={remainingRentToPay}
+          />
+        </Box>
+      </CardRow>
+    </>
+  );
+}));
 
 const Steps = withTranslation()(({ t, rent }) => {
   const classes = useStyles();
@@ -205,89 +195,67 @@ const Steps = withTranslation()(({ t, rent }) => {
   }, [rent.emailStatus, rent.payments]);
 
   return (
-    <>
-      { rentPaid ? (
-        <Box py={1.85} align="right" color="success.main">
-          <SuccessChip label={t('PAID')} icon={<DoneIcon />} />
-        </Box>
-      ) : (
-        <CardRow py={2}>
-          <Typography
-            color="textSecondary"
-            noWrap
-          >
-            {t('Remaining rent')}
-          </Typography>
-          <Box py={0.4} fontSize={16}>
-            <NumberFormat
-              variant="inherit"
-              value={rent.newBalance < 0 ? Math.abs(rent.newBalance) : 0}
+    <Stepper
+      activeStep={-1}
+      nonLinear={true}
+      orientation="vertical"
+      connector={<StepConnector classes={{ vertical: classes.stepConnector }} />}
+      style={{
+        padding: 0
+      }}
+    >
+      <Step>
+        <StepLabel icon={' '} completed={atLeastOneNoticeSent}>
+          {t('Notice sent')}
+          {firstNoticeSent && (
+            <DownloadLink
+              tooltipText={firstNoticeSentText}
+              url={`/rentcall/${rent.occupant._id}/${rent.term}`}
+              documentName={`${rent.occupant.name}-${t('first notice')}.pdf`}
+              color="textSecondary" variant="caption"
+              withIcon
             />
-          </Box>
-        </CardRow>
-      )}
-      <Stepper
-        activeStep={-1}
-        nonLinear={true}
-        orientation="vertical"
-        connector={<StepConnector classes={{ vertical: classes.stepConnector }} />}
-        style={{
-          padding: 0
-        }}
-      >
-        <Step>
-          <StepLabel icon={' '} completed={atLeastOneNoticeSent}>
-            {t('Notice sent')}
-            {firstNoticeSent && (
-              <DownloadLink
-                tooltipText={firstNoticeSentText}
-                url={`/rentcall/${rent.occupant._id}/${rent.term}`}
-                documentName={`${rent.occupant.name}-${t('first notice')}.pdf`}
-                color="textSecondary" variant="caption"
-                withIcon
-              />
-            )}
-            {secondNoticeSent && (
-              <DownloadLink
-                tooltipText={secondNoticeSentText}
-                url={`/rentcall_reminder/${rent.occupant._id}/${rent.term}`}
-                documentName={`${rent.occupant.name}-${t('second notice')}.pdf`}
-                color="textSecondary" variant="caption"
-                withIcon
-              />
-            )}
-            {lastNoticeSent && (
-              <DownloadLink
-                tooltipText={lastNoticeSentText}
-                url={`/rentcall_last_reminder/${rent.occupant._id}/${rent.term}`}
-                documentName={`${rent.occupant.name}-${t('last notice')}.pdf`}
-                color="textSecondary" variant="caption"
-                withIcon
-              />
-            )}
-          </StepLabel>
-        </Step>
-        <Step>
-          <StepLabel icon={' '} completed={rentPaid}>
-            {lastPayment ? t('Paid on {{date}}', { date: moment(lastPayment.date, 'DD/MM/YYYY').format('LL') }) : t('Paid')}
-          </StepLabel>
-        </Step>
-        <Step>
-          <StepLabel icon={' '} completed={receiptSent}>
-            {t('Receipt sent')}
-            {receiptSent && (
-              <DownloadLink
-                tooltipText={receiptSentText}
-                url={`/invoice/${rent.occupant._id}/${rent.term}`}
-                documentName={`${rent.occupant.name}-${t('invoice')}.pdf`}
-                color="textSecondary" variant="caption"
-                withIcon
-              />
-            )}
-          </StepLabel>
-        </Step>
-      </Stepper>
-    </>
+          )}
+          {secondNoticeSent && (
+            <DownloadLink
+              tooltipText={secondNoticeSentText}
+              url={`/rentcall_reminder/${rent.occupant._id}/${rent.term}`}
+              documentName={`${rent.occupant.name}-${t('second notice')}.pdf`}
+              color="textSecondary" variant="caption"
+              withIcon
+            />
+          )}
+          {lastNoticeSent && (
+            <DownloadLink
+              tooltipText={lastNoticeSentText}
+              url={`/rentcall_last_reminder/${rent.occupant._id}/${rent.term}`}
+              documentName={`${rent.occupant.name}-${t('last notice')}.pdf`}
+              color="textSecondary" variant="caption"
+              withIcon
+            />
+          )}
+        </StepLabel>
+      </Step>
+      <Step>
+        <StepLabel icon={' '} completed={rentPaid}>
+          {lastPayment ? t('Paid on {{date}}', { date: moment(lastPayment.date, 'DD/MM/YYYY').format('LL') }) : t('Paid')}
+        </StepLabel>
+      </Step>
+      <Step>
+        <StepLabel icon={' '} completed={receiptSent}>
+          {t('Receipt sent')}
+          {receiptSent && (
+            <DownloadLink
+              tooltipText={receiptSentText}
+              url={`/invoice/${rent.occupant._id}/${rent.term}`}
+              documentName={`${rent.occupant.name}-${t('invoice')}.pdf`}
+              color="textSecondary" variant="caption"
+              withIcon
+            />
+          )}
+        </StepLabel>
+      </Step>
+    </Stepper>
   );
 });
 
@@ -300,8 +268,11 @@ const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
     <Card>
       <CardContent>
         <Header rent={rent} />
+        <RentBar rent={rent} />
         <Divider />
-        <Steps rent={rent} />
+        <Box pt={2}>
+          <Steps rent={rent} />
+        </Box>
       </CardContent>
       <Divider variant="middle" />
       <CardActions>
