@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Children, memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { autorun } from 'mobx';
 import { withTranslation } from 'next-i18next';
 import Table from '@material-ui/core/Table';
@@ -140,11 +140,11 @@ const RentTable = withTranslation()(({ t }) => {
 
   const onSelectAllClick = useCallback((event) => {
     if (event.target.checked) {
-      setSelected(filteredRents.reduce((acc, { _id, occupant: { hasContactEmails } }) => {
-        if (hasContactEmails) {
+      setSelected(filteredRents.reduce((acc, rent) => {
+        if (rent.occupant.hasContactEmails) {
           return [
             ...acc,
-            _id
+            rent
           ];
         }
         return acc;
@@ -154,15 +154,15 @@ const RentTable = withTranslation()(({ t }) => {
     setSelected([]);
   }, [filteredRents]);
 
-  const onSelectClick = useCallback((event, id) => {
+  const onSelectClick = useCallback((event, rent) => {
     if (event.target.checked) {
       setSelected((selected) => [
         ...selected,
-        id
+        rent
       ]);
       return;
     }
-    setSelected((selected) => selected.filter(selectedId => selectedId !== id));
+    setSelected((selected) => selected.filter(r => r._id !== rent._id));
   }, []);
 
   const onSend = useCallback(async docName => {
@@ -170,9 +170,8 @@ const RentTable = withTranslation()(({ t }) => {
 
     const sendStatus = await store.rent.sendEmail({
       document: docName,
-      tenantIds: selected,
-      year: store.rent._period.year(),
-      month: store.rent._period.month() + 1
+      tenantIds: selected.map(r => r._id),
+      terms: selected.map(r => r.term),
     });
     if (sendStatus !== 200) {
       // TODO check error code to show a more detail error message
@@ -235,24 +234,24 @@ const RentTable = withTranslation()(({ t }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRents.map(rent => {
-              const isItemSelected = selected.includes(rent._id);
+            {Children.toArray(filteredRents.map(rent => {
+              const isItemSelected = selected.map(r => r._id).includes(rent._id);
               const contactEmails = rent.occupant.contactEmails.join(', ');
               return (
-                <TableRow hover selected={isItemSelected} size="small" key={rent._id}>
+                <TableRow hover selected={isItemSelected} size="small">
                   <TableCell padding="checkbox">
                     {rent.occupant.hasContactEmails ? (
                       <Checkbox
                         color="default"
                         checked={isItemSelected}
-                        onChange={event => onSelectClick(event, rent._id)}
+                        onChange={event => onSelectClick(event, rent)}
                         inputProps={{ 'aria-labelledby': rent.occupant.name }}
                       />
                     ) : (
                       <Tooltip title={t('No emails available for this tenant')}>
                         <span>
                           <Checkbox
-                            onChange={event => onSelectClick(event, rent._id)}
+                            onChange={event => onSelectClick(event, rent)}
                             inputProps={{ 'aria-labelledby': rent.occupant.name }}
                             disabled
                           />
@@ -338,7 +337,7 @@ const RentTable = withTranslation()(({ t }) => {
                 </TableRow>
               )
             }
-            )}
+            ))}
           </TableBody>
         </Table>
       </Paper>

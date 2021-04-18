@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext, useMemo, useCallback } from 'react';
+import { useEffect, useState, useRef, useContext, useMemo, useCallback, memo } from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -16,7 +16,7 @@ import { ListItemIcon } from '@material-ui/core';
 import { StoreContext } from '../store';
 import { useRouter } from 'next/router';
 
-const Nav = withTranslation()(({ t }) => {
+const Nav = memo(withTranslation()(({ t }) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [openDebounced, setOpenDebounced] = useState(false);
@@ -106,6 +106,6 @@ const Nav = withTranslation()(({ t }) => {
             </List>
         </Drawer>
     );
-});
+}));
 
 export default Nav;

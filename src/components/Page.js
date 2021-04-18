@@ -12,15 +12,15 @@ import { useRouter } from 'next/router';
 
 const { publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH } } = getConfig();
 
-const Demonstrationbar = withTranslation()(({ t }) => {
+const Demonstrationbar = memo(withTranslation()(({ t }) => {
   return DEMO_MODE ? (
     <Box color="primary.contrastText" bgcolor="success.dark">
       <Typography variant="button" component="div" align="center">{t('Demonstration mode')}</Typography>
     </Box>
   ) : null;
-});
+}));
 
-const MainToolbar = withTranslation()(({ t }) => {
+const MainToolbar = memo(withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
 
   const signOut = useCallback(async event => {
@@ -50,9 +50,9 @@ const MainToolbar = withTranslation()(({ t }) => {
       </Box>
     </Box>
   )
-});
+}));
 
-const ElevationScroll = ({ children }) => {
+const ElevationScroll = memo(({ children }) => {
   const trigger = useScrollTrigger({
     disableHysteresis: true
   });
@@ -63,15 +63,13 @@ const ElevationScroll = ({ children }) => {
       backgroundColor: 'transparent'
     } : null
   });
-};
+});
 
 const Page = observer(({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
   console.log('Page functional component')
   const store = useContext(StoreContext);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const displayToolbars = store.user.signedIn;
 
   useEffect(() => {
     const routeChangeStart = (url, { shallow }) => {
@@ -97,7 +95,7 @@ const Page = observer(({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 
   return (
     <>
       <Demonstrationbar />
-      {displayToolbars && (
+      {store.user.signedIn && (
         <Toolbar>
           <MainToolbar />
         </Toolbar>

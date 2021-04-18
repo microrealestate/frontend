@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Children, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { withTranslation } from 'next-i18next';
 import { Box, Paper, Typography } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
@@ -11,6 +11,7 @@ import { StoreContext } from '../../store';
 import { NumberFormat } from '../../utils/numberformat';
 import RequestError from '../RequestError';
 import Loading from '../Loading';
+import { getPeriod } from './RentPeriod';
 
 const RentHistory = withTranslation()(({ t, tenantId }) => {
   const store = useContext(StoreContext);
@@ -77,12 +78,12 @@ const RentHistory = withTranslation()(({ t, tenantId }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tenant?.rents?.map(rent => {
+                {Children.toArray(tenant?.rents?.map(rent => {
                   const isSelected = String(rent.term) === selectedTerm;
                   return (
-                    <TableRow hover ref={isSelected ? selectedRowRef : null} selected={isSelected} size="small" key={rent.term}>
+                    <TableRow hover ref={isSelected ? selectedRowRef : null} selected={isSelected} size="small">
                       <TableCell>
-                        {moment(rent.term, 'YYYYMMDDHH').format('MMMM YYYY')}
+                        {getPeriod(t, rent.term, tenant.occupant.frequency)}
                       </TableCell>
                       <TableCell align="right">
                         <NumberFormat variant="body1" value={rent.totalWithoutBalanceAmount + rent.promo - rent.extracharge} />
@@ -100,9 +101,9 @@ const RentHistory = withTranslation()(({ t, tenantId }) => {
                         <NumberFormat variant="body1" value={rent.newBalance} />
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 }
-                )}
+                ))}
               </TableBody>
             </Table >
           </Paper >

@@ -68,7 +68,7 @@ export default class Rent {
         // Search match contact
         if (!found) {
           found = !!contacts
-            .map(({ contact = '', email = '', phone = '' }) => ({
+            ?.map(({ contact = '', email = '', phone = '' }) => ({
               contact: contact.replace(regExp, '').toLowerCase(),
               email: email.toLowerCase(),
               phone: phone.replace(regExp, '')
@@ -116,12 +116,9 @@ export default class Rent {
     }
   };
 
-  *fetchOneTenantRent(tenantId) {
+  *fetchOneTenantRent(tenantId, term) {
     try {
-      const year = this._period.year();
-      const month = this._period.month() + 1;
-
-      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}/${year}/${month}`);
+      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}/${term}`);
 
       return { status: 200, data: response.data };
     } catch (error) {
@@ -139,9 +136,9 @@ export default class Rent {
     }
   };
 
-  *pay(payment) {
+  *pay(term, payment) {
     try {
-      const response = yield useApiFetch().patch(`/rents/payment/${payment._id}`, payment);
+      const response = yield useApiFetch().patch(`/rents/payment/${payment._id}/${term}`, payment);
       const rent = response.data;
       const index = this.items.findIndex(item => item._id === payment._id);
       if (index > -1) {

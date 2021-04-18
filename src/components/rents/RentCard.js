@@ -11,8 +11,9 @@ import { CardRow } from '../Cards';
 import SendRentEmailMenu from './SendRentEmailMenu';
 
 import { useStyles } from '../../styles/components/RentCards.styles';
+import RentPeriod from './RentPeriod';
 
-const Header = ({ rent }) => {
+const Header = memo(({ rent }) => {
   const classes = useStyles();
   return (
     <>
@@ -40,7 +41,7 @@ const Header = ({ rent }) => {
       </Box>
     </>
   )
-};
+});
 
 const RentBar = memo(withTranslation()(({ t, rent }) => {
   const theme = useTheme();
@@ -62,7 +63,10 @@ const RentBar = memo(withTranslation()(({ t, rent }) => {
 
   return (
     <>
-     <Tooltip
+      <CardRow>
+        <RentPeriod term={rent.term} frequency={rent.occupant.frequency} />
+      </CardRow>
+      <Tooltip
         title={
           <Box width={200}>
             <CardRow>
@@ -85,24 +89,19 @@ const RentBar = memo(withTranslation()(({ t, rent }) => {
         }
       >
         <span>
-      <ResponsiveContainer height={50}>
-        <BarChart layout="vertical" stackOffset="sign" data={data}>
-          <XAxis type="number" hide={true} axisLine={false} domain={['dataMin', 'dataMax']} />
-          <YAxis dataKey="name" hide={true} type="category" />
-          <Bar isAnimationActive={false} dataKey="payment" stackId="a" fill={theme.palette.success.main} background={{ fill: theme.palette.grey[200] }} />
-          <Bar isAnimationActive={false} dataKey="balance" stackId="a" fill={theme.palette.warning.dark} />
-          <Bar isAnimationActive={false} dataKey="currentRent" stackId="a" fill={theme.palette.warning.main} />
-        </BarChart>
-      </ResponsiveContainer>
-      </span>
+          <ResponsiveContainer height={50}>
+            <BarChart layout="vertical" stackOffset="sign" data={data}>
+              <XAxis type="number" hide={true} axisLine={false} domain={['dataMin', 'dataMax']} />
+              <YAxis dataKey="name" hide={true} type="category" />
+              <Bar isAnimationActive={false} dataKey="payment" stackId="a" fill={theme.palette.success.main} background={{ fill: theme.palette.grey[200] }} />
+              <Bar isAnimationActive={false} dataKey="balance" stackId="a" fill={theme.palette.warning.dark} />
+              <Bar isAnimationActive={false} dataKey="currentRent" stackId="a" fill={theme.palette.warning.main} />
+            </BarChart>
+          </ResponsiveContainer>
+        </span>
       </Tooltip>
       <CardRow pb={2}>
-        <Typography
-          color="textSecondary"
-          noWrap
-        >
-          {t('Left to pay')}
-        </Typography>
+        <Typography>{t('Left to pay')}</Typography>
         <Box py={0.4} fontSize={16}>
           <NumberFormat
             variant="inherit"
@@ -114,7 +113,7 @@ const RentBar = memo(withTranslation()(({ t, rent }) => {
   );
 }));
 
-const Steps = withTranslation()(({ t, rent }) => {
+const Steps = memo(withTranslation()(({ t, rent }) => {
   const classes = useStyles();
 
   const {
@@ -257,12 +256,12 @@ const Steps = withTranslation()(({ t, rent }) => {
       </Step>
     </Stepper>
   );
-});
+}));
 
 const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
   const _onEdit = useCallback(() => onEdit(rent), []);
   const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
-  const tenantIds = useMemo(() => [rent.occupant._id], [rent.occupant._id]);
+  const {tenantIds, terms} = useMemo(() => ({tenantIds: [rent.occupant._id], terms: [rent.term]}), [rent.occupant._id]);
 
   return (
     <Card>
@@ -280,6 +279,7 @@ const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
           <SendRentEmailMenu
             period={period}
             tenantIds={tenantIds}
+            terms={terms}
             // onError={() => {}}
             size="small"
             color="primary"

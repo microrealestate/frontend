@@ -12,19 +12,21 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SendIcon from '@material-ui/icons/Send';
 import HistoryIcon from '@material-ui/icons/History';
 
-import Page from '../../../../../components/Page'
-import { withAuthentication } from '../../../../../components/Authentication'
-import { getStoreInstance, StoreContext } from '../../../../../store';
-import { isServer } from '../../../../../utils';
-import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../../components/Form';
-import { CardRow, DashboardCard } from '../../../../../components/Cards';
-import { NumberFormat } from '../../../../../utils/numberformat';
-import Link from '../../../../../components/Link';
-import SendRentEmailMenu from '../../../../../components/rents/SendRentEmailMenu';
-import FullScreenDialogButton from '../../../../../components/FullScreenDialogButton';
-import RequestError from '../../../../../components/RequestError';
-import DownloadLink from '../../../../../components/DownloadLink';
-import RentHistory from '../../../../../components/rents/RentHistory';
+import Page from '../../../../components/Page'
+import { withAuthentication } from '../../../../components/Authentication'
+import { getStoreInstance, StoreContext } from '../../../../store';
+import { isServer } from '../../../../utils';
+import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../components/Form';
+import { CardRow, DashboardCard } from '../../../../components/Cards';
+import { NumberFormat } from '../../../../utils/numberformat';
+import Link from '../../../../components/Link';
+import SendRentEmailMenu from '../../../../components/rents/SendRentEmailMenu';
+import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
+import RequestError from '../../../../components/RequestError';
+import DownloadLink from '../../../../components/DownloadLink';
+import RentHistory from '../../../../components/rents/RentHistory';
+import { useRouter } from 'next/router';
+import { getPeriod } from '../../../../components/rents/RentPeriod';
 
 const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
@@ -91,8 +93,10 @@ const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' }
 
 const PaymentForm = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
+  const router = useRouter();
 
   const onSubmit = useCallback(async (values, actions) => {
+    const { term } = router.query;
     // clone to avoid changing the form fields
     const clonedValues = _.cloneDeep(values);
 
@@ -109,7 +113,7 @@ const PaymentForm = withTranslation()(({ t }) => {
     clonedValues.year = store.rent.selected.year;
     clonedValues._id = store.rent.selected._id;
     try {
-      await store.rent.pay(clonedValues);
+      await store.rent.pay(term, clonedValues);
 
       // clean fields if empty amounts were saved
       if (clonedValues.payments.length === 0) {
@@ -453,6 +457,7 @@ const RentPayment = withTranslation()(observer(({ t }) => {
           </Box>
           <SendRentEmailMenu
             tenantIds={[store.rent.selected.occupant._id]}
+            terms={[store.rent.selected.term]}
             period={store.rent._period}
             variant="contained"
             startIcon={<SendIcon />}
@@ -470,7 +475,7 @@ const RentPayment = withTranslation()(observer(({ t }) => {
             <Box pb={4}>
               <DashboardCard
                 Icon={ReceiptIcon}
-                title={t('Rent of {{monthYear}}', { monthYear: store.rent._period.format('MMMM YYYY') })}
+                title={t('Rent of {{monthYear}}', { monthYear: getPeriod(t, store.rent.selected.term, store.rent.selected.occupant.frequency)})}
               >
                 <Box pb={1}>
                   <NumberFormat align="right" variant="h5" value={store.rent.selected.totalAmount > 0 ? store.rent.selected.totalAmount : 0} />
@@ -551,19 +556,9 @@ const RentPayment = withTranslation()(observer(({ t }) => {
 RentPayment.getInitialProps = async (context) => {
   console.log('RentPayment.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
-  const tenantId = isServer() ? context.query.tenantId : store.rent.selected._id;
+  const {tenantId, term } = context.query;
 
-  if (isServer()) {
-    const { yearMonth } = context.query;
-    const rentPeriod = moment(yearMonth, 'YYYY.MM', true);
-    if (!rentPeriod.isValid()) {
-      return { error: { statusCode: 404 } };
-    }
-
-    store.rent.setPeriod(rentPeriod);
-  }
-
-  const { status, data } = await store.rent.fetchOneTenantRent(tenantId);
+  const { status, data } = await store.rent.fetchOneTenantRent(tenantId, term);
   if (status !== 200) {
     return { error: { statusCode: status } };
   }

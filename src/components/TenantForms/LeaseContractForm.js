@@ -104,6 +104,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
   const _onSubmit = async lease => {
     await onSubmit({
       leaseId: lease.leaseId,
+      frequency: store.leaseType.items.find(({ _id })=> _id === lease.leaseId).timeRange,
       beginDate: lease.beginDate?.format('DD/MM/YYYY'),
       endDate: lease.endDate?.format('DD/MM/YYYY'),
       terminationDate: lease.terminationDate?.format('DD/MM/YYYY'),

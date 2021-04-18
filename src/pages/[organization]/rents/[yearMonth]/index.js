@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react';
+import { Children, useCallback, useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
@@ -66,7 +66,7 @@ const Rents = withTranslation()(observer(({ t }) => {
 
   const onEdit = useCallback(async (rent) => {
     store.rent.setSelected(rent);
-    await router.push(`/${store.organization.selected.name}/rents/${store.rent.period}/payment/${rent.occupant._id}`);
+    await router.push(`/${store.organization.selected.name}/payment/${rent.occupant._id}/${store.rent.selected.term}`);
   }, []);
 
   const filters = useMemo(() => [
@@ -144,11 +144,11 @@ const Rents = withTranslation()(observer(({ t }) => {
         </Hidden>
       )}
       <Grid container spacing={3}>
-        {store.rent.filteredItems.map(rent => (
-          <Grid key={rent.uid} item xs={12} md={4}>
+        {Children.toArray(store.rent.filteredItems.map(rent => (
+          <Grid item xs={12} md={4}>
             <RentCard rent={rent} onEdit={onEdit} />
           </Grid>
-        ))}
+        )))}
       </Grid>
     </Page>
   );

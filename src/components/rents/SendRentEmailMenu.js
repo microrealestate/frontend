@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react';
+import { memo, useCallback, useContext, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -6,7 +6,7 @@ import { CircularProgress } from '@material-ui/core';
 import { withTranslation } from '../../utils/i18n';
 import { StoreContext } from '../../store';
 
-const SendRentEmailMenu = withTranslation()(({ t, i18n, tReady, period, tenantIds, onError, ...buttonProps }) => {
+const SendRentEmailMenu = memo(withTranslation()(({ t, i18n, tReady, period, tenantIds, terms, onError, ...buttonProps }) => {
   const store = useContext(StoreContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -17,8 +17,7 @@ const SendRentEmailMenu = withTranslation()(({ t, i18n, tReady, period, tenantId
     const sendStatus = await store.rent.sendEmail({
       document: docName,
       tenantIds,
-      year: period.year(),
-      month: period.month() + 1
+      terms
     });
     setSendingEmail(false);
     if (sendStatus !== 200) {
@@ -66,6 +65,6 @@ const SendRentEmailMenu = withTranslation()(({ t, i18n, tReady, period, tenantId
       </Menu>
     </>
   );
-});
+}));
 
 export default SendRentEmailMenu;
