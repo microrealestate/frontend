@@ -259,7 +259,7 @@ const Steps = memo(withTranslation()(({ t, rent }) => {
 }));
 
 const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
-  const _onEdit = useCallback(() => onEdit(rent), []);
+  const _onEdit = useCallback(() => onEdit(rent), [rent]);
   const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
   const {tenantIds, terms} = useMemo(() => ({tenantIds: [rent.occupant._id], terms: [rent.term]}), [rent.occupant._id]);
 

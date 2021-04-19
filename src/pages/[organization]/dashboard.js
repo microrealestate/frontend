@@ -5,7 +5,7 @@ import Page from '../../components/Page';
 import { withTranslation } from '../../utils/i18n';
 
 const Dashboard = withTranslation()(observer(({ t }) => {
-  console.log('Dashboard functional component')
+  console.log('Dashboard functional component');
 
   return (
     <Page>

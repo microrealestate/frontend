@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Children, useCallback, useContext, useMemo, useState } from 'react';
+import { Children, memo, useCallback, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { Avatar, Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
@@ -26,28 +26,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Properties = ({ tenant }) => {
+const Properties = memo(({ tenant }) => {
   return (
     <Box display="flex" height="100%" alignItems="center" flexWrap="wrap">
       {Children.toArray(tenant.properties?.map(({ property }) => {
-        const Icon = useMemo(() => {
-          let Icon = OfficeIcon;
-          switch (property.type) {
-            case 'office':
-              Icon = OfficeIcon;
-              break;
-            case 'parking':
-              Icon = ParkingIcon;
-              break;
-            case 'letterbox':
-              Icon = MailboxIcon;
-              break;
-            default:
-              Icon = OfficeIcon;
-              break;
-          }
-          return Icon;
-        });
+        let Icon = OfficeIcon;
+        switch (property.type) {
+          case 'office':
+            Icon = OfficeIcon;
+            break;
+          case 'parking':
+            Icon = ParkingIcon;
+            break;
+          case 'letterbox':
+            Icon = MailboxIcon;
+            break;
+          default:
+            Icon = OfficeIcon;
+            break;
+        }
 
         return (
           <Box m={0.5}>
@@ -61,7 +58,7 @@ const Properties = ({ tenant }) => {
       }))}
     </Box>
   );
-}
+});
 
 const TenantList = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
@@ -71,15 +68,15 @@ const TenantList = withTranslation()(({ t }) => {
   const onEdit = useCallback(async tenant => {
     store.tenant.setSelected(tenant);
     await router.push(`/${store.organization.selected.name}/tenants/${tenant._id}`);
-  });
+  }, []);
 
   return (
     <List
       component="nav"
       aria-labelledby="tenant-list"
     >
-      {store.tenant.filteredItems.map(tenant => {
-        const avatar = useMemo(() => tenant.name
+      {Children.toArray(store.tenant.filteredItems.map(tenant => {
+        const avatar = tenant.name
           .split(' ')
           .reduce((acc, w, index) => {
             if (index < 2) {
@@ -89,16 +86,16 @@ const TenantList = withTranslation()(({ t }) => {
           }, [])
           .filter(n => !!n)
           .map(n => n[0])
-          .join(''), []);
+          .join('');
 
         return (
-          <Paper key={tenant._id}>
+          <Paper>
             <ListItem
               button
               style={{
                 marginBottom: 20
               }}
-              onClick={useCallback(() => onEdit(tenant), [])}
+              onClick={() => onEdit(tenant)}
             >
               <Hidden smDown>
                 <ListItemAvatar>
@@ -118,7 +115,7 @@ const TenantList = withTranslation()(({ t }) => {
                           color="textSecondary"
                           component="div"
                         >
-                          {useMemo(() => _.startCase(_.capitalize(tenant.manager)), [])}
+                          {_.startCase(_.capitalize(tenant.manager))}
                         </Typography>
                       )}
                       <Typography
@@ -150,7 +147,7 @@ const TenantList = withTranslation()(({ t }) => {
             </ListItem>
           </Paper>
         )
-      })}
+      }))}
     </List>
   );
 });
