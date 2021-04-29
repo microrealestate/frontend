@@ -15,6 +15,7 @@ import RequestError from '../../components/RequestError'
 import { TabPanel } from '../../components/Tabs';
 import { getStoreInstance, StoreContext } from '../../store'
 import { isServer } from '../../utils';
+import ThirdPartiesForm from '../../components/OrganizationForms/ThirdPartiesForm';
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 
@@ -80,6 +81,7 @@ const Settings = withTranslation()(observer(({ t }) => {
           <Tab label={t('Billing')} />
           <Tab label={t('Lease types')} />
           <Tab label={t('Manage access')} />
+          <Tab label={t('Third-parties')} />
         </Tabs>
         <TabPanel value={tabSelected} index={0}>
           <LandlordForm onSubmit={onSubmit} />
@@ -92,6 +94,9 @@ const Settings = withTranslation()(observer(({ t }) => {
         </TabPanel>
         <TabPanel value={tabSelected} index={3}>
           <Members onSubmit={onSubmit} />
+        </TabPanel>
+        <TabPanel value={tabSelected} index={4}>
+          <ThirdPartiesForm onSubmit={onSubmit} />
         </TabPanel>
       </Paper>
     </Page>

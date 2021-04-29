@@ -55,7 +55,7 @@ const languages = [
   { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
 ];
 
-const LandlordForm = withTranslation()(observer(({ t, submitLabel, submitFullWidth = true, onSubmit }) => {
+const LandlordForm = withTranslation()(observer(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const initialValues = useMemo(() => ({

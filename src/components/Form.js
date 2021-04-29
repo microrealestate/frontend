@@ -8,7 +8,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 import { withTranslation } from '../utils/i18n';
 
-export const FormTextField = RestrictedComponent(({ label, disabled, ...props }) => {
+export const FormTextField = RestrictedComponent(({ label, disabled, showHidePassword = true, ...props }) => {
   const [displayPassword, showPassword] = useState(false);
   const [field, meta] = useField(props);
   const { isSubmitting } = useFormikContext();
@@ -30,7 +30,7 @@ export const FormTextField = RestrictedComponent(({ label, disabled, ...props })
       <InputLabel htmlFor={props.name} error={hasError}>{label}</InputLabel>
       <Input
         error={hasError}
-        endAdornment={props.type === 'password' ? (
+        endAdornment={props.type === 'password' && showHidePassword ? (
           <InputAdornment position="end">
             <IconButton
               aria-label="toggle password visibility"
