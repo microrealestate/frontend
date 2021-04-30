@@ -65,6 +65,7 @@ const RentBar = memo(withTranslation()(({ t, rent }) => {
     <>
       <CardRow>
         <RentPeriod term={rent.term} frequency={rent.occupant.frequency} />
+        <NumberFormat variant="h5" value={rent.totalToPay} />
       </CardRow>
       <Tooltip
         title={
@@ -101,13 +102,8 @@ const RentBar = memo(withTranslation()(({ t, rent }) => {
         </span>
       </Tooltip>
       <CardRow pb={2}>
-        <Typography>{t('Left to pay')}</Typography>
-        <Box py={0.4} fontSize={16}>
-          <NumberFormat
-            variant="inherit"
-            value={remainingRentToPay}
-          />
-        </Box>
+        <Typography variant="caption">{t('Left to pay')}</Typography>
+        <NumberFormat variant="caption" value={remainingRentToPay} />
       </CardRow>
     </>
   );
@@ -261,7 +257,7 @@ const Steps = memo(withTranslation()(({ t, rent }) => {
 const RentCard = withTranslation()(observer(({ t, rent, onEdit }) => {
   const _onEdit = useCallback(() => onEdit(rent), [rent]);
   const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
-  const {tenantIds, terms} = useMemo(() => ({tenantIds: [rent.occupant._id], terms: [rent.term]}), [rent.occupant._id]);
+  const { tenantIds, terms } = useMemo(() => ({ tenantIds: [rent.occupant._id], terms: [rent.term] }), [rent.occupant._id]);
 
   return (
     <Card>
