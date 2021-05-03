@@ -71,20 +71,24 @@ const OccupancyHistory = withTranslation()(({ t }) => {
   const classes = useStyles();
   return (
     <List className={classes.root}>
-      {Children.toArray(store.property.selected.occupancyHistory.map(occupant => {
-        const occupationDates = t('{{beginDate}} to {{endDate}}', {
-          beginDate: moment(occupant.beginDate, 'DD/MM/YYYY').format('LL'),
-          endDate: moment(occupant.endDate, 'DD/MM/YYYY').format('LL')
-        });
-        return (
-          <ListItem>
-            <ListItemAvatar>
-              <TenantAvatar tenant={occupant} />
-            </ListItemAvatar>
-            <ListItemText primary={occupant.name} secondary={occupationDates} />
-          </ListItem>
-        )
-      }))}
+      { !!store.property.selected?.occupancyHistory?.length ? (
+        Children.toArray(store.property.selected.occupancyHistory.map(occupant => {
+          const occupationDates = t('{{beginDate}} to {{endDate}}', {
+            beginDate: moment(occupant.beginDate, 'DD/MM/YYYY').format('LL'),
+            endDate: moment(occupant.endDate, 'DD/MM/YYYY').format('LL')
+          });
+          return (
+            <ListItem>
+              <ListItemAvatar>
+                <TenantAvatar tenant={occupant} />
+              </ListItemAvatar>
+              <ListItemText primary={occupant.name} secondary={occupationDates} />
+            </ListItem>
+          )
+        }))
+      ) : (
+        <Typography>{t('Property not rented so far')}</Typography>
+      )}
     </List>
   );
 });
