@@ -14,12 +14,14 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().email().required(),
   phone1: Yup.string().required(),
   phone2: Yup.string(),
-  street1: Yup.string().required(),
-  street2: Yup.string(),
-  city: Yup.string().required(),
-  zipCode: Yup.string().required(),
-  state: Yup.string(),
-  country: Yup.string().required()
+  address: Yup.object().shape({
+    street1: Yup.string().required(),
+    street2: Yup.string(),
+    city: Yup.string().required(),
+    zipCode: Yup.string().required(),
+    state: Yup.string(),
+    country: Yup.string().required()
+  })
 });
 
 const allowedRoles = ['administrator'];
@@ -35,12 +37,14 @@ const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
     email: store.organization.selected?.contacts?.[0].email || '',
     phone1: store.organization.selected?.contacts?.[0].phone1 || '',
     phone2: store.organization.selected?.contacts?.[0].phone2 || '',
-    street1: store.organization.selected?.addresses?.[0].street1 || '',
-    street2: store.organization.selected?.addresses?.[0].street2 || '',
-    city: store.organization.selected?.addresses?.[0].city || '',
-    zipCode: store.organization.selected?.addresses?.[0].zipCode || '',
-    state: store.organization.selected?.addresses?.[0].state || '',
-    country: store.organization.selected?.addresses?.[0].country || ''
+    address: store.organization.selected?.addresses?.[0] || {
+      street1: '',
+      street2: '',
+      city: '',
+      zipCode: '',
+      state: '',
+      country: ''
+    }
   }), [store.organization.selected]);
 
   const _onSubmit = useCallback(async (billing, actions) => {
@@ -59,14 +63,7 @@ const BillingForm = withTranslation()(observer(({ t, onSubmit }) => {
         phone1: billing.phone1,
         phone2: billing.phone2,
       }],
-      addresses: [{
-        street1: billing.street1,
-        street2: billing.street2,
-        city: billing.city,
-        zipCode: billing.zipCode,
-        state: billing.state,
-        country: billing.country
-      }]
+      addresses: [billing.address]
     });
   }, [onSubmit]);
 

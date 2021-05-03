@@ -30,12 +30,14 @@ const validationSchema = Yup.object().shape({
       phone2: Yup.string(),
     })
   ),
-  street1: Yup.string().required(),
-  street2: Yup.string(),
-  city: Yup.string().required(),
-  zipCode: Yup.string().required(),
-  state: Yup.string(),
-  country: Yup.string().required()
+  address: Yup.object().shape({
+    street1: Yup.string().required(),
+    street2: Yup.string(),
+    city: Yup.string().required(),
+    zipCode: Yup.string().required(),
+    state: Yup.string(),
+    country: Yup.string().required()
+  }),
 });
 
 const emptyContact = { contact: '', email: '', phone1: '', phone2: '' };
@@ -56,12 +58,14 @@ const TenantForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
       phone1: phone1 || phone,
       phone2: phone2 || ''
     })) : [emptyContact],
-    street1: store.tenant.selected?.street1 || '',
-    street2: store.tenant.selected?.street2 || '',
-    city: store.tenant.selected?.city || '',
-    zipCode: store.tenant.selected?.zipCode || '',
-    state: store.tenant.selected?.state || '',
-    country: store.tenant.selected?.country || ''
+    address: {
+      street1: store.tenant.selected?.street1 || '',
+      street2: store.tenant.selected?.street2 || '',
+      city: store.tenant.selected?.city || '',
+      zipCode: store.tenant.selected?.zipCode || '',
+      state: store.tenant.selected?.state || '',
+      country: store.tenant.selected?.country || ''
+    }
   };
 
   const _onSubmit = async tenant => {
@@ -73,12 +77,12 @@ const TenantForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
       legalForm: tenant.isCompany === 'true' ? tenant.legalStructure : '',
       siret: tenant.isCompany === 'true' ? tenant.ein : '',
       capital: tenant.isCompany === 'true' ? tenant.capital : '',
-      street1: tenant.street1,
-      street2: tenant.street2 || '',
-      zipCode: tenant.zipCode,
-      city: tenant.city,
-      state: tenant.state,
-      country: tenant.country,
+      street1: tenant.address.street1,
+      street2: tenant.address.street2 || '',
+      zipCode: tenant.address.zipCode,
+      city: tenant.address.city,
+      state: tenant.address.state,
+      country: tenant.address.country,
       contacts: tenant.contacts
         .filter(({ contact }) => !!contact)
         .map(({ contact, email, phone1, phone2 }) => {

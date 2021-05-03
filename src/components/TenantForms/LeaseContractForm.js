@@ -7,8 +7,6 @@ import { FieldArray, Form, Formik, validateYupSchema, yupToFormErrors } from 'fo
 import { FormTextField, SubmitButton, FormSection, DateField, DateRangeField, SelectField } from '../Form';
 import { StoreContext } from '../../store';
 import { withTranslation } from '../../utils/i18n';
-import { useFormatNumber } from '../../utils/numberformat';
-import { toJS } from 'mobx';
 
 const validationSchema = Yup.object().shape({
   leaseId: Yup.string().required(),
@@ -18,6 +16,14 @@ const validationSchema = Yup.object().shape({
   properties: Yup.array().of(
     Yup.object().shape({
       _id: Yup.string().required(),
+      rent: Yup.number().min(0),
+      expense: Yup.object().shape({
+        title: Yup.mixed().when('amount', {
+          is: val => val > 0,
+          then: Yup.string().required(),
+        }),
+        amount: Yup.number().min(0)
+      }),
       entryDate: Yup.date().required().test(
         'entryDate',
         'Date not included in the contract date range',
@@ -46,8 +52,12 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
+const emptyExpense = { title: '', amount: '' };
+
 const emptyProperty = {
   _id: '',
+  rent: '',
+  expense: emptyExpense,
   entryDate: null,
   exitDate: null
 };
@@ -55,8 +65,6 @@ const emptyProperty = {
 const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit }) => {
   const store = useContext(StoreContext);
   const [contractDuration, setContractDuration] = useState();
-
-  const formatNumber = useFormatNumber();
 
   const initialValues =
     useMemo(() => {
@@ -69,6 +77,8 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
         properties: store.tenant.selected?.properties?.length ? store.tenant.selected.properties.map(property => {
           return {
             _id: property.property._id,
+            rent: property.rent || '',
+            expense: property.expenses.length && property.expenses[0] || emptyExpense,
             entryDate: property.entryDate ? moment(property.entryDate, 'DD/MM/YYYY') : null,
             exitDate: property.exitDate ? moment(property.exitDate, 'DD/MM/YYYY') : null
           }
@@ -88,12 +98,11 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
     const currentProperties = store.tenant.selected?.properties ? store.tenant.selected.properties.map(({ propertyId }) => propertyId) : [];
     return [
       { id: 'none', label: '', value: '' },
-      ...store.property.items.map(({ _id, name, status, price, occupantLabel }) => ({
+      ...store.property.items.map(({ _id, name, status, occupantLabel }) => ({
         id: _id,
         value: _id,
-        label: t('{{name}} ({{rentAmount}} - {{status}})', {
+        label: t('{{name}} - {{status}}', {
           name,
-          rentAmount: formatNumber(price),
           status: status === 'occupied' ? (!currentProperties.includes(_id) ? t('occupied by {{tenantName}}', { tenantName: occupantLabel }) : t('occupied by current tenant')) : t('vacant')
         }),
         //disabled: selectedPropertyId !== _id && status === 'occupied'
@@ -104,7 +113,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
   const _onSubmit = async lease => {
     await onSubmit({
       leaseId: lease.leaseId,
-      frequency: store.leaseType.items.find(({ _id })=> _id === lease.leaseId).timeRange,
+      frequency: store.leaseType.items.find(({ _id }) => _id === lease.leaseId).timeRange,
       beginDate: lease.beginDate?.format('DD/MM/YYYY'),
       endDate: lease.endDate?.format('DD/MM/YYYY'),
       terminationDate: lease.terminationDate?.format('DD/MM/YYYY'),
@@ -115,6 +124,8 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
         .map(property => {
           return {
             propertyId: property._id,
+            rent: property.rent,
+            expenses: property.expense.title ? [property.expense] : [],
             entryDate: property.entryDate?.format('DD/MM/YYYY'),
             exitDate: property.exitDate?.format('DD/MM/YYYY')
           }
@@ -190,15 +201,36 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
               <FieldArray
                 name="properties"
                 render={arrayHelpers => (
-                  <div>
+                  <>
                     {Children.toArray(values.properties.map((property, index) => (
                       <>
                         <Grid container spacing={2}>
-                          <Grid item xs={12}>
+                          <Grid item xs={12} md={9}>
                             <SelectField
                               label={t('Property')}
                               name={`properties[${index}]._id`}
                               values={availableProperties}
+                              disabled={readOnly}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={3}>
+                            <FormTextField
+                              label={t('Rent')}
+                              name={`properties[${index}].rent`}
+                              disabled={readOnly}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={9}>
+                            <FormTextField
+                              label={t('Expense')}
+                              name={`properties[${index}].expense.title`}
+                              disabled={readOnly}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={3}>
+                            <FormTextField
+                              label={t('Amount')}
+                              name={`properties[${index}].expense.amount`}
                               disabled={readOnly}
                             />
                           </Grid>
@@ -214,7 +246,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                             />
                           </Grid>
                         </Grid>
-                        { !readOnly && values.properties.length > 1 && (
+                        {!readOnly && values.properties.length > 1 && (
                           <Box pb={2} display="flex" justifyContent="flex-end">
                             <Button
                               // variant="contained"
@@ -240,7 +272,7 @@ const LeaseContractForm = withTranslation()(observer(({ t, readOnly, onSubmit })
                         </Button>
                       </Box>
                     )}
-                  </div>
+                  </>
                 )}
               />
             </FormSection>

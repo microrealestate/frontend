@@ -1,12 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { Children, memo, useCallback, useContext, useMemo, useState } from 'react';
+import { Children, memo, useCallback, useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
-import { Avatar, Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
-import OfficeIcon from '@material-ui/icons/HomeWork';
-import ParkingIcon from '@material-ui/icons/LocalParking';
-import MailboxIcon from '@material-ui/icons/MarkunreadMailbox';
+import { Box, Button, Chip, Grid, Hidden, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
 
 import { withAuthentication } from '../../../components/Authentication'
 import Page from '../../../components/Page'
@@ -16,10 +13,12 @@ import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 import { useRouter } from 'next/router';
 import NewTenantDialog from '../../../components/TenantForms/NewTenantDialog';
+import PropertyIcon from '../../../components/properties/PropertyIcon';
+import TenantAvatar from '../../../components/TenantForms/TenantAvatar';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {
-    backgroundColor: theme.palette.success.dark
+    backgroundColor: theme.palette.success.main
   },
   inProgress: {
     color: theme.palette.success.dark
@@ -30,28 +29,12 @@ const Properties = memo(({ tenant }) => {
   return (
     <Box display="flex" height="100%" alignItems="center" flexWrap="wrap">
       {Children.toArray(tenant.properties?.map(({ property }) => {
-        let Icon = OfficeIcon;
-        switch (property.type) {
-          case 'office':
-            Icon = OfficeIcon;
-            break;
-          case 'parking':
-            Icon = ParkingIcon;
-            break;
-          case 'letterbox':
-            Icon = MailboxIcon;
-            break;
-          default:
-            Icon = OfficeIcon;
-            break;
-        }
 
         return (
           <Box m={0.5}>
             <Chip
-              icon={<Icon />}
+              icon={<PropertyIcon type={property.type} color="action" />}
               label={property.name}
-              variant="outlined"
             />
           </Box>
         );
@@ -76,18 +59,6 @@ const TenantList = withTranslation()(({ t }) => {
       aria-labelledby="tenant-list"
     >
       {Children.toArray(store.tenant.filteredItems.map(tenant => {
-        const avatar = tenant.name
-          .split(' ')
-          .reduce((acc, w, index) => {
-            if (index < 2) {
-              acc.push(w);
-            }
-            return acc;
-          }, [])
-          .filter(n => !!n)
-          .map(n => n[0])
-          .join('');
-
         return (
           <Paper>
             <ListItem
@@ -99,7 +70,7 @@ const TenantList = withTranslation()(({ t }) => {
             >
               <Hidden smDown>
                 <ListItemAvatar>
-                  <Avatar className={!tenant.terminated ? classes.avatarInProgress : null}>{avatar}</Avatar>
+                  <TenantAvatar tenant={tenant} className={!tenant.terminated ? classes.avatarInProgress : null} />
                 </ListItemAvatar>
               </Hidden>
               <ListItemText

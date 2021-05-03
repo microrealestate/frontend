@@ -15,7 +15,10 @@ export default class Property {
       setSelected: action,
       setFilters: action,
       fetch: flow,
-      fetchOne: flow
+      fetchOne: flow,
+      create: flow,
+      update: flow,
+      delete: flow
     });
   }
 
@@ -66,4 +69,42 @@ export default class Property {
       return { status: error.response.status };
     }
   }
+
+  *create(property) {
+    try {
+      const response = yield useApiFetch().post(`/properties`, property);
+      const createdProperty = response.data;
+      this.items.push(createdProperty);
+
+      return { status: 200, data: createdProperty };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
+
+  *update(property) {
+    try {
+      const response = yield useApiFetch().patch(`/properties/${property._id}`, property);
+      const updatedProperty = response.data;
+      const index = this.items.findIndex(item => item._id === property._id);
+      if (index > -1) {
+        this.items.splice(index, 1, updatedProperty);
+      }
+      if (this.selected._id === updatedProperty._id) {
+        this.setSelected(updatedProperty);
+      }
+      return { status: 200, data: updatedProperty };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
+
+  *delete(ids) {
+    try {
+      yield useApiFetch().delete(`/properties/${ids.join(',')}`);
+      return { status: 200 };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  };
 }

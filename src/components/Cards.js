@@ -70,7 +70,7 @@ export const DashboardCard = memo(({ variant, Icon, title, info, children }) => 
           <IconTypography Icon={Icon}>{title}</IconTypography>
         </Box>
 
-        <Box p={2}>
+        <Box p={1.8}>
           {children}
         </Box>
         {info && (

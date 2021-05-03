@@ -300,7 +300,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       <Grid item xs={12}>
         <FormTextField
           label={t('Street')}
-          name="street1"
+          name="address.street1"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />
@@ -308,7 +308,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       <Grid item xs={12}>
         <FormTextField
           label={t('Street')}
-          name="street2"
+          name="address.street2"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />
@@ -316,7 +316,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       <Grid item xs={12} md={6}>
         <FormTextField
           label={t('Zip code')}
-          name="zipCode"
+          name="address.zipCode"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />
@@ -324,7 +324,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       <Grid item xs={12} md={6}>
         <FormTextField
           label={t('City')}
-          name="city"
+          name="address.city"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />
@@ -333,7 +333,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
 
         <FormTextField
           label={t('State')}
-          name="state"
+          name="address.state"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />
@@ -341,7 +341,7 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       <Grid item xs={12} md={6}>
         <FormTextField
           label={t('Country')}
-          name="country"
+          name="address.country"
           onlyRoles={onlyRoles}
           disabled={disabled}
         />

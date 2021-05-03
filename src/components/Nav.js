@@ -43,8 +43,8 @@ const Nav = memo(withTranslation()(({ t }) => {
       icon: <PeopleIcon />
     },
     {
-      value: t('Estates'),
-      pathname: '/estates',
+      value: t('Properties'),
+      pathname: '/properties',
       icon: <VpnKeyIcon />
     },
     {
