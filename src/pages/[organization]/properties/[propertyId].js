@@ -87,7 +87,7 @@ const OccupancyHistory = withTranslation()(({ t }) => {
           )
         }))
       ) : (
-        <Typography>{t('Property not rented so far')}</Typography>
+        <Typography color="textSecondary">{t('Property not rented so far')}</Typography>
       )}
     </List>
   );

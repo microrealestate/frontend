@@ -58,10 +58,10 @@ const SendRentEmailMenu = memo(withTranslation()(({ t, i18n, tReady, period, ten
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={useCallback(() => onSend('rentcall'), [])}>{t('Send first notice')}</MenuItem>
-        <MenuItem onClick={useCallback(() => onSend('rentcall_reminder'), [])}>{t('Send second notice')}</MenuItem>
-        <MenuItem onClick={useCallback(() => onSend('rentcall_last_reminder'), [])}>{t('Send last notice')}</MenuItem>
-        <MenuItem onClick={useCallback(() => onSend('invoice'), [])}>{t('Send receipt')}</MenuItem>
+        <MenuItem onClick={() => onSend('rentcall')}>{t('Send first notice')}</MenuItem>
+        <MenuItem onClick={() => onSend('rentcall_reminder')}>{t('Send second notice')}</MenuItem>
+        <MenuItem onClick={() => onSend('rentcall_last_reminder')}>{t('Send last notice')}</MenuItem>
+        <MenuItem onClick={() => onSend('invoice')}>{t('Send receipt')}</MenuItem>
       </Menu>
     </>
   );

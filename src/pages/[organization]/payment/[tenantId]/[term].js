@@ -1,12 +1,9 @@
-import _ from 'lodash';
 import moment from 'moment';
 import { Children, memo, useCallback, useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite'
 import { toJS } from 'mobx';
 import { withTranslation } from 'next-i18next';
-import { FieldArray, Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Button, Divider, Grid, Hidden, List, ListItem, Typography, withStyles } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Breadcrumbs, Divider, Grid, Hidden, List, ListItem, Paper, Tab, Tabs, Typography, withStyles } from '@material-ui/core';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import SendIcon from '@material-ui/icons/Send';
@@ -16,7 +13,6 @@ import Page from '../../../../components/Page'
 import { withAuthentication } from '../../../../components/Authentication'
 import { getStoreInstance, StoreContext } from '../../../../store';
 import { isServer } from '../../../../utils';
-import { DateField, FormTextField, SelectField, SubmitButton } from '../../../../components/Form';
 import { CardRow, DashboardCard } from '../../../../components/Cards';
 import { NumberFormat } from '../../../../utils/numberformat';
 import Link from '../../../../components/Link';
@@ -26,7 +22,11 @@ import RequestError from '../../../../components/RequestError';
 import DownloadLink from '../../../../components/DownloadLink';
 import RentHistory from '../../../../components/rents/RentHistory';
 import { useRouter } from 'next/router';
-import { getPeriod } from '../../../../components/rents/RentPeriod';
+import BalanceBar from '../../../../components/rents/BalanceBar';
+import { TabPanel } from '../../../../components/Tabs';
+import PaymentForm from '../../../../components/payment/PaymentForm';
+import AdditionalCostDiscountForm from '../../../../components/payment/AdditionalCostDiscountForm';
+import InternalNoteForm from '../../../../components/payment/InternalNoteForm';
 
 const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);
@@ -62,237 +62,6 @@ const FormSection = memo(({ label, children, ...props }) => {
   );
 });
 
-const validationSchema = Yup.object().shape({
-  payments: Yup.array().of(
-    Yup.object().shape({
-      amount: Yup.number().min(0),
-      date: Yup.mixed().when('amount', {
-        is: val => val > 0,
-        then: Yup.date().required()
-      }),
-      type: Yup.string().required(),
-      reference: Yup.mixed().when('type', {
-        is: val => val !== 'cash',
-        then: Yup.string().required()
-      })
-    })).min(1),
-  extracharge: Yup.number().min(0),
-  noteextracharge: Yup.mixed().when('extracharge', {
-    is: val => val > 0,
-    then: Yup.string().required(),
-  }),
-  promo: Yup.number().min(0),
-  notepromo: Yup.mixed().when('promo', {
-    is: val => val > 0,
-    then: Yup.string().required(),
-  }),
-  description: Yup.string()
-});
-
-const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
-
-const PaymentForm = withTranslation()(({ t }) => {
-  const store = useContext(StoreContext);
-  const router = useRouter();
-
-  const onSubmit = useCallback(async (values, actions) => {
-    const { term } = router.query;
-    // clone to avoid changing the form fields
-    const clonedValues = _.cloneDeep(values);
-
-    // Save only payments
-    clonedValues.payments = clonedValues.payments.filter(({ amount }) => amount > 0).map(payment => {
-      // convert moment into string for the DB
-      payment.date = payment.date.format('DD/MM/YYYY');
-      if (payment.type === 'cash') {
-        delete payment.reference;
-      }
-      return payment;
-    });
-    clonedValues.month = store.rent.selected.month;
-    clonedValues.year = store.rent.selected.year;
-    clonedValues._id = store.rent.selected._id;
-    try {
-      await store.rent.pay(term, clonedValues);
-
-      // clean fields if empty amounts were saved
-      if (clonedValues.payments.length === 0) {
-        values.payments = [emptyPayment];
-      }
-      if (!clonedValues.extracharge || clonedValues.extracharge === '0') {
-        values.extracharge = '';
-        values.noteextracharge = '';
-      }
-      if (!clonedValues.promo || clonedValues.promo === '0') {
-        values.promo = '';
-        values.notepromo = '';
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  });
-
-  const initialValues = useMemo(() => ({
-    payments: store.rent.selected.payments.length ? store.rent.selected.payments.map(({ amount, date, type, reference }) => {
-      return {
-        amount: amount === 0 ? '' : amount,
-        date: date ? moment(date, 'DD/MM/YYYY') : null,
-        type: type,
-        reference: reference || ''
-      }
-    }) : [emptyPayment],
-    extracharge: store.rent.selected.extracharge !== 0 ? store.rent.selected.extracharge : '',
-    noteextracharge: store.rent.selected.noteextracharge || '',
-    promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
-    notepromo: store.rent.selected.notepromo || '',
-    description: store.rent.selected.description || ''
-  }), [store.rent.selected]);
-
-  return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={onSubmit}
-    >
-      {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description } }) => {
-        return (
-          <Form autoComplete="off">
-
-            <FormSection label={t('Payments')} defaultExpanded>
-              <FieldArray
-                name="payments"
-                render={arrayHelpers => (
-                  <div>
-                    {Children.toArray(payments.map((payment, index) => (
-                      <>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <FormTextField
-                              label={t('Amount')}
-                              name={`payments[${index}].amount`}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <DateField
-                              label={t('Date')}
-                              name={`payments[${index}].date`}
-                              minDate={store.rent._period.startOf('month').toISOString()}
-                              maxDate={store.rent._period.endOf('month').toISOString()}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <SelectField
-                              label={t('Type')}
-                              name={`payments[${index}].type`}
-                              values={[
-                                { id: 'cheque', label: t('Cheque'), value: 'cheque' },
-                                { id: 'cash', label: t('Cash'), value: 'cash' },
-                                { id: 'levy', label: t('Levy'), value: 'levy' },
-                                { id: 'transfer', label: t('Transfer'), value: 'transfer' }
-                              ]}
-                            />
-                          </Grid>
-                          {(payments[index].type !== 'cash') && (
-                            <Grid item xs={6}>
-                              <FormTextField
-                                label={t('Reference')}
-                                name={`payments[${index}].reference`}
-                              />
-                            </Grid>
-                          )}
-                        </Grid>
-                        { payments.length > 1 && (
-                          <Box pb={2} display="flex" justifyContent="flex-end">
-                            <Button
-                              // variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => arrayHelpers.remove(index)}
-                            >
-                              {t('Remove payment')}
-                            </Button>
-                          </Box>
-                        )}
-                      </>
-                    )))}
-                    <Box display="flex" justifyContent="space-between">
-                      <SubmitButton
-                        size="small"
-                        label={!isSubmitting ? t('Save') : t('Saving')}
-                      />
-                      <Button
-                        // variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => arrayHelpers.push(emptyPayment)}
-                      >
-                        {t('Add payment')}
-                      </Button>
-                    </Box>
-                  </div>
-                )}
-              />
-            </FormSection>
-            <FormSection label={t('Additional cost')} defaultExpanded={!!initialValues.extracharge}>
-              <FormTextField
-                label={t('Amount')}
-                name="extracharge"
-                value={extracharge}
-              />
-              <FormTextField
-                label={t('Description')}
-                name="noteextracharge"
-                value={noteextracharge}
-                multiline
-                rows={3}
-              />
-              <SubmitButton
-                size="small"
-                label={!isSubmitting ? t('Save') : t('Saving')}
-              />
-            </FormSection>
-
-            <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
-              <FormTextField
-                label={t('Discount')}
-                name="promo"
-                value={promo}
-              />
-              <FormTextField
-                label={t('Description')}
-                name="notepromo"
-                value={notepromo}
-                multiline
-                rows={3}
-              />
-              <SubmitButton
-                size="small"
-                label={!isSubmitting ? t('Save') : t('Saving')}
-              />
-            </FormSection>
-
-            <FormSection label={t('Internal description')} defaultExpanded={!!initialValues.description}>
-              <FormTextField
-                label={t('Description')}
-                name="description"
-                value={description}
-                multiline
-                rows={3}
-              />
-              <SubmitButton
-                size="small"
-                label={!isSubmitting ? t('Save') : t('Saving')}
-              />
-            </FormSection>
-          </Form>
-        )
-      }}
-    </Formik>
-  )
-});
-
 const StyledListItem = withStyles(theme => ({
   root: {
     paddingLeft: 0,
@@ -316,7 +85,7 @@ const _rentDetails = rent => {
 
 export const PaymentBalance = withTranslation()(({ t }) => {
   const store = useContext(StoreContext);
-  const rentDetails = useMemo(() =>_rentDetails(store.rent.selected), [store.rent.selected]);
+  const rentDetails = useMemo(() => _rentDetails(store.rent.selected), [store.rent.selected]);
 
   return (
     <>
@@ -360,7 +129,7 @@ export const PaymentBalance = withTranslation()(({ t }) => {
           noWrap
         />
       </CardRow>
-      <CardRow>
+      <CardRow pb={1.5}>
         <Typography
           color="textSecondary"
           noWrap
@@ -374,7 +143,7 @@ export const PaymentBalance = withTranslation()(({ t }) => {
         />
       </CardRow>
       <Divider />
-      <CardRow>
+      <CardRow pt={1.5}>
         <Typography
           color="textSecondary"
           noWrap
@@ -424,9 +193,9 @@ export const PaymentBalance = withTranslation()(({ t }) => {
 const RentPayment = withTranslation()(observer(({ t }) => {
   console.log('RentPayment functional component')
   const store = useContext(StoreContext);
+  const router = useRouter();
   const [error, setError] = useState('');
-
-  //TODO manage errors
+  const [tabSelected, setTabSelected] = useState(0);
 
   const backPath = useMemo(() => {
     let backPath = `/${store.organization.selected.name}/rents/${store.rent.period}`;
@@ -434,6 +203,34 @@ const RentPayment = withTranslation()(observer(({ t }) => {
       backPath = `${backPath}?search=${encodeURIComponent(store.rent.filters.searchText)}&status=${encodeURIComponent(store.rent.filters.status)}`
     }
     return backPath;
+  }, []);
+
+  const onTabChange = useCallback((event, newValue) => {
+    setTabSelected(newValue);
+  }, []);
+
+  const onSubmit = useCallback(async paymentPart => {
+      const { term } = router.query;
+
+      const payment = {
+        _id: store.rent.selected._id,
+        month: store.rent.selected.month,
+        year: store.rent.selected.year,
+        payments: toJS(store.rent.selected.payments),
+        extracharge: store.rent.selected.extracharge,
+        noteextracharge: store.rent.selected.noteextracharge,
+        promo: store.rent.selected.promo,
+        notepromo: store.rent.selected.notepromo,
+        description: store.rent.selected.description,
+        ...paymentPart
+      }
+
+      try {
+        await store.rent.pay(term, payment);
+      } catch (error) {
+        //TODO manage errors
+        console.error(error);
+      }
   }, []);
 
   return (
@@ -468,17 +265,37 @@ const RentPayment = withTranslation()(observer(({ t }) => {
       <RequestError error={error} />
       <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
-          <PaymentForm />
+          <Paper>
+            <Tabs
+              variant="scrollable"
+              value={tabSelected}
+              onChange={onTabChange}
+              aria-label="Property tabs"
+            >
+              <Tab label={t('Payments')} />
+              <Tab label={t('Additional cost and discount')} />
+              <Tab label={t('Internal note')} />
+            </Tabs>
+            <TabPanel value={tabSelected} index={0}>
+              <PaymentForm onSubmit={onSubmit} />
+            </TabPanel>
+            <TabPanel value={tabSelected} index={1}>
+              <AdditionalCostDiscountForm onSubmit={onSubmit} />
+            </TabPanel>
+            <TabPanel value={tabSelected} index={2}>
+              <InternalNoteForm onSubmit={onSubmit} />
+            </TabPanel>
+          </Paper>
         </Grid>
         <Hidden smDown>
           <Grid item md={4}>
             <Box pb={4}>
               <DashboardCard
                 Icon={ReceiptIcon}
-                title={t('Rent of {{monthYear}}', { monthYear: getPeriod(t, store.rent.selected.term, store.rent.selected.occupant.frequency)})}
+                title={t('Rent')}
               >
                 <Box pb={1}>
-                  <NumberFormat align="right" variant="h5" value={store.rent.selected.totalAmount > 0 ? store.rent.selected.totalAmount : 0} />
+                  <BalanceBar rent={store.rent.selected} hideTooltip={true} />
                 </Box>
                 <Divider />
                 <Box pt={1}>
@@ -556,7 +373,7 @@ const RentPayment = withTranslation()(observer(({ t }) => {
 RentPayment.getInitialProps = async (context) => {
   console.log('RentPayment.getInitialProps')
   const store = isServer() ? context.store : getStoreInstance();
-  const {tenantId, term } = context.query;
+  const { tenantId, term } = context.query;
 
   const { status, data } = await store.rent.fetchOneTenantRent(tenantId, term);
   if (status !== 200) {
