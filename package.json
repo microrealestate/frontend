@@ -24,7 +24,7 @@
     "mobx": "^6.1.8",
     "mobx-react-lite": "^3.2.0",
     "moment": "^2.29.1",
-    "next": "^10.1.3",
+    "next": "^10.2.0",
     "next-i18next": "^7.0.1",
     "pigeon-maps": "0.19.5",
     "react": "17.0.2",
