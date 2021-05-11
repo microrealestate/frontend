@@ -5,7 +5,7 @@ import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger,
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 import { withTranslation } from '../utils/i18n';
-import OrganizationSwitcher from './OrganizationSwitcher';
+import OrganizationSwitcher from './organization/OrganizationSwitcher';
 import { StoreContext } from '../store';
 import Loading from './Loading';
 import { useRouter } from 'next/router';

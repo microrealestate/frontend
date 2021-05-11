@@ -11,7 +11,7 @@ import { getStoreInstance, StoreContext } from '../store';
 import Page from '../components/Page';
 import { isServer, redirect } from '../utils';
 import RequestError from '../components/RequestError';
-import Landlord from '../components/OrganizationForms/LandlordForm';
+import Landlord from '../components/organization/LandlordForm';
 
 const FirstAccess = withTranslation()(observer(({ t }) => {
   const { publicRuntimeConfig: { APP_NAME } } = getConfig();

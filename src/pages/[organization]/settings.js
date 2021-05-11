@@ -7,15 +7,15 @@ import { Paper, Tab, Tabs } from '@material-ui/core'
 
 import Page from '../../components/Page'
 import { withAuthentication } from '../../components/Authentication'
-import LandlordForm from '../../components/OrganizationForms/LandlordForm';
-import BillingForm from '../../components/OrganizationForms/BillingForm'
-import Members from '../../components/OrganizationForms/Members'
-import LeaseTypes from '../../components/OrganizationForms/LeaseTypes'
+import LandlordForm from '../../components/organization/LandlordForm';
+import BillingForm from '../../components/organization/BillingForm'
+import Members from '../../components/organization/Members'
+import LeaseTypes from '../../components/organization/LeaseTypes'
 import RequestError from '../../components/RequestError'
 import { TabPanel } from '../../components/Tabs';
 import { getStoreInstance, StoreContext } from '../../store'
 import { isServer } from '../../utils';
-import ThirdPartiesForm from '../../components/OrganizationForms/ThirdPartiesForm';
+import ThirdPartiesForm from '../../components/organization/ThirdPartiesForm';
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 

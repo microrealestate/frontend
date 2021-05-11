@@ -23,12 +23,12 @@ import RentHistory from '../../../components/rents/RentHistory';
 import { TabPanel } from '../../../components/Tabs';
 import { CardRow, DashboardCard } from '../../../components/Cards';
 import { NumberFormat } from '../../../utils/numberformat';
-import TenantForm from '../../../components/TenantForms/TenantForm';
-import BillingForm from '../../../components/TenantForms/BillingForm';
-import LeaseContractForm from '../../../components/TenantForms/LeaseContractForm';
+import TenantForm from '../../../components/tenants/TenantForm';
+import BillingForm from '../../../components/tenants/BillingForm';
+import LeaseContractForm from '../../../components/tenants/LeaseContractForm';
 import { useRouter } from 'next/router';
 import ConfirmDialog from '../../../components/ConfirmDialog';
-import TerminateLeaseDialog from '../../../components/TenantForms/TerminateLeaseDialog';
+import TerminateLeaseDialog from '../../../components/tenants/TerminateLeaseDialog';
 
 const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);

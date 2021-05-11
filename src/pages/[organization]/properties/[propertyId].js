@@ -22,7 +22,7 @@ import { useRouter } from 'next/router';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import PropertyForm from '../../../components/properties/PropertyForm';
 import Map from '../../../components/Map';
-import TenantAvatar from '../../../components/TenantForms/TenantAvatar';
+import TenantAvatar from '../../../components/tenants/TenantAvatar';
 
 const BreadcrumbBar = memo(withTranslation()(({ t, backPath }) => {
   const store = useContext(StoreContext);

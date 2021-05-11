@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { useCallback, useContext, useMemo } from 'react';
 import getConfig from 'next/config';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import { StoreContext } from '../store';
-import ToggleMenu from './ToggleMenu';
+import { StoreContext } from '../../store';
+import ToggleMenu from '../ToggleMenu';
 
 const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
 

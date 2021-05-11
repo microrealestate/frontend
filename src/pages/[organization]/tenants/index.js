@@ -12,9 +12,9 @@ import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 import { useRouter } from 'next/router';
-import NewTenantDialog from '../../../components/TenantForms/NewTenantDialog';
+import NewTenantDialog from '../../../components/tenants/NewTenantDialog';
 import PropertyIcon from '../../../components/properties/PropertyIcon';
-import TenantAvatar from '../../../components/TenantForms/TenantAvatar';
+import TenantAvatar from '../../../components/tenants/TenantAvatar';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {
