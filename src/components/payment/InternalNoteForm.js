@@ -6,19 +6,22 @@ import { FormSection, FormTextField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
 
 const validationSchema = Yup.object().shape({
-  description: Yup.string()
+  description: Yup.string(),
 });
 
 const InternalNoteForm = withTranslation()(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
-  const initialValues = useMemo(() => ({
-    description: store.rent.selected.description || ''
-  }), [store.rent.selected]);
+  const initialValues = useMemo(
+    () => ({
+      description: store.rent.selected.description || '',
+    }),
+    [store.rent.selected]
+  );
 
-  const _onSubmit = useCallback(async values => {
+  const _onSubmit = useCallback(async (values) => {
     const paymentPart = {
-      ...values
+      ...values,
     };
     await onSubmit(paymentPart);
   }, []);
@@ -32,7 +35,10 @@ const InternalNoteForm = withTranslation()(({ t, onSubmit }) => {
       {({ isSubmitting, values: { description } }) => {
         return (
           <Form autoComplete="off">
-            <FormSection label={t('Internal note')} defaultExpanded={!!initialValues.description}>
+            <FormSection
+              label={t('Internal note')}
+              defaultExpanded={!!initialValues.description}
+            >
               <FormTextField
                 label={t('Note')}
                 name="description"
@@ -41,14 +47,12 @@ const InternalNoteForm = withTranslation()(({ t, onSubmit }) => {
                 rows={3}
               />
             </FormSection>
-            <SubmitButton
-              label={!isSubmitting ? t('Save') : t('Saving')}
-            />
+            <SubmitButton label={!isSubmitting ? t('Save') : t('Saving')} />
           </Form>
-        )
+        );
       }}
     </Formik>
-  )
+  );
 });
 
 export default InternalNoteForm;

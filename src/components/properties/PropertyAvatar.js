@@ -5,8 +5,8 @@ import PropertyIcon from './PropertyIcon';
 
 const useStyles = makeStyles((theme) => ({
   vacant: {
-    backgroundColor: theme.palette.success.main
-  }
+    backgroundColor: theme.palette.success.main,
+  },
 }));
 
 const PropertyAvatar = ({ type, status }) => {
@@ -17,6 +17,6 @@ const PropertyAvatar = ({ type, status }) => {
       <PropertyIcon type={type} />
     </Avatar>
   );
-}
+};
 
 export default memo(PropertyAvatar);

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { observable, action, flow, computed, makeObservable, toJS } from 'mobx';
+import { observable, action, flow, computed, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 export default class Rent {
   selected = {};
@@ -35,7 +35,7 @@ export default class Rent {
       fetchOneTenantRent: flow,
       fetchTenantRents: flow,
       pay: flow,
-      sendEmail: flow
+      sendEmail: flow,
     });
   }
 
@@ -44,52 +44,66 @@ export default class Rent {
   }
 
   get filteredItems() {
-    let filteredItems = this.filters.status === '' ? this.items : this.items.filter(({ status }) => {
-      if (status === this.filters.status) {
-        return true;
-      }
+    let filteredItems =
+      this.filters.status === ''
+        ? this.items
+        : this.items.filter(({ status }) => {
+            if (status === this.filters.status) {
+              return true;
+            }
 
-      return false;
-    });
+            return false;
+          });
 
     if (this.filters.searchText) {
-      const regExp = /\s|\.|-/ig;
-      const cleanedSearchText = this.filters.searchText.toLowerCase().replace(regExp, '')
+      const regExp = /\s|\.|-/gi;
+      const cleanedSearchText = this.filters.searchText
+        .toLowerCase()
+        .replace(regExp, '');
 
-      filteredItems = filteredItems.filter(({ occupant: { isCompany, name, manager, contacts } }) => {
-        // Search match name
-        let found = name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) != -1;
+      filteredItems = filteredItems.filter(
+        ({ occupant: { isCompany, name, manager, contacts } }) => {
+          // Search match name
+          let found =
+            name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) !=
+            -1;
 
-        // Search match manager
-        if (!found && isCompany) {
-          found = manager.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) != -1;
+          // Search match manager
+          if (!found && isCompany) {
+            found =
+              manager
+                .replace(regExp, '')
+                .toLowerCase()
+                .indexOf(cleanedSearchText) != -1;
+          }
+
+          // Search match contact
+          if (!found) {
+            found = !!contacts
+              ?.map(({ contact = '', email = '', phone = '' }) => ({
+                contact: contact.replace(regExp, '').toLowerCase(),
+                email: email.toLowerCase(),
+                phone: phone.replace(regExp, ''),
+              }))
+              .filter(
+                ({ contact, email, phone }) =>
+                  contact.indexOf(cleanedSearchText) != -1 ||
+                  email.indexOf(cleanedSearchText) != -1 ||
+                  phone.indexOf(cleanedSearchText) != -1
+              ).length;
+          }
+          return found;
         }
-
-        // Search match contact
-        if (!found) {
-          found = !!contacts
-            ?.map(({ contact = '', email = '', phone = '' }) => ({
-              contact: contact.replace(regExp, '').toLowerCase(),
-              email: email.toLowerCase(),
-              phone: phone.replace(regExp, '')
-            }))
-            .filter(({ contact, email, phone }) => (
-              contact.indexOf(cleanedSearchText) != -1 ||
-              email.indexOf(cleanedSearchText) != -1 ||
-              phone.indexOf(cleanedSearchText) != -1
-            ))
-            .length;
-        }
-        return found;
-      });
+      );
     }
     return filteredItems;
   }
-  setSelected = rent => this.selected = rent;
+  setSelected = (rent) => (this.selected = rent);
 
-  setFilters = ({ searchText = '', status = '' }) => this.filters = { searchText, status };
+  setFilters = ({ searchText = '', status = '' }) =>
+    (this.filters = { searchText, status });
 
-  setPeriod = period => this._period = period;
+  setPeriod = (period) => (this._period = period);
 
   *fetch() {
     try {
@@ -108,23 +122,27 @@ export default class Rent {
 
       this.items = response.data.rents;
       if (this.selected._id) {
-        this.setSelected(this.items.find(item => item._id === this.selected._id) || {});
+        this.setSelected(
+          this.items.find((item) => item._id === this.selected._id) || {}
+        );
       }
       return { status: 200, data: response.data };
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 
   *fetchOneTenantRent(tenantId, term) {
     try {
-      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}/${term}`);
+      const response = yield useApiFetch().get(
+        `/rents/tenant/${tenantId}/${term}`
+      );
 
       return { status: 200, data: response.data };
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 
   *fetchTenantRents(tenantId) {
     try {
@@ -134,13 +152,16 @@ export default class Rent {
       console.error(error);
       return { status: error.response.status };
     }
-  };
+  }
 
   *pay(term, payment) {
     try {
-      const response = yield useApiFetch().patch(`/rents/payment/${payment._id}/${term}`, payment);
+      const response = yield useApiFetch().patch(
+        `/rents/payment/${payment._id}/${term}`,
+        payment
+      );
       const rent = response.data;
-      const index = this.items.findIndex(item => item._id === payment._id);
+      const index = this.items.findIndex((item) => item._id === payment._id);
       if (index > -1) {
         this.items.splice(index, 1, rent);
       }
@@ -151,7 +172,7 @@ export default class Rent {
     } catch (error) {
       return error.response.status;
     }
-  };
+  }
 
   // payload
   // {
@@ -167,5 +188,5 @@ export default class Rent {
     } catch (error) {
       return error.response.status;
     }
-  };
+  }
 }

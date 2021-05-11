@@ -1,7 +1,24 @@
-import { useState, useContext, cloneElement, useEffect, memo, useCallback } from 'react';
+import {
+  useState,
+  useContext,
+  cloneElement,
+  useEffect,
+  memo,
+  useCallback,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
-import { IconButton, Box, Tooltip, Container, Toolbar, AppBar, useScrollTrigger, Typography, Grid } from '@material-ui/core';
+import {
+  IconButton,
+  Box,
+  Tooltip,
+  Container,
+  Toolbar,
+  AppBar,
+  useScrollTrigger,
+  Typography,
+  Grid,
+} from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 import { withTranslation } from '../utils/i18n';
@@ -10,130 +27,132 @@ import { StoreContext } from '../store';
 import Loading from './Loading';
 import { useRouter } from 'next/router';
 
-const { publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH } } = getConfig();
+const {
+  publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH },
+} = getConfig();
 
-const Demonstrationbar = memo(withTranslation()(({ t }) => {
-  return DEMO_MODE ? (
-    <Box color="primary.contrastText" bgcolor="success.dark">
-      <Typography variant="button" component="div" align="center">{t('Demonstration mode')}</Typography>
-    </Box>
-  ) : null;
-}));
-
-const MainToolbar = memo(withTranslation()(({ t }) => {
-  const store = useContext(StoreContext);
-
-  const signOut = useCallback(async event => {
-    event.preventDefault();
-    await store.user.signOut();
-    window.location.assign(`${BASE_PATH}/signin`);
-  }, []);
-
-  return (
-    <Box width="100%" display="flex" alignItems="center" justifyContent="space-between">
-      <Typography variant="h5">
-        {APP_NAME}
-      </Typography>
-      <Box display="flex" alignItems="center">
-        {store.organization.items && store.organization.items.length && (
-          <OrganizationSwitcher />
-        )}
-        <Tooltip title={t('Sign out')} aria-label="sign out">
-          <IconButton
-            aria-label="sign out"
-            onClick={signOut}
-            color="default"
-          >
-            <PowerSettingsNewIcon />
-          </IconButton>
-        </Tooltip>
+const Demonstrationbar = memo(
+  withTranslation()(({ t }) => {
+    return DEMO_MODE ? (
+      <Box color="primary.contrastText" bgcolor="success.dark">
+        <Typography variant="button" component="div" align="center">
+          {t('Demonstration mode')}
+        </Typography>
       </Box>
-    </Box>
-  )
-}));
+    ) : null;
+  })
+);
+
+const MainToolbar = memo(
+  withTranslation()(({ t }) => {
+    const store = useContext(StoreContext);
+
+    const signOut = useCallback(async (event) => {
+      event.preventDefault();
+      await store.user.signOut();
+      window.location.assign(`${BASE_PATH}/signin`);
+    }, []);
+
+    return (
+      <Box
+        width="100%"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Typography variant="h5">{APP_NAME}</Typography>
+        <Box display="flex" alignItems="center">
+          {store.organization.items && store.organization.items.length && (
+            <OrganizationSwitcher />
+          )}
+          <Tooltip title={t('Sign out')} aria-label="sign out">
+            <IconButton aria-label="sign out" onClick={signOut} color="default">
+              <PowerSettingsNewIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+    );
+  })
+);
 
 const ElevationScroll = memo(({ children }) => {
   const trigger = useScrollTrigger({
-    disableHysteresis: true
+    disableHysteresis: true,
   });
 
   return cloneElement(children, {
     elevation: trigger ? 4 : 0,
-    style: !trigger ? {
-      backgroundColor: 'transparent'
-    } : null
+    style: !trigger
+      ? {
+          backgroundColor: 'transparent',
+        }
+      : null,
   });
 });
 
-const Page = observer(({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
-  console.log('Page functional component')
-  const store = useContext(StoreContext);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+const Page = observer(
+  ({ children, PrimaryToolbar, SecondaryToolbar, maxWidth = 'lg' }) => {
+    console.log('Page functional component');
+    const store = useContext(StoreContext);
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
-  useEffect(() => {
-    const routeChangeStart = (url, { shallow }) => {
-      if (!shallow) {
-        setLoading(true);
-      }
-    };
-    const routeChangeComplete = (url, { shallow }) => {
-      if (!shallow) {
-        setLoading(false);
-      }
-    };
+    useEffect(() => {
+      const routeChangeStart = (url, { shallow }) => {
+        if (!shallow) {
+          setLoading(true);
+        }
+      };
+      const routeChangeComplete = (url, { shallow }) => {
+        if (!shallow) {
+          setLoading(false);
+        }
+      };
 
-    router.events.on('routeChangeStart', routeChangeStart)
-    router.events.on('routeChangeComplete', routeChangeComplete)
+      router.events.on('routeChangeStart', routeChangeStart);
+      router.events.on('routeChangeComplete', routeChangeComplete);
 
-    return () => {
-      router.events.off('routeChangeStart', routeChangeStart)
-      router.events.off('routeChangeComplete', routeChangeComplete)
-    }
-  }, []);
+      return () => {
+        router.events.off('routeChangeStart', routeChangeStart);
+        router.events.off('routeChangeComplete', routeChangeComplete);
+      };
+    }, []);
 
-  return (
-    <>
-      <Demonstrationbar />
-      {store.user.signedIn && (
-        <Toolbar>
-          <MainToolbar />
-        </Toolbar>
-      )}
-      { !loading && (PrimaryToolbar || SecondaryToolbar) && (
-        <ElevationScroll>
-          <AppBar
-            position="sticky"
-          >
-            <Toolbar>
-              <Grid container
-                alignItems="center"
-                justify="space-between"
-                wrap="nowrap"
-                spacing={5}
-              >
-                <Grid item>
-                  {PrimaryToolbar}
+    return (
+      <>
+        <Demonstrationbar />
+        {store.user.signedIn && (
+          <Toolbar>
+            <MainToolbar />
+          </Toolbar>
+        )}
+        {!loading && (PrimaryToolbar || SecondaryToolbar) && (
+          <ElevationScroll>
+            <AppBar position="sticky">
+              <Toolbar>
+                <Grid
+                  container
+                  alignItems="center"
+                  justify="space-between"
+                  wrap="nowrap"
+                  spacing={5}
+                >
+                  <Grid item>{PrimaryToolbar}</Grid>
+                  <Grid item>{SecondaryToolbar}</Grid>
                 </Grid>
-                <Grid item>
-                  {SecondaryToolbar}
-                </Grid>
-              </Grid>
-            </Toolbar>
-          </AppBar>
-        </ElevationScroll>
-      )}
-      <Box mt={(!loading && (PrimaryToolbar || SecondaryToolbar)) ? 4 : 0}>
-        <Container
-          maxWidth={maxWidth}
-        >
-          {loading || store.appLoading ? (
-            <Loading />
-          ) : children}
-        </Container>
-      </Box>
-    </>
-  );
-});
+              </Toolbar>
+            </AppBar>
+          </ElevationScroll>
+        )}
+        <Box mt={!loading && (PrimaryToolbar || SecondaryToolbar) ? 4 : 0}>
+          <Container maxWidth={maxWidth}>
+            {loading || store.appLoading ? <Loading /> : children}
+          </Container>
+        </Box>
+      </>
+    );
+  }
+);
 
 export default memo(Page);

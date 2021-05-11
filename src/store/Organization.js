@@ -13,18 +13,16 @@ export default class Organization {
       setItems: action,
       fetch: flow,
       create: flow,
-      update: flow
-    })
+      update: flow,
+    });
   }
 
   setSelected = (org, user) => {
     this.selected = org;
     user.setRole(
-      this.selected.members
-        .find(({ email }) => email === user.email)
-        .role
+      this.selected.members.find(({ email }) => email === user.email).role
     );
-  }
+  };
 
   setItems = (organizations = []) => {
     this.items = organizations;
@@ -36,10 +34,10 @@ export default class Organization {
       this.setItems(response.data);
       return 200;
     } catch (error) {
-      console.error(error)
+      console.error(error);
       return error.response.status;
     }
-  };
+  }
 
   *create(organization) {
     try {
@@ -49,15 +47,18 @@ export default class Organization {
       console.error(error);
       return { status: error.response.status };
     }
-  };
+  }
 
   *update(organization) {
     try {
-      const response = yield useApiFetch().patch(`/realms/${organization._id}`, organization);
+      const response = yield useApiFetch().patch(
+        `/realms/${organization._id}`,
+        organization
+      );
       return { status: 200, data: response.data };
     } catch (error) {
       console.error(error);
       return { status: error.response.status };
     }
-  };
+  }
 }

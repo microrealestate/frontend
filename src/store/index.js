@@ -1,7 +1,5 @@
-
-import { toJS } from 'mobx';
-import { enableStaticRendering } from 'mobx-react-lite'
-import { createContext, useEffect, useState } from 'react'
+import { enableStaticRendering } from 'mobx-react-lite';
+import { createContext, useEffect, useState } from 'react';
 import { isServer } from '../utils';
 import Store from './Store';
 
@@ -15,7 +13,7 @@ function getStoreInstance(initialData) {
   }
 
   if (!_store) {
-    console.log('create store')
+    console.log('create store');
     _store = new Store();
     _store.hydrate(initialData);
     if (process.env.NODE_ENV === 'development') {
@@ -26,8 +24,7 @@ function getStoreInstance(initialData) {
   return _store;
 }
 
-
-const StoreContext = createContext()
+const StoreContext = createContext();
 
 function InjectStoreContext({ children, initialData }) {
   const [store, setStore] = useState();
@@ -39,7 +36,9 @@ function InjectStoreContext({ children, initialData }) {
     }
   }, []);
 
-  return store ? <StoreContext.Provider value={store}>{children}</StoreContext.Provider> : null;
+  return store ? (
+    <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+  ) : null;
 }
 
-export { InjectStoreContext, StoreContext, getStoreInstance }
+export { InjectStoreContext, StoreContext, getStoreInstance };

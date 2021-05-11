@@ -2,9 +2,8 @@ import { observer } from 'mobx-react-lite';
 
 import { withAuthentication } from '../../components/Authentication';
 import Page from '../../components/Page';
-import { withTranslation } from '../../utils/i18n';
 
-const Dashboard = withTranslation()(observer(({ t }) => {
+const Dashboard = observer(() => {
   console.log('Dashboard functional component');
 
   return (
@@ -12,6 +11,6 @@ const Dashboard = withTranslation()(observer(({ t }) => {
       <div>Dashboard</div>
     </Page>
   );
-}));
+});
 
 export default withAuthentication(Dashboard);

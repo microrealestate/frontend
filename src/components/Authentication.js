@@ -7,11 +7,13 @@ import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 import { isServer, redirect } from '../utils';
 
-const { publicRuntimeConfig: { BASE_PATH } } = getConfig();
+const {
+  publicRuntimeConfig: { BASE_PATH },
+} = getConfig();
 
 export function withAuthentication(PageComponent) {
-  const WithAuth = pageProps => {
-    console.log('WithAuth functional component')
+  const WithAuth = (pageProps) => {
+    console.log('WithAuth functional component');
     const store = useContext(StoreContext);
 
     useEffect(() => {
@@ -25,27 +27,25 @@ export function withAuthentication(PageComponent) {
         return null;
       }
 
-      return (
-        <ErrorPage statusCode={pageProps.error.statusCode} />
-      );
+      return <ErrorPage statusCode={pageProps.error.statusCode} />;
     }
 
     return (
       <Observer>
-        { () => store.user.signedIn ? <PageComponent {...pageProps} /> : null}
+        {() => (store.user.signedIn ? <PageComponent {...pageProps} /> : null)}
       </Observer>
     );
   };
 
-  WithAuth.getInitialProps = async context => {
-    console.log('WithAuth.getInitialProps')
+  WithAuth.getInitialProps = async (context) => {
+    console.log('WithAuth.getInitialProps');
     const store = getStoreInstance();
     context.store = store;
     if (isServer()) {
       const cookies = new Cookies(context.req.headers.cookie);
       const refreshToken = cookies.get('refreshToken');
       if (!refreshToken) {
-        console.log('no refresh token redirecting to /signin')
+        console.log('no refresh token redirecting to /signin');
         redirect(context, '/signin');
         return {};
       }
@@ -63,7 +63,7 @@ export function withAuthentication(PageComponent) {
       // }
       await store.user.refreshTokens(context);
       if (!store.user.signedIn) {
-        console.log('current refresh token invalid redirecting to /signin')
+        console.log('current refresh token invalid redirecting to /signin');
         redirect(context, '/signin');
         return {};
       }
@@ -74,7 +74,9 @@ export function withAuthentication(PageComponent) {
           const organizationName = context.query.organization;
           if (organizationName) {
             store.organization.setSelected(
-              store.organization.items.find(org => org.name === organizationName),
+              store.organization.items.find(
+                (org) => org.name === organizationName
+              ),
               store.user
             );
           } else {
@@ -86,36 +88,38 @@ export function withAuthentication(PageComponent) {
           if (!store.organization.selected) {
             return {
               error: {
-                statusCode: 404
-              }
+                statusCode: 404,
+              },
             };
           }
         }
       } catch (error) {
         if (error.response?.status === 403) {
-          console.log('current refresh token invalid redirecting to /signin')
+          console.log('current refresh token invalid redirecting to /signin');
           redirect(context, '/signin');
           return {};
         }
-        console.error(error)
+        console.error(error);
         return {
           error: {
             statusCode: 500,
             //error: buildFetchError(error)
-          }
+          },
         };
       }
     }
 
-    const initialProps = PageComponent.getInitialProps ? await PageComponent.getInitialProps(context) : { initialState: { store: toJS(store) } };
+    const initialProps = PageComponent.getInitialProps
+      ? await PageComponent.getInitialProps(context)
+      : { initialState: { store: toJS(store) } };
 
     if (isServer() && initialProps.error?.statusCode === 403) {
-      console.log('current refresh token invalid redirecting to /signin')
+      console.log('current refresh token invalid redirecting to /signin');
       redirect(context, '/signin');
       return {};
     }
 
     return initialProps;
-  }
+  };
   return WithAuth;
 }

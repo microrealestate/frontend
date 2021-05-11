@@ -15,10 +15,12 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
         </Head>
-        <body style={{
-          backgroundColor: theme.palette.backgroundColor,
-          overflowX: 'hidden'
-        }}>
+        <body
+          style={{
+            backgroundColor: theme.palette.backgroundColor,
+            overflowX: 'hidden',
+          }}
+        >
           <Main />
           <NextScript />
         </body>
@@ -66,6 +68,9 @@ MyDocument.getInitialProps = async (ctx) => {
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
+    styles: [
+      ...React.Children.toArray(initialProps.styles),
+      sheets.getStyleElement(),
+    ],
   };
 };

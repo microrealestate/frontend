@@ -2,57 +2,79 @@ import moment from 'moment';
 import * as Yup from 'yup';
 import { FieldArray, Form, Formik } from 'formik';
 import { Children, useCallback, useContext, useMemo } from 'react';
-import { withTranslation } from "../../utils/i18n";
+import { withTranslation } from '../../utils/i18n';
 import { Box, Button, Grid } from '@material-ui/core';
-import { DateField, FormSection, FormTextField, SelectField, SubmitButton } from '../Form';
+import {
+  DateField,
+  FormSection,
+  FormTextField,
+  SelectField,
+  SubmitButton,
+} from '../Form';
 import { StoreContext } from '../../store';
+import _ from 'lodash';
 
 const validationSchema = Yup.object().shape({
-  payments: Yup.array().of(
-    Yup.object().shape({
-      amount: Yup.number().min(0),
-      date: Yup.mixed().when('amount', {
-        is: val => val > 0,
-        then: Yup.date().required()
-      }),
-      type: Yup.string().required(),
-      reference: Yup.mixed().when('type', {
-        is: val => val !== 'cash',
-        then: Yup.string().required()
+  payments: Yup.array()
+    .of(
+      Yup.object().shape({
+        amount: Yup.number().min(0),
+        date: Yup.mixed().when('amount', {
+          is: (val) => val > 0,
+          then: Yup.date().required(),
+        }),
+        type: Yup.string().required(),
+        reference: Yup.mixed().when('type', {
+          is: (val) => val !== 'cash',
+          then: Yup.string().required(),
+        }),
       })
-    })).min(1)
+    )
+    .min(1),
 });
 
-const emptyPayment = { amount: '', date: moment(), type: 'cash', reference: '' };
+const emptyPayment = {
+  amount: '',
+  date: moment(),
+  type: 'cash',
+  reference: '',
+};
 
 const PaymentForm = withTranslation()(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
-  const initialValues = useMemo(() => ({
-    payments: store.rent.selected.payments.length ? store.rent.selected.payments.map(({ amount, date, type, reference }) => {
-      return {
-        amount: amount === 0 ? '' : amount,
-        date: date ? moment(date, 'DD/MM/YYYY') : null,
-        type: type,
-        reference: reference || ''
-      }
-    }) : [emptyPayment],
-  }), [store.rent.selected]);
+  const initialValues = useMemo(
+    () => ({
+      payments: store.rent.selected.payments.length
+        ? store.rent.selected.payments.map(
+            ({ amount, date, type, reference }) => {
+              return {
+                amount: amount === 0 ? '' : amount,
+                date: date ? moment(date, 'DD/MM/YYYY') : null,
+                type: type,
+                reference: reference || '',
+              };
+            }
+          )
+        : [emptyPayment],
+    }),
+    [store.rent.selected]
+  );
 
-  const _onSubmit = useCallback(async values => {
+  const _onSubmit = useCallback(async (values) => {
     const clonedValues = _.cloneDeep(values);
 
     const paymentPart = {
       payments: clonedValues.payments
         .filter(({ amount }) => amount > 0)
-        .map(payment => {
+        .map((payment) => {
           // convert moment into string for the DB
           payment.date = payment.date.format('DD/MM/YYYY');
           if (payment.type === 'cash') {
             delete payment.reference;
           }
           return payment;
-        })
+        }),
     };
     try {
       await onSubmit(paymentPart);
@@ -70,90 +92,118 @@ const PaymentForm = withTranslation()(({ t, onSubmit }) => {
       validationSchema={validationSchema}
       onSubmit={_onSubmit}
     >
-      {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description } }) => {
+      {({ isSubmitting, values: { payments } }) => {
         return (
           <Form autoComplete="off">
             <FormSection label={t('Payments')}>
               <FieldArray
                 name="payments"
-                render={arrayHelpers => (
+                render={(arrayHelpers) => (
                   <div>
-                    {Children.toArray(payments.map((payment, index) => (
-                      <>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <FormTextField
-                              label={t('Amount')}
-                              name={`payments[${index}].amount`}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <DateField
-                              label={t('Date')}
-                              name={`payments[${index}].date`}
-                              minDate={store.rent._period.startOf('month').toISOString()}
-                              maxDate={store.rent._period.endOf('month').toISOString()}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <SelectField
-                              label={t('Type')}
-                              name={`payments[${index}].type`}
-                              values={[
-                                { id: 'cheque', label: t('Cheque'), value: 'cheque' },
-                                { id: 'cash', label: t('Cash'), value: 'cash' },
-                                { id: 'levy', label: t('Levy'), value: 'levy' },
-                                { id: 'transfer', label: t('Transfer'), value: 'transfer' }
-                              ]}
-                            />
-                          </Grid>
-                          {(payments[index].type !== 'cash') && (
+                    {Children.toArray(
+                      payments.map((payment, index) => (
+                        <>
+                          <Grid container spacing={2}>
                             <Grid item xs={6}>
                               <FormTextField
-                                label={t('Reference')}
-                                name={`payments[${index}].reference`}
+                                label={t('Amount')}
+                                name={`payments[${index}].amount`}
                               />
                             </Grid>
-                          )}
-                        </Grid>
-                        <Box pb={2} display="flex" justifyContent={payments.length === index + 1 ? 'space-between' : 'flex-end'}>
-                          {(payments.length === index + 1) && (
-                            <Button
-                              // variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => arrayHelpers.push(emptyPayment)}
-                            >
-                              {t('Add payment')}
-                            </Button>
-                          )}
-                          {payments.length > 1 && (
-                            <Button
-                              // variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => arrayHelpers.remove(index)}
-                            >
-                              {t('Remove payment')}
-                            </Button>
-                          )}
-                        </Box>
-                      </>
-                    )))}
+                            <Grid item xs={6}>
+                              <DateField
+                                label={t('Date')}
+                                name={`payments[${index}].date`}
+                                minDate={store.rent._period
+                                  .startOf('month')
+                                  .toISOString()}
+                                maxDate={store.rent._period
+                                  .endOf('month')
+                                  .toISOString()}
+                              />
+                            </Grid>
+                          </Grid>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <SelectField
+                                label={t('Type')}
+                                name={`payments[${index}].type`}
+                                values={[
+                                  {
+                                    id: 'cheque',
+                                    label: t('Cheque'),
+                                    value: 'cheque',
+                                  },
+                                  {
+                                    id: 'cash',
+                                    label: t('Cash'),
+                                    value: 'cash',
+                                  },
+                                  {
+                                    id: 'levy',
+                                    label: t('Levy'),
+                                    value: 'levy',
+                                  },
+                                  {
+                                    id: 'transfer',
+                                    label: t('Transfer'),
+                                    value: 'transfer',
+                                  },
+                                ]}
+                              />
+                            </Grid>
+                            {payments[index].type !== 'cash' && (
+                              <Grid item xs={6}>
+                                <FormTextField
+                                  label={t('Reference')}
+                                  name={`payments[${index}].reference`}
+                                />
+                              </Grid>
+                            )}
+                          </Grid>
+                          <Box
+                            pb={2}
+                            display="flex"
+                            justifyContent={
+                              payments.length === index + 1
+                                ? 'space-between'
+                                : 'flex-end'
+                            }
+                          >
+                            {payments.length === index + 1 && (
+                              <Button
+                                // variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => arrayHelpers.push(emptyPayment)}
+                              >
+                                {t('Add payment')}
+                              </Button>
+                            )}
+                            {payments.length > 1 && (
+                              <Button
+                                // variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => arrayHelpers.remove(index)}
+                              >
+                                {t('Remove payment')}
+                              </Button>
+                            )}
+                          </Box>
+                        </>
+                      ))
+                    )}
                   </div>
                 )}
               />
             </FormSection>
-            <SubmitButton
-              label={!isSubmitting ? t('Save') : t('Saving')}
-            />
+            <SubmitButton label={!isSubmitting ? t('Save') : t('Saving')} />
           </Form>
-        )
+        );
       }}
     </Formik>
-  )
+  );
 });
 
 export default PaymentForm;

@@ -6,21 +6,25 @@ import { CardRow } from '../Cards';
 import { NumberFormat } from '../../utils/numberformat';
 import { withTranslation } from '../../utils/i18n';
 
-const BalanceBar = memo(withTranslation()(({ t, rent, hideTooltip }) => {
+const BalanceBar = memo(
+  withTranslation()(({ t, rent, hideTooltip }) => {
     const theme = useTheme();
 
     const data = useMemo(() => {
       const leftToPayInBalance = rent.balance - rent.payment;
-      const leftToPayInCurrentRent = leftToPayInBalance < 0 ? rent.totalWithoutBalanceAmount + leftToPayInBalance : rent.totalWithoutBalanceAmount;
+      const leftToPayInCurrentRent =
+        leftToPayInBalance < 0
+          ? rent.totalWithoutBalanceAmount + leftToPayInBalance
+          : rent.totalWithoutBalanceAmount;
       return [
         {
           name: '',
           payment: rent.payment,
           balance: leftToPayInBalance > 0 ? leftToPayInBalance : 0,
-          currentRent: leftToPayInCurrentRent > 0 ? leftToPayInCurrentRent : 0
-        }
+          currentRent: leftToPayInCurrentRent > 0 ? leftToPayInCurrentRent : 0,
+        },
       ];
-    }, [rent.payment, rent.totalWithoutBalanceAmount, rent.balance])
+    }, [rent.payment, rent.totalWithoutBalanceAmount, rent.balance]);
 
     return (
       <>
@@ -60,17 +64,39 @@ const BalanceBar = memo(withTranslation()(({ t, rent, hideTooltip }) => {
           <span>
             <ResponsiveContainer height={50}>
               <BarChart layout="vertical" stackOffset="sign" data={data}>
-                <XAxis type="number" hide={true} axisLine={false} domain={['dataMin', 'dataMax']} />
+                <XAxis
+                  type="number"
+                  hide={true}
+                  axisLine={false}
+                  domain={['dataMin', 'dataMax']}
+                />
                 <YAxis dataKey="name" hide={true} type="category" />
-                <Bar isAnimationActive={false} dataKey="payment" stackId="a" fill={theme.palette.success.main} background={{ fill: theme.palette.grey[200] }} />
-                <Bar isAnimationActive={false} dataKey="balance" stackId="a" fill={theme.palette.warning.dark} />
-                <Bar isAnimationActive={false} dataKey="currentRent" stackId="a" fill={theme.palette.warning.main} />
+                <Bar
+                  isAnimationActive={false}
+                  dataKey="payment"
+                  stackId="a"
+                  fill={theme.palette.success.main}
+                  background={{ fill: theme.palette.grey[200] }}
+                />
+                <Bar
+                  isAnimationActive={false}
+                  dataKey="balance"
+                  stackId="a"
+                  fill={theme.palette.warning.dark}
+                />
+                <Bar
+                  isAnimationActive={false}
+                  dataKey="currentRent"
+                  stackId="a"
+                  fill={theme.palette.warning.main}
+                />
               </BarChart>
             </ResponsiveContainer>
           </span>
         </Tooltip>
       </>
     );
-  }));
+  })
+);
 
-  export default BalanceBar;
+export default BalanceBar;

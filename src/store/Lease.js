@@ -1,4 +1,4 @@
-import { observable, action, flow, computed, makeObservable } from 'mobx';
+import { observable, flow, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
 
 export default class Lease {
@@ -11,7 +11,7 @@ export default class Lease {
       fetchOne: flow,
       create: flow,
       update: flow,
-      delete: flow
+      delete: flow,
     });
   }
 
@@ -24,7 +24,7 @@ export default class Lease {
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 
   *fetchOne(leaseId) {
     try {
@@ -38,7 +38,7 @@ export default class Lease {
 
   *create(lease) {
     try {
-      const response = yield useApiFetch().post(`/leases`, lease);
+      const response = yield useApiFetch().post('/leases', lease);
       const createdLease = response.data;
       this.items.push(createdLease);
 
@@ -46,13 +46,13 @@ export default class Lease {
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 
   *update(lease) {
     try {
       const response = yield useApiFetch().patch(`/leases/${lease._id}`, lease);
       const updatedLease = response.data;
-      const index = this.items.findIndex(item => item._id === lease._id);
+      const index = this.items.findIndex((item) => item._id === lease._id);
       if (index > -1) {
         this.items.splice(index, 1, updatedLease);
       }
@@ -60,15 +60,15 @@ export default class Lease {
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 
   *delete(ids) {
     try {
       yield useApiFetch().delete(`/leases/${ids.join(',')}`);
-      this.items = this.items.filter(lease => !ids.includes(lease._id));
+      this.items = this.items.filter((lease) => !ids.includes(lease._id));
       return { status: 200 };
     } catch (error) {
       return { status: error.response.status };
     }
-  };
+  }
 }

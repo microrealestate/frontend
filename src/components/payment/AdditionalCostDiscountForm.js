@@ -8,29 +8,35 @@ import { StoreContext } from '../../store';
 const validationSchema = Yup.object().shape({
   extracharge: Yup.number().min(0),
   noteextracharge: Yup.mixed().when('extracharge', {
-    is: val => val > 0,
+    is: (val) => val > 0,
     then: Yup.string().required(),
   }),
   promo: Yup.number().min(0),
   notepromo: Yup.mixed().when('promo', {
-    is: val => val > 0,
+    is: (val) => val > 0,
     then: Yup.string().required(),
-  })
+  }),
 });
 
 const AdditionalCostDiscountForm = withTranslation()(({ t, onSubmit }) => {
   const store = useContext(StoreContext);
 
-  const initialValues = useMemo(() => ({
-    extracharge: store.rent.selected.extracharge !== 0 ? store.rent.selected.extracharge : '',
-    noteextracharge: store.rent.selected.noteextracharge || '',
-    promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
-    notepromo: store.rent.selected.notepromo || '',
-  }), [store.rent.selected]);
+  const initialValues = useMemo(
+    () => ({
+      extracharge:
+        store.rent.selected.extracharge !== 0
+          ? store.rent.selected.extracharge
+          : '',
+      noteextracharge: store.rent.selected.noteextracharge || '',
+      promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
+      notepromo: store.rent.selected.notepromo || '',
+    }),
+    [store.rent.selected]
+  );
 
-  const _onSubmit = useCallback(async values => {
+  const _onSubmit = useCallback(async (values) => {
     const paymentPart = {
-      ...values
+      ...values,
     };
     try {
       await onSubmit(paymentPart);
@@ -52,10 +58,16 @@ const AdditionalCostDiscountForm = withTranslation()(({ t, onSubmit }) => {
       validationSchema={validationSchema}
       onSubmit={_onSubmit}
     >
-      {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description } }) => {
+      {({
+        isSubmitting,
+        values: { extracharge, noteextracharge, promo, notepromo },
+      }) => {
         return (
           <Form autoComplete="off">
-            <FormSection label={t('Additional cost')} defaultExpanded={!!initialValues.extracharge}>
+            <FormSection
+              label={t('Additional cost')}
+              defaultExpanded={!!initialValues.extracharge}
+            >
               <FormTextField
                 label={t('Amount')}
                 name="extracharge"
@@ -69,12 +81,11 @@ const AdditionalCostDiscountForm = withTranslation()(({ t, onSubmit }) => {
                 rows={3}
               />
             </FormSection>
-            <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
-              <FormTextField
-                label={t('Discount')}
-                name="promo"
-                value={promo}
-              />
+            <FormSection
+              label={t('Discount')}
+              defaultExpanded={!!initialValues.promo}
+            >
+              <FormTextField label={t('Discount')} name="promo" value={promo} />
               <FormTextField
                 label={t('Description')}
                 name="notepromo"
@@ -83,14 +94,12 @@ const AdditionalCostDiscountForm = withTranslation()(({ t, onSubmit }) => {
                 rows={3}
               />
             </FormSection>
-            <SubmitButton
-              label={!isSubmitting ? t('Save') : t('Saving')}
-            />
+            <SubmitButton label={!isSubmitting ? t('Save') : t('Saving')} />
           </Form>
-        )
+        );
       }}
     </Formik>
-  )
+  );
 });
 
 export default AdditionalCostDiscountForm;

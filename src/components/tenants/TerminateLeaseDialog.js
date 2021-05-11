@@ -15,7 +15,7 @@ import moment from 'moment';
 
 const validationSchema = Yup.object().shape({
   terminationDate: Yup.date().required(),
-  guarantyPayback: Yup.number().min(0)
+  guarantyPayback: Yup.number().min(0),
 });
 
 const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
@@ -23,20 +23,22 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
   const [error, setError] = useState('');
 
   const initialValues = {
-    terminationDate: store.tenant.selected?.terminationDate ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY') : null,
-    guarantyPayback: store.tenant.selected?.guarantyPayback
+    terminationDate: store.tenant.selected?.terminationDate
+      ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY')
+      : null,
+    guarantyPayback: store.tenant.selected?.guarantyPayback,
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const _onSubmit = async tenantPart => {
+  const _onSubmit = async (tenantPart) => {
     const tenant = {
-     ...toJS(store.tenant.selected),
-     terminationDate: tenantPart.terminationDate.format('DD/MM/YYYY'),
-     guarantyPayback: tenantPart.guarantyPayback || 0,
-    }
+      ...toJS(store.tenant.selected),
+      terminationDate: tenantPart.terminationDate.format('DD/MM/YYYY'),
+      guarantyPayback: tenantPart.guarantyPayback || 0,
+    };
 
     const { status, data } = await store.tenant.update(tenant);
 
@@ -45,18 +47,18 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
         case 422:
           return setError(t('Tenant name is missing.'));
         case 403:
-          return setError(t('You are not allowed to update the tenant.'))
+          return setError(t('You are not allowed to update the tenant.'));
         case 409:
-          return setError(t('The tenant already exists.'))
+          return setError(t('The tenant already exists.'));
         default:
           return setError(t('Something went wrong'));
-      };
+      }
     }
 
     store.tenant.setSelected(data);
 
     handleClose(false);
-  }
+  };
 
   return (
     <Dialog
@@ -66,9 +68,13 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
       onClose={handleClose}
       aria-labelledby="new-tenant-dialog"
     >
-      <DialogTitle>{t('Terminate {{tenant}}\'s lease ', { tenant: store.tenant.selected.name})}</DialogTitle>
+      <DialogTitle>
+        {t("Terminate {{tenant}}'s lease", {
+          tenant: store.tenant.selected.name,
+        })}
+      </DialogTitle>
       <Box p={1}>
-        < RequestError error={error} />
+        <RequestError error={error} />
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -81,8 +87,16 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
                   <DateField
                     label={t('Termination date')}
                     name="terminationDate"
-                    minDate={store.tenant.selected?.beginDate ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY') : undefined}
-                    maxDate={store.tenant.selected?.endDate ? moment(store.tenant.selected.endDate, 'DD/MM/YYYY') : undefined}
+                    minDate={
+                      store.tenant.selected?.beginDate
+                        ? moment(store.tenant.selected.beginDate, 'DD/MM/YYYY')
+                        : undefined
+                    }
+                    maxDate={
+                      store.tenant.selected?.endDate
+                        ? moment(store.tenant.selected.endDate, 'DD/MM/YYYY')
+                        : undefined
+                    }
                   />
                   <FormTextField
                     label={t('Returned deposit')}
@@ -98,7 +112,7 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
                   />
                 </DialogActions>
               </Form>
-            )
+            );
           }}
         </Formik>
       </Box>

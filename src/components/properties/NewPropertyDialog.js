@@ -15,110 +15,115 @@ import { StoreContext } from '../../store';
 const validationSchema = Yup.object().shape({
   type: Yup.string().required(),
   name: Yup.string().required(),
-  rent: Yup.number().min(0).required()
+  rent: Yup.number().min(0).required(),
 });
 
 const initialValues = {
   type: '',
   name: '',
-  rent: ''
+  rent: '',
 };
 
-const NewPropertyDialog = withTranslation()(({ t, open, setOpen, onConfirm }) => {
-  const store = useContext(StoreContext);
-  const [error, setError] = useState('');
+const NewPropertyDialog = withTranslation()(
+  ({ t, open, setOpen, onConfirm }) => {
+    const store = useContext(StoreContext);
+    const [error, setError] = useState('');
 
-  const handleClose = useCallback(() => {
-    setOpen(false);
-  }, []);
+    const handleClose = useCallback(() => {
+      setOpen(false);
+    }, []);
 
-  const _onSubmit = useCallback(async propertyPart => {
-    let property = {
-      ...propertyPart,
-      price: propertyPart.rent
-    }
-
-    const { status, data } = await store.property.create(property);
-    if (status !== 200) {
-      switch (status) {
-        case 422:
-          return setError(t('Property name is missing.'));
-        case 403:
-          return setError(t('You are not allowed to create a property.'))
-        case 409:
-          return setError(t('The property already exists.'))
-        default:
-          return setError(t('Something went wrong'));
+    const _onSubmit = useCallback(async (propertyPart) => {
+      let property = {
+        ...propertyPart,
+        price: propertyPart.rent,
       };
-    }
 
-    handleClose(false);
-    await onConfirm(data);
-  }, []);
+      const { status, data } = await store.property.create(property);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Property name is missing.'));
+          case 403:
+            return setError(t('You are not allowed to create a property.'));
+          case 409:
+            return setError(t('The property already exists.'));
+          default:
+            return setError(t('Something went wrong'));
+        }
+      }
 
-  const propertyTypes = useMemo(() => types.map(type => ({
-    id: type.id,
-    value: type.id,
-    label: t(type.labelId)
-  })), []);
+      handleClose(false);
+      await onConfirm(data);
+    }, []);
 
-  return (
-    <Dialog
-      maxWidth="sm"
-      fullWidth
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="new-property-dialog"
-    >
-      <DialogTitle>{t('Create a new property')}</DialogTitle>
-      <Box p={1}>
-        < RequestError error={error} />
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={_onSubmit}
-        >
-          {({ values, isSubmitting }) => {
-            return (
-              <Form autoComplete="off">
-                <DialogContent>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={4}>
-                      <SelectField
-                        label={t('Property Type')}
-                        name="type"
-                        values={propertyTypes}
-                      />
+    const propertyTypes = useMemo(
+      () =>
+        types.map((type) => ({
+          id: type.id,
+          value: type.id,
+          label: t(type.labelId),
+        })),
+      []
+    );
+
+    return (
+      <Dialog
+        maxWidth="sm"
+        fullWidth
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="new-property-dialog"
+      >
+        <DialogTitle>{t('Create a new property')}</DialogTitle>
+        <Box p={1}>
+          <RequestError error={error} />
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={_onSubmit}
+          >
+            {({ isSubmitting }) => {
+              return (
+                <Form autoComplete="off">
+                  <DialogContent>
+                    <Grid container spacing={1}>
+                      <Grid item xs={12} md={4}>
+                        <SelectField
+                          label={t('Property Type')}
+                          name="type"
+                          values={propertyTypes}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={8}>
+                        <FormTextField label={t('Name')} name="name" />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormTextField
+                          label={t('Rent without expenses')}
+                          name="rent"
+                        />
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} md={8}>
-                      <FormTextField
-                        label={t('Name')}
-                        name="name"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormTextField
-                        label={t('Rent without expenses')}
-                        name="rent"
-                      />
-                    </Grid>
-                  </Grid>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose} color="primary">
-                    {t('Cancel')}
-                  </Button>
-                  <SubmitButton
-                    label={!isSubmitting ? t('Create') : t('Creating property')}
-                  />
-                </DialogActions>
-              </Form>
-            )
-          }}
-        </Formik>
-      </Box>
-    </Dialog>
-  );
-});
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                      {t('Cancel')}
+                    </Button>
+                    <SubmitButton
+                      label={
+                        !isSubmitting ? t('Create') : t('Creating property')
+                      }
+                    />
+                  </DialogActions>
+                </Form>
+              );
+            }}
+          </Formik>
+        </Box>
+      </Dialog>
+    );
+  }
+);
 
 export default NewPropertyDialog;

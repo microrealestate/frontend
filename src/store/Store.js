@@ -1,9 +1,9 @@
 import moment from 'moment';
-import { makeObservable, observable, reaction } from 'mobx'
+import { makeObservable, observable, reaction } from 'mobx';
 
-import User from './User'
-import Organization from './Organization'
-import Rent from './Rent'
+import User from './User';
+import Organization from './Organization';
+import Rent from './Rent';
 import Tenant from './Tenant';
 import Property from './Property';
 import Lease from './Lease';
@@ -26,17 +26,20 @@ export default class Store {
       leaseType: observable,
       rent: observable,
       tenant: observable,
-      property: observable
+      property: observable,
     });
 
     let refreshTokenHandle;
     reaction(
       () => this.user.token,
-      token => {
+      (token) => {
         // console.log('react to access token changed')
         setApiHeaders({
           accessToken: token,
-          organizationId: this.organization && this.organization.selected ? this.organization.selected._id : undefined
+          organizationId:
+            this.organization && this.organization.selected
+              ? this.organization.selected._id
+              : undefined,
         });
 
         if (!isServer()) {
@@ -51,7 +54,7 @@ export default class Store {
                 // TODO display a dialog before reloading
                 window.location.reload();
               }
-            }, (this.user.tokenExpiry * 1000) - Date.now() - 10000);
+            }, this.user.tokenExpiry * 1000 - Date.now() - 10000);
           } else {
             if (refreshTokenHandle) {
               clearTimeout(refreshTokenHandle);
@@ -63,10 +66,10 @@ export default class Store {
     );
     reaction(
       () => this.organization.selected,
-      async organization => {
+      async (organization) => {
         setApiHeaders({
           accessToken: this.user.token,
-          organizationId: organization ? organization._id : undefined
+          organizationId: organization ? organization._id : undefined,
         });
         moment.locale(this.organization.selected.locale || 'en');
         await i18n.changeLanguage(this.organization.selected.locale || 'en');
@@ -74,7 +77,7 @@ export default class Store {
     );
     reaction(
       () => this.organization.selected?.locale,
-      async locale => {
+      async (locale) => {
         moment.locale(locale || 'en');
         await i18n.changeLanguage(locale || 'en');
       }
@@ -86,32 +89,32 @@ export default class Store {
       return;
     }
 
-    console.log('hydrate store')
+    console.log('hydrate store');
     const {
       user = {},
       organization = {
-        items: []
+        items: [],
       },
       leaseType = {
-        items: []
+        items: [],
       },
       rent = {
-        items: []
+        items: [],
       },
       tenant = {
-        items: []
+        items: [],
       },
       property = {
-        items: []
-      }
+        items: [],
+      },
     } = initialData;
 
-    this.user.firstName = user.firstName
-    this.user.lastName = user.lastName
-    this.user.email = user.email
-    this.user.role = user.role
-    this.user.token = user.token
-    this.user.tokenExpiry = user.tokenExpiry
+    this.user.firstName = user.firstName;
+    this.user.lastName = user.lastName;
+    this.user.email = user.email;
+    this.user.role = user.role;
+    this.user.token = user.token;
+    this.user.tokenExpiry = user.tokenExpiry;
 
     this.organization.items = organization.items;
     this.organization.selected = organization.selected;

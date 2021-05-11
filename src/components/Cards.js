@@ -2,7 +2,7 @@ import { Children, memo, useMemo } from 'react';
 import { Box, Divider, Paper, Typography } from '@material-ui/core';
 import IconTypography from './IconTypography';
 
-const _variantToBgColor = variant => {
+const _variantToBgColor = (variant) => {
   switch (variant) {
     case 'success':
       return 'success.main';
@@ -15,18 +15,26 @@ const _variantToBgColor = variant => {
   }
 };
 
-export const CardRow = memo(({ children, ...props }) => (
-  <Box display="flex" alignItems="center" {...props}>
-    { Children.toArray(children).map((child, index) => (
-      <Box key={index} flexGrow={index === 0 ? 1 : 0}>
-        {child}
-      </Box>
-    ))}
-  </Box>
-));
+export const CardRow = memo(function CardRow({ children, ...props }) {
+  return (
+    <Box display="flex" alignItems="center" {...props}>
+      {Children.toArray(children).map((child, index) => (
+        <Box key={index} flexGrow={index === 0 ? 1 : 0}>
+          {child}
+        </Box>
+      ))}
+    </Box>
+  );
+});
 
-export const PageCard = memo(({ variant, Icon, title, info, children}) => {
-  const bgColor = useMemo(() =>_variantToBgColor(variant), [variant]);
+export const PageCard = memo(function PageCard({
+  variant,
+  Icon,
+  title,
+  info,
+  children,
+}) {
+  const bgColor = useMemo(() => _variantToBgColor(variant), [variant]);
   return (
     <Paper>
       <Box
@@ -35,7 +43,7 @@ export const PageCard = memo(({ variant, Icon, title, info, children}) => {
         color="primary.contrastText"
         style={{
           borderTopLeftRadius: 4,
-          borderTopRightRadius: 4
+          borderTopRightRadius: 4,
         }}
       >
         <IconTypography Icon={Icon}>{title}</IconTypography>
@@ -51,13 +59,20 @@ export const PageCard = memo(({ variant, Icon, title, info, children}) => {
   );
 });
 
-export const DashboardCard = memo(({ variant, Icon, title, info, children }) => {
-
+export const DashboardCard = memo(function DashboardCard({
+  variant,
+  Icon,
+  title,
+  info,
+  children,
+}) {
   return (
-    <Paper style={{
-      display: 'flex',
-      marginTop: 16
-    }}>
+    <Paper
+      style={{
+        display: 'flex',
+        marginTop: 16,
+      }}
+    >
       <Box width="100%">
         <Box
           px={1}
@@ -70,18 +85,22 @@ export const DashboardCard = memo(({ variant, Icon, title, info, children }) => 
           <IconTypography Icon={Icon}>{title}</IconTypography>
         </Box>
 
-        <Box p={1.8}>
-          {children}
-        </Box>
+        <Box p={1.8}>{children}</Box>
         {info && (
           <>
             <Divider />
             <Box p={1}>
-              <Typography component="div" color="textSecondary" variant="caption">{info}</Typography>
+              <Typography
+                component="div"
+                color="textSecondary"
+                variant="caption"
+              >
+                {info}
+              </Typography>
             </Box>
           </>
         )}
       </Box>
     </Paper>
-  )
+  );
 });

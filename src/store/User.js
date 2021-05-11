@@ -1,14 +1,14 @@
-import { observable, flow, computed, action, makeObservable } from 'mobx'
-const jwt = require('jsonwebtoken')
-import { useApiFetch, useAuthApiFetch } from '../utils/fetch'
+import { observable, flow, computed, action, makeObservable } from 'mobx';
+const jwt = require('jsonwebtoken');
+import { useApiFetch, useAuthApiFetch } from '../utils/fetch';
 import { isServer } from '../utils';
 export default class User {
-  token
-  tokenExpiry
-  firstName
-  lastName
-  email
-  role
+  token;
+  tokenExpiry;
+  firstName;
+  lastName;
+  email;
+  role;
 
   constructor() {
     makeObservable(this, {
@@ -26,19 +26,19 @@ export default class User {
       signOut: flow,
       refreshTokens: flow,
       forgotPassword: flow,
-      resetPassword: flow
-    })
+      resetPassword: flow,
+    });
   }
 
   get signedIn() {
-    return !!this.token
+    return !!this.token;
   }
 
   get isAdministrator() {
     return this.role === 'administrator';
   }
 
-  setRole = role => this.role = role;
+  setRole = (role) => (this.role = role);
 
   *signUp(firstname, lastname, email, password) {
     try {
@@ -46,8 +46,8 @@ export default class User {
         firstname,
         lastname,
         email,
-        password
-      })
+        password,
+      });
       return 200;
     } catch (error) {
       return error.response.status;
@@ -58,31 +58,34 @@ export default class User {
     try {
       const response = yield useApiFetch().post('/authenticator/signin', {
         email,
-        password
-      })
-      const { accessToken } = response.data
-      const { account: { firstname, lastname }, exp } = jwt.decode(accessToken)
-      this.firstName = firstname
-      this.lastName = lastname
-      this.email = email
-      this.tokenExpiry = exp
-      this.token = accessToken
+        password,
+      });
+      const { accessToken } = response.data;
+      const {
+        account: { firstname, lastname },
+        exp,
+      } = jwt.decode(accessToken);
+      this.firstName = firstname;
+      this.lastName = lastname;
+      this.email = email;
+      this.tokenExpiry = exp;
+      this.token = accessToken;
       return 200;
     } catch (error) {
       console.error(error);
-      return error.response.status
+      return error.response.status;
     }
   }
 
   *signOut() {
     try {
-      yield useApiFetch().delete('/authenticator/signout')
+      yield useApiFetch().delete('/authenticator/signout');
     } finally {
-      this.firstName = undefined
-      this.lastName = undefined
-      this.email = undefined
-      this.tokenExpiry = undefined
-      this.token = undefined
+      this.firstName = undefined;
+      this.lastName = undefined;
+      this.email = undefined;
+      this.tokenExpiry = undefined;
+      this.token = undefined;
     }
   }
 
@@ -90,44 +93,47 @@ export default class User {
     try {
       let response;
       if (isServer()) {
-        const authFetchApi = useAuthApiFetch(context.req.headers.cookie)
-        response = yield authFetchApi.post('/authenticator/refreshtoken')
+        const authFetchApi = useAuthApiFetch(context.req.headers.cookie);
+        response = yield authFetchApi.post('/authenticator/refreshtoken');
 
         const cookies = response.headers['set-cookie'];
         if (cookies) {
           context.res.setHeader('Set-Cookie', cookies);
         }
       } else {
-        response = yield useApiFetch().post('/authenticator/refreshtoken')
+        response = yield useApiFetch().post('/authenticator/refreshtoken');
       }
-      const { accessToken } = response.data
-      const { account: { firstname, lastname, email }, exp } = jwt.decode(accessToken)
-      this.firstName = firstname
-      this.lastName = lastname
-      this.email = email
-      this.tokenExpiry = exp
-      this.token = accessToken
+      const { accessToken } = response.data;
+      const {
+        account: { firstname, lastname, email },
+        exp,
+      } = jwt.decode(accessToken);
+      this.firstName = firstname;
+      this.lastName = lastname;
+      this.email = email;
+      this.tokenExpiry = exp;
+      this.token = accessToken;
       return { status: 200 };
     } catch (error) {
-      this.firstName = undefined
-      this.lastName = undefined
-      this.email = undefined
-      this.tokenExpiry = undefined
-      this.token = undefined
+      this.firstName = undefined;
+      this.lastName = undefined;
+      this.email = undefined;
+      this.tokenExpiry = undefined;
+      this.token = undefined;
       console.error(error);
-      return { status: error.response.status, error }
+      return { status: error.response.status, error };
     }
   }
 
   *forgotPassword(email) {
     try {
       yield useApiFetch().post('/authenticator/forgotpassword', {
-        email
+        email,
       });
       return 200;
     } catch (error) {
       console.error(error);
-      return error.response.status
+      return error.response.status;
     }
   }
 
@@ -135,7 +141,7 @@ export default class User {
     try {
       yield useApiFetch().patch('/authenticator/resetpassword', {
         resetToken,
-        password
+        password,
       });
       return 200;
     } catch (error) {

@@ -9,38 +9,35 @@ import ApartmentIcon from '@material-ui/icons/ApartmentOutlined';
 import HomeIcon from '@material-ui/icons/HomeOutlined';
 
 const PropertyIcon = ({ type, ...props }) => {
-
   let TypeIcon = TerrainIcon;
   switch (type) {
     case 'store':
-      TypeIcon = StoreIcon
+      TypeIcon = StoreIcon;
       break;
     case 'building':
-      TypeIcon = ApartmentIcon
+      TypeIcon = ApartmentIcon;
       break;
     case 'apartment':
-      TypeIcon = HomeIcon
+      TypeIcon = HomeIcon;
       break;
     case 'room':
-      TypeIcon = ApartmentIcon
+      TypeIcon = ApartmentIcon;
       break;
     case 'office':
-      TypeIcon = ApartmentIcon
+      TypeIcon = ApartmentIcon;
       break;
     case 'garage':
-      TypeIcon = EmojiTransportationOutlinedIcon
+      TypeIcon = EmojiTransportationOutlinedIcon;
       break;
     case 'parking':
-      TypeIcon = ParkingIcon
+      TypeIcon = ParkingIcon;
       break;
     case 'letterbox':
-      TypeIcon = MarkunreadMailboxIcon
+      TypeIcon = MarkunreadMailboxIcon;
       break;
   }
 
-  return (
-    <TypeIcon {...props} />
-  );
-}
+  return <TypeIcon {...props} />;
+};
 
 export default memo(PropertyIcon);

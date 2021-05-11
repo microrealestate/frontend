@@ -10,16 +10,16 @@ import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 
-export default function SplitButton({ options, value, onChange=() => {}}) {
+export default function SplitButton({ options, value, onChange = () => {} }) {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const [selectedOption, setSelectedOption] = useState(value);
 
   useEffect(() => {
     onChange(selectedOption);
-  }, [selectedOption])
+  }, [selectedOption]);
 
-  const handleMenuItemClick = option => {
+  const handleMenuItemClick = (option) => {
     setSelectedOption(option);
     setOpen(false);
   };
@@ -39,7 +39,12 @@ export default function SplitButton({ options, value, onChange=() => {}}) {
   return (
     <Grid container direction="column" alignItems="center">
       <Grid item xs={12}>
-        <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button">
+        <ButtonGroup
+          variant="contained"
+          color="primary"
+          ref={anchorRef}
+          aria-label="split button"
+        >
           <Button>{selectedOption.label}</Button>
           <Button
             color="primary"
@@ -53,18 +58,25 @@ export default function SplitButton({ options, value, onChange=() => {}}) {
             <ArrowDropDownIcon />
           </Button>
         </ButtonGroup>
-        <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+        <Popper
+          open={open}
+          anchorEl={anchorRef.current}
+          role={undefined}
+          transition
+          disablePortal
+        >
           {({ TransitionProps, placement }) => (
             <Grow
               {...TransitionProps}
               style={{
-                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                transformOrigin:
+                  placement === 'bottom' ? 'center top' : 'center bottom',
               }}
             >
               <Paper>
                 <ClickAwayListener onClickAway={handleClose}>
                   <MenuList id="split-button-menu">
-                    {options.map((option, index) => (
+                    {options.map((option) => (
                       <MenuItem
                         key={option.id}
                         selected={option.id === selectedOption.id}

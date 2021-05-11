@@ -1,4 +1,3 @@
-
 export default [
   { id: 'store', labelId: 'Store' },
   { id: 'building', labelId: 'Building' },

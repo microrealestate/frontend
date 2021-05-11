@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
 import React from 'react';
 import clsx from 'clsx';
 import MuiLink from '@material-ui/core/Link';
@@ -34,12 +33,27 @@ function Link(props) {
   });
 
   if (naked) {
-    return <NextComposed className={className} ref={innerRef} href={href} {...other} />;
+    return (
+      <NextComposed
+        className={className}
+        ref={innerRef}
+        href={href}
+        {...other}
+      />
+    );
   }
 
   return (
-    <MuiLink component={NextComposed} className={className} ref={innerRef} href={href} {...other} />
+    <MuiLink
+      component={NextComposed}
+      className={className}
+      ref={innerRef}
+      href={href}
+      {...other}
+    />
   );
 }
 
-export default React.forwardRef((props, ref) => <Link {...props} innerRef={ref} />);
+export default React.forwardRef(function LinkEx(props, ref) {
+  return <Link {...props} innerRef={ref} />;
+});

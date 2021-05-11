@@ -1,16 +1,14 @@
-import { observer } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite';
 
-import { withTranslation } from '../../utils/i18n';
-import Page from '../../components/Page'
-import { withAuthentication } from '../../components/Authentication'
+import Page from '../../components/Page';
+import { withAuthentication } from '../../components/Authentication';
 
-const Accounting = withTranslation()(observer(({ t }) => {
+const Accounting = observer(() => {
   return (
     <Page>
       <div>Accounting</div>
     </Page>
   );
-}));
+});
 
 export default withAuthentication(Accounting);
-

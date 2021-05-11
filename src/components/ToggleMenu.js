@@ -5,7 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Typography } from '@material-ui/core';
 
-const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
+const ToggleMenu = ({ startIcon, options, value, onChange = () => {} }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedOption, setSelectedOption] = useState(value);
 
@@ -17,11 +17,14 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
     setAnchorEl(null);
   }, []);
 
-  const onClick = useCallback(option => {
-    setSelectedOption(option);
-    onChange(option)
-    handleClose();
-  }, [onChange]);
+  const onClick = useCallback(
+    (option) => {
+      setSelectedOption(option);
+      onChange(option);
+      handleClose();
+    },
+    [onChange]
+  );
 
   // useEffect(() => {
   //     onChange(selectedOption);
@@ -39,7 +42,9 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
         onClick={handleClick}
         fullWidth
       >
-        <Typography noWrap>{selectedOption && selectedOption.label ? selectedOption.label : ''}</Typography>
+        <Typography noWrap>
+          {selectedOption && selectedOption.label ? selectedOption.label : ''}
+        </Typography>
       </Button>
       <Menu
         id="select-menu"
@@ -48,8 +53,10 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => { } }) => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        {options.map(option => (
-          <MenuItem key={option.id} onClick={() => onClick(option)}>{option.label}</MenuItem>
+        {options.map((option) => (
+          <MenuItem key={option.id} onClick={() => onClick(option)}>
+            {option.label}
+          </MenuItem>
         ))}
       </Menu>
     </>
