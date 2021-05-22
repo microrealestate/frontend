@@ -112,8 +112,12 @@ const RichTextEditor = withTranslation()(
 
         // load document
         initialLoad = true;
-        const data = (await onLoad()) || placeholder;
-        textEditor.setContents(data);
+        const data = await onLoad();
+        if (!data) {
+          textEditor.setText(placeholder);
+        } else {
+          textEditor.setContents(data);
+        }
         setReady(true);
 
         // Setup the auto save

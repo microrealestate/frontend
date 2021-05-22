@@ -259,9 +259,6 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
       disableEscapeKeyDown
       open={!!open}
       aria-labelledby="form-dialog-title"
-      placeholder={
-        'Functionality is not fully implemented. Work in progress here.'
-      }
     >
       <RichTextEditor
         title={open.name}
@@ -270,6 +267,9 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
         onSave={onSave}
         onClose={handleClose}
         showPrintButton
+        placeholder={
+          '\nFunctionality is not fully implemented. Work in progress here.'
+        }
       />
     </RichTextEditorDialog>
   );
