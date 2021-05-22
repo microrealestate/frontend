@@ -7,8 +7,8 @@ import { Button, Box, Grid, Typography, Paper } from '@material-ui/core';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { FormTextField, SubmitButton } from '../components/Form';
+import { withTranslation } from 'next-i18next';
 
-import { withTranslation } from '../utils/i18n';
 import { StoreContext } from '../store';
 import RequestError from '../components/RequestError';
 import Page from '../components/Page';

@@ -17,7 +17,7 @@ import {
 } from '@material-ui/core';
 
 import { getStoreInstance, StoreContext } from '../../../store';
-import { withTranslation } from '../../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import Page from '../../../components/Page';
 import { withAuthentication } from '../../../components/Authentication';
 import RequestError from '../../../components/RequestError';

@@ -1,10 +1,10 @@
+import { withTranslation } from 'next-i18next';
 import React, { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Typography, Box, Paper } from '@material-ui/core';
 
-import { withTranslation } from '../utils/i18n';
 import { withAuthentication } from '../components/Authentication';
 import { getStoreInstance, StoreContext } from '../store';
 import Page from '../components/Page';

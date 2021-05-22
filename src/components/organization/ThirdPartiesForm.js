@@ -4,7 +4,7 @@ import { useCallback, useContext, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { FormTextField, SubmitButton, FormSection } from '../Form';
 import { StoreContext } from '../../store';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { Typography } from '@material-ui/core';
 
 const validationSchema = Yup.object().shape({

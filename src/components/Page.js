@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
-import { withTranslation } from '../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import OrganizationSwitcher from './organization/OrganizationSwitcher';
 import { StoreContext } from '../store';
 import Loading from './Loading';
@@ -62,7 +62,7 @@ const MainToolbar = memo(
       >
         <Typography variant="h5">{APP_NAME}</Typography>
         <Box display="flex" alignItems="center">
-          {store.organization.items && store.organization.items.length && (
+          {!!(store.organization.items && store.organization.items.length) && (
             <OrganizationSwitcher />
           )}
           <Tooltip title={t('Sign out')} aria-label="sign out">

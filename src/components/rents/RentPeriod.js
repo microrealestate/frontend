@@ -2,7 +2,7 @@ import moment from 'moment';
 import { memo, useMemo } from 'react';
 
 import { Typography } from '@material-ui/core';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 export const getPeriod = (t, term, frequency) => {
   const termMoment = moment(term, 'YYYYMMDDHH');

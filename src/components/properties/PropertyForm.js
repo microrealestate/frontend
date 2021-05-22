@@ -12,7 +12,7 @@ import {
   SelectField,
 } from '../Form';
 import { StoreContext } from '../../store';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 const validationSchema = Yup.object().shape({
   type: Yup.string().required(),

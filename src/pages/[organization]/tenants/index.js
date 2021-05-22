@@ -20,7 +20,7 @@ import {
 
 import { withAuthentication } from '../../../components/Authentication';
 import Page from '../../../components/Page';
-import { withTranslation } from '../../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
@@ -120,9 +120,7 @@ const TenantList = withTranslation()(({ t }) => {
                                 'DD/MM/YYYY'
                               ).format('L'),
                               endDate: moment(
-                                tenant.terminated
-                                  ? tenant.terminationDate
-                                  : tenant.endDate,
+                                tenant.terminationDate || tenant.endDate,
                                 'DD/MM/YYYY'
                               ).format('L'),
                             }

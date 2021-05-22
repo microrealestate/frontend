@@ -11,7 +11,7 @@ import ReceiptIcon from '@material-ui/icons/Receipt';
 import { StoreContext, getStoreInstance } from '../../../../store';
 import { withAuthentication } from '../../../../components/Authentication';
 import { isServer } from '../../../../utils';
-import { withTranslation } from '../../../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import SendIcon from '@material-ui/icons/Send';
 import Page from '../../../../components/Page';
 import RentCard from '../../../../components/rents/RentCard';

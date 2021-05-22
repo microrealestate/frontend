@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { CircularProgress } from '@material-ui/core';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { StoreContext } from '../../store';
 
 const SendRentEmailMenu = memo(

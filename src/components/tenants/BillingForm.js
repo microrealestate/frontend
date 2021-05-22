@@ -9,7 +9,7 @@ import {
   SubmitButton,
 } from '../Form';
 import { StoreContext } from '../../store';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { Box } from '@material-ui/core';
 
 const validationSchema = Yup.object().shape({

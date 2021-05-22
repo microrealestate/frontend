@@ -10,7 +10,7 @@ import {
 } from '../Form';
 import { useCallback, useContext, useMemo } from 'react';
 import { StoreContext } from '../../store';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 const validationSchema = Yup.object().shape({
   vatNumber: Yup.string(),

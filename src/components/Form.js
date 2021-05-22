@@ -27,7 +27,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
-import { withTranslation } from '../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 export const FormTextField = RestrictedComponent(
   ({ label, disabled, showHidePassword = true, ...props }) => {

@@ -2,7 +2,7 @@ import moment from 'moment';
 import * as Yup from 'yup';
 import { FieldArray, Form, Formik } from 'formik';
 import { Children, useCallback, useContext, useMemo } from 'react';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { Box, Button, Grid } from '@material-ui/core';
 import {
   DateField,

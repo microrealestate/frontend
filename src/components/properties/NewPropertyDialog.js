@@ -8,7 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { Box, DialogTitle, Grid } from '@material-ui/core';
 import types from './types';
 import RequestError from '../RequestError';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { FormTextField, SelectField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
 

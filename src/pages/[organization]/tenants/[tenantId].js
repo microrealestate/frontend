@@ -566,7 +566,7 @@ Tenant.getInitialProps = async (context) => {
   const responses = await Promise.all([
     store.tenant.fetchOne(tenantId),
     store.property.fetch(),
-    store.leaseType.fetch(),
+    store.lease.fetch(),
   ]);
 
   const statuses = responses.map(({ status }) => status);

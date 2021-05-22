@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@material-ui/core';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { NumberFormat } from '../../utils/numberformat';
 import DownloadLink from '../DownloadLink';
 import { CardRow } from '../Cards';

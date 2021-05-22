@@ -9,7 +9,7 @@ import LocationCityIcon from '@material-ui/icons/LocationCity';
 
 import { FormTextField, SubmitButton } from '../components/Form';
 import { StoreContext } from '../store';
-import { withTranslation } from '../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import Link from '../components/Link';
 import RequestError from '../components/RequestError';
 import Page from '../components/Page';

@@ -9,10 +9,11 @@ import { Box } from '@material-ui/core';
 const Application = observer(({ children }) => {
   console.log('Application functional component');
   const store = useContext(StoreContext);
-  const displayNav =
+  const displayNav = !!(
     store.user.signedIn &&
     store.organization.items &&
-    store.organization.items.length;
+    store.organization.items.length
+  );
 
   return (
     <Box display="flex">

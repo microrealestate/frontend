@@ -5,7 +5,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Form, Formik } from 'formik';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { Box, DialogTitle } from '@material-ui/core';
 import { DateField, FormTextField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';

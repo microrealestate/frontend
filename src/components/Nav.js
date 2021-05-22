@@ -20,7 +20,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 
 import { useStyles } from '../styles/components/Nav.styles';
-import { withTranslation } from '../utils/i18n';
+import { withTranslation } from 'next-i18next';
 import { ListItemIcon } from '@material-ui/core';
 import { StoreContext } from '../store';
 import { useRouter } from 'next/router';

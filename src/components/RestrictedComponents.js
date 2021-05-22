@@ -1,7 +1,7 @@
+import { withTranslation } from 'next-i18next';
 import { useContext, useMemo } from 'react';
 import { Button, IconButton, Tooltip } from '@material-ui/core';
 import { StoreContext } from '../store';
-import { withTranslation } from '../utils/i18n';
 
 export const RestrictedComponent = (Component) =>
   withTranslation()(

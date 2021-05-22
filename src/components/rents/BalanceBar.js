@@ -4,7 +4,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import RentPeriod from './RentPeriod';
 import { CardRow } from '../Cards';
 import { NumberFormat } from '../../utils/numberformat';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 const BalanceBar = memo(
   withTranslation()(({ t, rent, hideTooltip }) => {
