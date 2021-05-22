@@ -19,7 +19,7 @@ import {
   SelectField,
 } from '../Form';
 import { StoreContext } from '../../store';
-import { withTranslation } from '../../utils/i18n';
+import { withTranslation } from 'next-i18next';
 
 const validationSchema = Yup.object().shape({
   leaseId: Yup.string().required(),
@@ -128,13 +128,13 @@ const LeaseContractForm = withTranslation()(
     }, [store.tenant.selected]);
 
     const availableLeases = useMemo(() => {
-      return store.leaseType.items.map(({ _id, name, active }) => ({
+      return store.lease.items.map(({ _id, name, active }) => ({
         id: _id,
         value: _id,
         label: name,
         disabled: !active,
       }));
-    }, [store.leaseType.items]);
+    }, [store.lease.items]);
 
     const availableProperties = useMemo(() => {
       const currentProperties = store.tenant.selected?.properties
@@ -164,9 +164,8 @@ const LeaseContractForm = withTranslation()(
     const _onSubmit = async (lease) => {
       await onSubmit({
         leaseId: lease.leaseId,
-        frequency: store.leaseType.items.find(
-          ({ _id }) => _id === lease.leaseId
-        ).timeRange,
+        frequency: store.lease.items.find(({ _id }) => _id === lease.leaseId)
+          .timeRange,
         beginDate: lease.beginDate?.format('DD/MM/YYYY'),
         endDate: lease.endDate?.format('DD/MM/YYYY'),
         terminationDate: lease.terminationDate?.format('DD/MM/YYYY'),
@@ -200,16 +199,31 @@ const LeaseContractForm = withTranslation()(
         onSubmit={_onSubmit}
       >
         {({ values, isSubmitting, handleChange }) => {
-          const onLeaseTypeChange = (evt) => {
-            const leaseType = store.leaseType.items.find(
+          const onLeaseChange = (evt) => {
+            const lease = store.lease.items.find(
               ({ _id }) => _id === evt.target.value
             );
-            if (leaseType && leaseType.numberOfTerms) {
+            if (lease && lease.numberOfTerms) {
               setContractDuration(
-                moment.duration(leaseType.numberOfTerms, leaseType.timeRange)
+                moment.duration(lease.numberOfTerms, lease.timeRange)
               );
             } else {
               setContractDuration();
+            }
+            handleChange(evt);
+          };
+
+          const onPropertyChange = (evt, previousProperty) => {
+            const property = store.property.items.find(
+              ({ _id }) => _id === evt.target.value
+            );
+            if (previousProperty) {
+              previousProperty._id = property._id;
+              previousProperty.rent = property.price || '';
+              previousProperty.expense =
+                property?.expense > 0
+                  ? { title: '', amount: property.expense }
+                  : emptyExpense;
             }
             handleChange(evt);
           };
@@ -234,10 +248,10 @@ const LeaseContractForm = withTranslation()(
               )}
               <FormSection label={t('Lease')}>
                 <SelectField
-                  label={t('Lease Type')}
+                  label={t('Lease')}
                   name="leaseId"
                   values={availableLeases}
-                  onChange={onLeaseTypeChange}
+                  onChange={onLeaseChange}
                   disabled={readOnly}
                 />
                 <DateRangeField
@@ -268,6 +282,9 @@ const LeaseContractForm = withTranslation()(
                                   label={t('Property')}
                                   name={`properties[${index}]._id`}
                                   values={availableProperties}
+                                  onChange={(evt) =>
+                                    onPropertyChange(evt, property)
+                                  }
                                   disabled={readOnly}
                                 />
                               </Grid>

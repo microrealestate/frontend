@@ -10,7 +10,7 @@ import { withAuthentication } from '../../components/Authentication';
 import LandlordForm from '../../components/organization/LandlordForm';
 import BillingForm from '../../components/organization/BillingForm';
 import Members from '../../components/organization/Members';
-import LeaseTypes from '../../components/organization/LeaseTypes';
+import Leases from '../../components/organization/Leases';
 import RequestError from '../../components/RequestError';
 import { TabPanel } from '../../components/Tabs';
 import { getStoreInstance, StoreContext } from '../../store';
@@ -87,7 +87,7 @@ const Settings = withTranslation()(
           >
             <Tab label={t('Landlord')} />
             <Tab label={t('Billing')} />
-            <Tab label={t('Lease types')} />
+            <Tab label={t('Leases')} />
             <Tab label={t('Manage access')} />
             <Tab label={t('Third-parties')} />
           </Tabs>
@@ -98,7 +98,7 @@ const Settings = withTranslation()(
             <BillingForm onSubmit={onSubmit} />
           </TabPanel>
           <TabPanel value={tabSelected} index={2}>
-            <LeaseTypes setError={setError} />
+            <Leases setError={setError} />
           </TabPanel>
           <TabPanel value={tabSelected} index={3}>
             <Members onSubmit={onSubmit} />
@@ -116,7 +116,7 @@ Settings.getInitialProps = async (context) => {
   console.log('Settings.getInitialProps');
   const store = isServer() ? context.store : getStoreInstance();
 
-  const { status } = await store.leaseType.fetch();
+  const { status } = await store.lease.fetch();
   if (status !== 200) {
     return { error: { statusCode: status } };
   }

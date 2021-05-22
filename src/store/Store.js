@@ -7,6 +7,7 @@ import Rent from './Rent';
 import Tenant from './Tenant';
 import Property from './Property';
 import Lease from './Lease';
+import Template from './Template';
 import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
 import { i18n } from '../utils/i18n';
@@ -14,19 +15,21 @@ import { i18n } from '../utils/i18n';
 export default class Store {
   user = new User();
   organization = new Organization();
-  leaseType = new Lease();
+  lease = new Lease();
   rent = new Rent();
   tenant = new Tenant();
   property = new Property();
+  template = new Template();
 
   constructor() {
     makeObservable(this, {
       user: observable,
       organization: observable,
-      leaseType: observable,
+      lease: observable,
       rent: observable,
       tenant: observable,
       property: observable,
+      template: observable,
     });
 
     let refreshTokenHandle;
@@ -95,7 +98,7 @@ export default class Store {
       organization = {
         items: [],
       },
-      leaseType = {
+      lease = {
         items: [],
       },
       rent = {
@@ -105,6 +108,9 @@ export default class Store {
         items: [],
       },
       property = {
+        items: [],
+      },
+      template = {
         items: [],
       },
     } = initialData;
@@ -119,7 +125,7 @@ export default class Store {
     this.organization.items = organization.items;
     this.organization.selected = organization.selected;
 
-    this.leaseType.items = leaseType.items;
+    this.lease.items = lease.items;
 
     this.rent.items = rent.items;
     this.rent.selected = rent.selected;
@@ -140,5 +146,9 @@ export default class Store {
     this.property.items = property.items;
     this.property.selected = property.selected;
     this.property.filters = property.filters;
+
+    this.template.items = template.items;
+    this.template.selected = template.selected;
+    this.template.filters = template.filters;
   }
 }

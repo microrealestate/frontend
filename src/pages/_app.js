@@ -11,6 +11,8 @@ import { appWithTranslation } from '../utils/i18n';
 import { InjectStoreContext } from '../store';
 
 import theme from '../styles/theme';
+import 'quill/dist/quill.snow.css';
+import '../components/RichTextEditor/richtexteditor.css';
 
 Yup.addMethod(Yup.string, 'emails', function (message) {
   return this.test({
