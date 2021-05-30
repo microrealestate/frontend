@@ -8,7 +8,10 @@ export const RestrictedComponent = (Component) =>
     ({ t, i18n, tReady, onlyRoles, disabled, children, ...props }) => {
       const store = useContext(StoreContext);
       const isDisabled = useMemo(
-        () => onlyRoles && !onlyRoles.includes(store.user.role),
+        () =>
+          onlyRoles && store.user.role
+            ? !onlyRoles.includes(store.user.role)
+            : false,
         [onlyRoles, store.user.role]
       );
 

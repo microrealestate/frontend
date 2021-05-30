@@ -42,6 +42,7 @@ const FirstAccess = withTranslation()(
         }
         store.organization.setSelected(data, store.user);
         router.push(`${store.organization.selected.name}/dashboard`);
+        store.organization.setItems([data]);
       } catch (error) {
         console.error(error);
         setError(t('Something went wrong'));
@@ -79,7 +80,7 @@ FirstAccess.getInitialProps = async (context) => {
   const store = isServer() ? context.store : getStoreInstance();
 
   if (isServer()) {
-    if (store.organization.items) {
+    if (store.organization.selected?.name) {
       redirect(context, `/${store.organization.selected.name}/dashboard`);
       return {};
     }

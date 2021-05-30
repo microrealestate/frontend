@@ -86,6 +86,7 @@ const SignIn = withTranslation()(
           <Box px={4} pb={4} pt={2}>
             <RequestError error={error} />
             <Formik
+              enableReinitialize={true}
               initialValues={initialValues}
               validationSchema={validationSchema}
               onSubmit={signIn}

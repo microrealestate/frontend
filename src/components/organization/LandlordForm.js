@@ -32,7 +32,10 @@ const validationSchema = Yup.object().shape({
     is: 'true',
     then: Yup.string().required(),
   }),
-  capital: Yup.number().moreThan(0).required(),
+  capital: Yup.mixed().when('isCompany', {
+    is: 'true',
+    then: Yup.number().moreThan(0).required(),
+  }),
 });
 
 const currencies = [
@@ -70,7 +73,7 @@ const LandlordForm = withTranslation()(
 
     const initialValues = useMemo(
       () => ({
-        name: store.organization.selected?.name,
+        name: store.organization.selected?.name || '',
         locale: store.organization.selected?.locale || '',
         currency: store.organization.selected?.currency || '',
         isCompany: store.organization.selected?.isCompany ? 'true' : 'false',
