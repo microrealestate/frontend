@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
 import { useRouter } from 'next/router';
@@ -18,9 +18,9 @@ const {
   publicRuntimeConfig: { DEMO_MODE, SIGNUP, APP_NAME },
 } = getConfig();
 
-const initialValues = {
-  email: DEMO_MODE ? 'demo@demo.com' : '',
-  password: DEMO_MODE ? 'demo' : '',
+const defaultValues = {
+  email: '',
+  password: '',
 };
 
 const validationSchema = Yup.object().shape({
@@ -32,8 +32,18 @@ const SignIn = withTranslation()(
   observer(({ t }) => {
     console.log('Signin functional component');
     const store = useContext(StoreContext);
+    const [initialValues, setInitialValues] = useState(defaultValues);
     const [error, setError] = useState('');
     const router = useRouter();
+
+    useEffect(() => {
+      if (DEMO_MODE) {
+        setInitialValues({
+          email: 'demo@demo.com',
+          password: 'demo',
+        });
+      }
+    }, []);
 
     const signIn = async ({ email, password }) => {
       try {
