@@ -1,6 +1,6 @@
 FROM node:12-slim
 
-RUN apt-get update 
+RUN apt-get update
 
 WORKDIR /usr/app
 
@@ -14,6 +14,9 @@ COPY next.config.js .
 COPY package.json .
 COPY package-lock.json .
 COPY LICENSE .
+
+ARG BASE_PATH
+ENV BASE_PATH $BASE_PATH
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
