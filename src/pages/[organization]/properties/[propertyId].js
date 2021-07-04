@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import {
   Box,
   Breadcrumbs,
@@ -46,22 +46,21 @@ import PropertyForm from '../../../components/properties/PropertyForm';
 import Map from '../../../components/Map';
 import TenantAvatar from '../../../components/tenants/TenantAvatar';
 
-const BreadcrumbBar = memo(
-  withTranslation()(({ t, backPath }) => {
-    const store = useContext(StoreContext);
+const BreadcrumbBar = memo(function BreadcrumbBar({ backPath }) {
+  const { t } = useTranslation('common');
+  const store = useContext(StoreContext);
 
-    return (
-      <Breadcrumbs aria-label="breadcrumb">
-        <Link color="inherit" href={backPath}>
-          {t('Properties')}
-        </Link>
-        <Typography variant="h6" noWrap>
-          {store.property.selected.name}
-        </Typography>
-      </Breadcrumbs>
-    );
-  })
-);
+  return (
+    <Breadcrumbs aria-label="breadcrumb">
+      <Link color="inherit" href={backPath}>
+        {t('Properties')}
+      </Link>
+      <Typography variant="h6" noWrap>
+        {store.property.selected.name}
+      </Typography>
+    </Breadcrumbs>
+  );
+});
 
 const PropertyOverview = observer(() => {
   const store = useContext(StoreContext);
@@ -89,7 +88,8 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const OccupancyHistory = withTranslation()(({ t }) => {
+const OccupancyHistory = () => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const classes = useStyles();
   return (
@@ -121,173 +121,172 @@ const OccupancyHistory = withTranslation()(({ t }) => {
       )}
     </List>
   );
-});
+};
 
-const Property = withTranslation()(
-  observer(({ t }) => {
-    console.log('Property functional component');
-    const store = useContext(StoreContext);
-    const router = useRouter();
-    const [error, setError] = useState('');
+const Property = observer(() => {
+  console.log('Property functional component');
+  const { t } = useTranslation('common');
+  const store = useContext(StoreContext);
+  const router = useRouter();
+  const [error, setError] = useState('');
 
-    const [tabSelected, setTabSelected] = useState(0);
-    const [openConfirmDeleteProperty, setOpenConfirmDeleteProperty] =
-      useState(false);
+  const [tabSelected, setTabSelected] = useState(0);
+  const [openConfirmDeleteProperty, setOpenConfirmDeleteProperty] =
+    useState(false);
 
-    const onTabChange = useCallback((event, newValue) => {
-      setTabSelected(newValue);
-    }, []);
+  const onTabChange = useCallback((event, newValue) => {
+    setTabSelected(newValue);
+  }, []);
 
-    const backPath = useMemo(() => {
-      let backPath = `/${store.organization.selected.name}/properties`;
-      if (store.property.filters.searchText || store.property.filters.status) {
-        backPath = `${backPath}?search=${encodeURIComponent(
-          store.property.filters.searchText
-        )}&status=${encodeURIComponent(store.property.filters.status)}`;
+  const backPath = useMemo(() => {
+    let backPath = `/${store.organization.selected.name}/properties`;
+    if (store.property.filters.searchText || store.property.filters.status) {
+      backPath = `${backPath}?search=${encodeURIComponent(
+        store.property.filters.searchText
+      )}&status=${encodeURIComponent(store.property.filters.status)}`;
+    }
+    return backPath;
+  }, [store.organization.selected, store.property.filters]);
+
+  const onConfirmDeleteProperty = useCallback(() => {
+    setOpenConfirmDeleteProperty(true);
+  }, []);
+
+  const onDeleteProperty = useCallback(async () => {
+    setError('');
+
+    const { status } = await store.property.delete([
+      store.property.selected._id,
+    ]);
+    if (status !== 200) {
+      switch (status) {
+        case 422:
+          return setError(t('Property cannot be deleted'));
+        case 404:
+          return setError(t('Property does not exist'));
+        case 403:
+          return setError(t('You are not allowed to delete the Property'));
+        default:
+          return setError(t('Something went wrong'));
       }
-      return backPath;
-    }, [store.organization.selected, store.property.filters]);
+    }
 
-    const onConfirmDeleteProperty = useCallback(() => {
-      setOpenConfirmDeleteProperty(true);
-    }, []);
+    await router.push(backPath);
+  }, []);
 
-    const onDeleteProperty = useCallback(async () => {
-      setError('');
+  const onSubmit = useCallback(async (propertyPart) => {
+    let property = {
+      ...toJS(store.property.selected),
+      ...propertyPart,
+      price: propertyPart.rent,
+    };
 
-      const { status } = await store.property.delete([
-        store.property.selected._id,
-      ]);
+    setError('');
+
+    if (property._id) {
+      const { status, data } = await store.property.update(property);
       if (status !== 200) {
         switch (status) {
           case 422:
-            return setError(t('Property cannot be deleted.'));
-          case 404:
-            return setError(t('Property does not exist.'));
+            return setError(t('Property name is missing'));
           case 403:
-            return setError(t('You are not allowed to delete the Property.'));
+            return setError(t('You are not allowed to update the property'));
           default:
             return setError(t('Something went wrong'));
         }
       }
-
-      await router.push(backPath);
-    }, []);
-
-    const onSubmit = useCallback(async (propertyPart) => {
-      let property = {
-        ...toJS(store.property.selected),
-        ...propertyPart,
-        price: propertyPart.rent,
-      };
-
-      setError('');
-
-      if (property._id) {
-        const { status, data } = await store.property.update(property);
-        if (status !== 200) {
-          switch (status) {
-            case 422:
-              return setError(t('Property name is missing.'));
-            case 403:
-              return setError(t('You are not allowed to update the property.'));
-            default:
-              return setError(t('Something went wrong'));
-          }
+      store.property.setSelected(data);
+    } else {
+      const { status, data } = await store.property.create(property);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Property name is missing'));
+          case 403:
+            return setError(t('You are not allowed to create a property'));
+          case 409:
+            return setError(t('The property already exists'));
+          default:
+            return setError(t('Something went wrong'));
         }
-        store.property.setSelected(data);
-      } else {
-        const { status, data } = await store.property.create(property);
-        if (status !== 200) {
-          switch (status) {
-            case 422:
-              return setError(t('Property name is missing.'));
-            case 403:
-              return setError(t('You are not allowed to create a property.'));
-            case 409:
-              return setError(t('The property already exists.'));
-            default:
-              return setError(t('Something went wrong'));
-          }
-        }
-        store.property.setSelected(data);
-        await router.push(
-          `/${store.organization.selected.name}/properties/${data._id}`
-        );
       }
-    }, []);
+      store.property.setSelected(data);
+      await router.push(
+        `/${store.organization.selected.name}/properties/${data._id}`
+      );
+    }
+  }, []);
 
-    return (
-      <Page
-        PrimaryToolbar={<BreadcrumbBar backPath={backPath} />}
-        SecondaryToolbar={
-          <Grid container spacing={2}>
-            <Grid item>
-              <Button
-                variant="contained"
-                startIcon={<DeleteIcon />}
-                onClick={onConfirmDeleteProperty}
-              >
-                {t('Delete')}
-              </Button>
-            </Grid>
+  return (
+    <Page
+      PrimaryToolbar={<BreadcrumbBar backPath={backPath} />}
+      SecondaryToolbar={
+        <Grid container spacing={2}>
+          <Grid item>
+            <Button
+              variant="contained"
+              startIcon={<DeleteIcon />}
+              onClick={onConfirmDeleteProperty}
+            >
+              {t('Delete')}
+            </Button>
           </Grid>
-        }
-      >
-        <RequestError error={error} />
-        <Grid container spacing={5}>
-          <Grid item sm={12} md={8}>
-            <Paper>
-              <Tabs
-                variant="scrollable"
-                value={tabSelected}
-                onChange={onTabChange}
-                aria-label="Property tabs"
-              >
-                <Tab label={t('Property')} />
-              </Tabs>
-              <TabPanel value={tabSelected} index={0}>
-                <PropertyForm onSubmit={onSubmit} />
-              </TabPanel>
-            </Paper>
-          </Grid>
-
-          <Hidden smDown>
-            <Grid item md={4}>
-              <Box pb={2}>
-                <DashboardCard Icon={VpnKeyIcon} title={t('Property')}>
-                  <PropertyOverview />
-                </DashboardCard>
-              </Box>
-              <DashboardCard Icon={HistoryIcon} title={t('Occupancy history')}>
-                <OccupancyHistory />
-              </DashboardCard>
-            </Grid>
-          </Hidden>
         </Grid>
-        <ConfirmDialog
-          open={openConfirmDeleteProperty}
-          setOpen={setOpenConfirmDeleteProperty}
-          onConfirm={onDeleteProperty}
-        >
-          <Box display="flex" alignItems="center">
-            <Box pr={1}>
-              <WarningIcon fontSize="large" color="secondary" />
+      }
+    >
+      <RequestError error={error} />
+      <Grid container spacing={5}>
+        <Grid item sm={12} md={8}>
+          <Paper>
+            <Tabs
+              variant="scrollable"
+              value={tabSelected}
+              onChange={onTabChange}
+              aria-label="Property tabs"
+            >
+              <Tab label={t('Property')} />
+            </Tabs>
+            <TabPanel value={tabSelected} index={0}>
+              <PropertyForm onSubmit={onSubmit} />
+            </TabPanel>
+          </Paper>
+        </Grid>
+
+        <Hidden smDown>
+          <Grid item md={4}>
+            <Box pb={2}>
+              <DashboardCard Icon={VpnKeyIcon} title={t('Property')}>
+                <PropertyOverview />
+              </DashboardCard>
             </Box>
-            <Typography variant="h6">
-              {t('Are you sure to definitely remove this property?')}
-            </Typography>
+            <DashboardCard Icon={HistoryIcon} title={t('Occupancy history')}>
+              <OccupancyHistory />
+            </DashboardCard>
+          </Grid>
+        </Hidden>
+      </Grid>
+      <ConfirmDialog
+        open={openConfirmDeleteProperty}
+        setOpen={setOpenConfirmDeleteProperty}
+        onConfirm={onDeleteProperty}
+      >
+        <Box display="flex" alignItems="center">
+          <Box pr={1}>
+            <WarningIcon fontSize="large" color="secondary" />
           </Box>
-          <Box py={2}>
-            <Typography variant="h6" align="center">
-              {store.property.selected.name}
-            </Typography>
-          </Box>
-        </ConfirmDialog>
-      </Page>
-    );
-  })
-);
+          <Typography variant="h6">
+            {t('Are you sure to definitely remove this property?')}
+          </Typography>
+        </Box>
+        <Box py={2}>
+          <Typography variant="h6" align="center">
+            {store.property.selected.name}
+          </Typography>
+        </Box>
+      </ConfirmDialog>
+    </Page>
+  );
+});
 
 Property.getInitialProps = async (context) => {
   console.log('Property.getInitialProps');

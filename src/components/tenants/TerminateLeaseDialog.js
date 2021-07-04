@@ -5,7 +5,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Form, Formik } from 'formik';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { Box, DialogTitle } from '@material-ui/core';
 import { DateField, FormTextField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
@@ -18,7 +18,8 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
-const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
+const TerminateLeaseDialog = ({ open, setOpen }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
 
@@ -45,11 +46,11 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
     if (status !== 200) {
       switch (status) {
         case 422:
-          return setError(t('Tenant name is missing.'));
+          return setError(t('Tenant name is missing'));
         case 403:
-          return setError(t('You are not allowed to update the tenant.'));
+          return setError(t('You are not allowed to update the tenant'));
         case 409:
-          return setError(t('The tenant already exists.'));
+          return setError(t('The tenant already exists'));
         default:
           return setError(t('Something went wrong'));
       }
@@ -118,6 +119,6 @@ const TerminateLeaseDialog = withTranslation()(({ t, open, setOpen }) => {
       </Box>
     </Dialog>
   );
-});
+};
 
 export default TerminateLeaseDialog;

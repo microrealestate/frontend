@@ -1,7 +1,7 @@
+import { useCallback, useContext, useMemo } from 'react';
+import useTranslation from 'next-translate/useTranslation';
 import * as Yup from 'yup';
 import { Form, Formik } from 'formik';
-import { useCallback, useContext, useMemo } from 'react';
-import { withTranslation } from 'next-i18next';
 import { FormSection, FormTextField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
 
@@ -9,7 +9,8 @@ const validationSchema = Yup.object().shape({
   description: Yup.string(),
 });
 
-const InternalNoteForm = withTranslation()(({ t, onSubmit }) => {
+const InternalNoteForm = ({ onSubmit }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
 
   const initialValues = useMemo(
@@ -53,6 +54,6 @@ const InternalNoteForm = withTranslation()(({ t, onSubmit }) => {
       }}
     </Formik>
   );
-});
+};
 
 export default InternalNoteForm;

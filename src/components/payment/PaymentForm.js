@@ -2,7 +2,7 @@ import moment from 'moment';
 import * as Yup from 'yup';
 import { FieldArray, Form, Formik } from 'formik';
 import { Children, useCallback, useContext, useMemo } from 'react';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { Box, Button, Grid } from '@material-ui/core';
 import {
   DateField,
@@ -40,7 +40,8 @@ const emptyPayment = {
   reference: '',
 };
 
-const PaymentForm = withTranslation()(({ t, onSubmit }) => {
+const PaymentForm = ({ onSubmit }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
 
   const initialValues = useMemo(
@@ -204,11 +205,12 @@ const PaymentForm = withTranslation()(({ t, onSubmit }) => {
       }}
     </Formik>
   );
-});
+};
 
 export default PaymentForm;
 
-//   const PaymentForm = withTranslation()(({ t }) => {
+//   const PaymentForm = () => {
+//     const { t } = useTranslation('common');
 //     const store = useContext(StoreContext);
 //     const router = useRouter();
 
@@ -408,4 +410,4 @@ export default PaymentForm;
 //         }}
 //       </Formik>
 //     )
-//   });
+//   };

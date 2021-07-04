@@ -1,4 +1,4 @@
-import { Children, useCallback, useState } from 'react';
+import { Children, useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -10,7 +10,7 @@ import {
   withStyles,
 } from '@material-ui/core';
 import SearchBar from '../SearchBar';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 
 const StyledDrawer = withStyles((theme) => ({
   paper: {
@@ -19,23 +19,24 @@ const StyledDrawer = withStyles((theme) => ({
   },
 }))(Drawer);
 
-export default withTranslation()(function FieldBar({
-  t,
-  fields,
-  onInsertField,
-}) {
-  const [filteredFields, setFilteredFields] = useState(fields);
+export default function FieldBar({ fields, onInsertField }) {
+  const { t } = useTranslation('common');
+  const translatedFields = useMemo(() => {
+    return fields.map((field) => ({
+      ...field,
+      title: t(field._id),
+      description: t(`${field._id}_description`),
+    }));
+  }, [fields]);
+  const [filteredFields, setFilteredFields] = useState(translatedFields);
 
   const onSearch = useCallback(
     (text) => {
       setFilteredFields(
-        fields.filter(({ _id }) => {
+        translatedFields.filter(({ title, description }) => {
           if (!text) {
             return true;
           }
-
-          const title = t(_id);
-          const description = t(`${_id}.description`);
 
           if (title.toLowerCase().indexOf(text.toLowerCase()) !== -1) {
             return true;
@@ -63,16 +64,8 @@ export default withTranslation()(function FieldBar({
         <List>
           {Children.toArray(
             filteredFields.map((field) => {
-              const title = t(field._id);
-              const description = t(`${field._id}.description`);
-
               return (
-                <ListItem
-                  button
-                  onClick={() =>
-                    onInsertField({ ...field, title, description })
-                  }
-                >
+                <ListItem button onClick={() => onInsertField(field)}>
                   <ListItemText
                     primary={
                       <Box
@@ -81,13 +74,13 @@ export default withTranslation()(function FieldBar({
                         component="span"
                         whiteSpace="nowrap"
                       >
-                        {title}
+                        {field.title}
                       </Box>
                     }
                     secondary={
                       <Box pt={1}>
                         <Typography variant="caption" noWrap={false}>
-                          {description}
+                          {field.description}
                         </Typography>
                       </Box>
                     }
@@ -101,4 +94,4 @@ export default withTranslation()(function FieldBar({
       </Box>
     </StyledDrawer>
   );
-});
+}

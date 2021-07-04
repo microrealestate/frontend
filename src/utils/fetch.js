@@ -60,10 +60,6 @@ export const useApiFetch = () => {
             error.response.status
           }`
         );
-        // if (!isServer() && [401, 403].includes(error.response.status)) {
-        //     window.location.assign('${BASE_PATH}/signin');
-        //     return;
-        // }
         return Promise.reject(error);
       }
     );

@@ -5,8 +5,10 @@ RUN apt-get update
 WORKDIR /usr/app
 
 COPY public public
+COPY locales locales
 COPY src src
 COPY .babelrc .
+COPY i18n.json .
 COPY next.config.js .
 COPY package.json .
 COPY package-lock.json .

@@ -7,7 +7,6 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Application from '../components/Application';
-import { appWithTranslation } from '../utils/i18n';
 import { InjectStoreContext } from '../store';
 
 import theme from '../styles/theme';
@@ -76,4 +75,4 @@ MyApp.getInitialProps = async (appContext) => {
   return appProps;
 };
 
-export default appWithTranslation(MyApp);
+export default MyApp;

@@ -1,6 +1,7 @@
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import useTranslation from 'next-translate/useTranslation';
 import {
   Box,
   Button,
@@ -13,7 +14,6 @@ import {
   Typography,
 } from '@material-ui/core';
 import { FormTextField, SubmitButton, SelectField } from '../Form';
-import { withTranslation } from 'next-i18next';
 import { StoreContext } from '../../store';
 
 const timeRanges = ['days', 'weeks', 'months', 'years'];
@@ -27,7 +27,8 @@ const initialValues = {
   system: false,
 };
 
-const LeaseForm = withTranslation()(({ t, open, setOpen, onSubmit }) => {
+const LeaseForm = ({ open, setOpen, onSubmit }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [addMode, setAddMode] = useState(true);
 
@@ -161,6 +162,6 @@ const LeaseForm = withTranslation()(({ t, open, setOpen, onSubmit }) => {
       </Dialog>
     </>
   );
-});
+};
 
 export default LeaseForm;

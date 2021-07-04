@@ -1,7 +1,7 @@
 import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import useTranslation from 'next-translate/useTranslation';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { withTranslation } from 'next-i18next';
 import { observer } from 'mobx-react-lite';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -41,268 +41,266 @@ const initialValues = {
   role: roles[1],
 };
 
-const FormDialog = memo(
-  withTranslation()(({ t, members = [], onSubmit }) => {
-    const [open, setOpen] = useState(false);
+const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
+  const { t } = useTranslation('common');
+  const [open, setOpen] = useState(false);
 
-    const handleClickOpen = useCallback(() => {
-      setOpen(true);
-    }, []);
+  const handleClickOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
 
-    const handleClose = useCallback(() => {
-      setOpen(false);
-    }, []);
+  const handleClose = useCallback(() => {
+    setOpen(false);
+  }, []);
 
-    const _onSubmit = useCallback(
-      async (member) => {
-        await onSubmit(member);
-        handleClose();
-      },
-      [onSubmit]
-    );
+  const _onSubmit = useCallback(
+    async (member) => {
+      await onSubmit(member);
+      handleClose();
+    },
+    [onSubmit]
+  );
 
-    const validationSchema = useMemo(
-      () =>
-        Yup.object().shape({
-          email: Yup.string()
-            .email()
-            .notOneOf(members.map(({ email }) => email))
-            .required(),
-          role: Yup.string().required(),
-        }),
-      [members]
-    );
+  const validationSchema = useMemo(
+    () =>
+      Yup.object().shape({
+        email: Yup.string()
+          .email()
+          .notOneOf(members.map(({ email }) => email))
+          .required(),
+        role: Yup.string().required(),
+      }),
+    [members]
+  );
 
-    const roleValues = useMemo(
-      () => roles.map((role) => ({ id: role, label: t(role), value: role })),
-      []
-    );
+  const roleValues = useMemo(
+    () => roles.map((role) => ({ id: role, label: t(role), value: role })),
+    []
+  );
 
-    return (
-      <>
-        <RestrictButton
-          variant="contained"
-          color="primary"
-          onClick={handleClickOpen}
-          onlyRoles={allowedRoles}
+  return (
+    <>
+      <RestrictButton
+        variant="contained"
+        color="primary"
+        onClick={handleClickOpen}
+        onlyRoles={allowedRoles}
+      >
+        {t('Add member')}
+      </RestrictButton>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={_onSubmit}
         >
-          {t('Add member')}
-        </RestrictButton>
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="form-dialog-title"
-        >
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={_onSubmit}
-          >
-            {({ isSubmitting }) => {
-              return (
-                <Form autoComplete="off">
-                  <DialogTitle id="form-dialog-title">
-                    {t('Add member')}
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      {t('Add a new member to your organization')}
-                    </DialogContentText>
-                    <Box minHeight={100} minWidth={500}>
-                      <Grid container spacing={1}>
-                        <Grid item xs={7}>
-                          <FormTextField label={t('Email')} name="email" />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <SelectField
-                            label={t('Role')}
-                            name="role"
-                            values={roleValues}
-                          />
-                        </Grid>
+          {({ isSubmitting }) => {
+            return (
+              <Form autoComplete="off">
+                <DialogTitle id="form-dialog-title">
+                  {t('Add member')}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    {t('Add a new member to your organization')}
+                  </DialogContentText>
+                  <Box minHeight={100} minWidth={500}>
+                    <Grid container spacing={1}>
+                      <Grid item xs={7}>
+                        <FormTextField label={t('Email')} name="email" />
                       </Grid>
-                    </Box>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose}>{t('Cancel')}</Button>
-                    <SubmitButton
-                      label={!isSubmitting ? t('Add') : t('Submitting')}
-                      onlyRoles={allowedRoles}
-                    />
-                  </DialogActions>
-                </Form>
-              );
-            }}
-          </Formik>
-        </Dialog>
-      </>
-    );
-  })
-);
+                      <Grid item xs={5}>
+                        <SelectField
+                          label={t('Role')}
+                          name="role"
+                          values={roleValues}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleClose}>{t('Cancel')}</Button>
+                  <SubmitButton
+                    label={!isSubmitting ? t('Add') : t('Submitting')}
+                    onlyRoles={allowedRoles}
+                  />
+                </DialogActions>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Dialog>
+    </>
+  );
+});
 
-const Members = withTranslation()(
-  observer(({ t, onSubmit }) => {
-    const store = useContext(StoreContext);
-    const [memberToRemove, setMemberToRemove] = useState(false);
-    const [updating, setUpdating] = useState();
+const Members = observer(({ onSubmit }) => {
+  const { t } = useTranslation('common');
+  const store = useContext(StoreContext);
+  const [memberToRemove, setMemberToRemove] = useState(false);
+  const [updating, setUpdating] = useState();
 
-    const onAddMember = useCallback(
-      async (member) => {
-        const updatedMembers = [...store.organization.selected.members, member];
-        await onSubmit({
-          members: updatedMembers,
-        });
-      },
-      [onSubmit]
-    );
+  const onAddMember = useCallback(
+    async (member) => {
+      const updatedMembers = [...store.organization.selected.members, member];
+      await onSubmit({
+        members: updatedMembers,
+      });
+    },
+    [onSubmit]
+  );
 
-    const removeMember = useCallback(
-      async (member) => {
-        setUpdating(member);
-        const updatedMembers = store.organization.selected.members.filter(
-          ({ email }) => email !== member.email
-        );
-        await onSubmit({
-          members: updatedMembers,
-        });
-        setUpdating();
-      },
-      [onSubmit]
-    );
+  const removeMember = useCallback(
+    async (member) => {
+      setUpdating(member);
+      const updatedMembers = store.organization.selected.members.filter(
+        ({ email }) => email !== member.email
+      );
+      await onSubmit({
+        members: updatedMembers,
+      });
+      setUpdating();
+    },
+    [onSubmit]
+  );
 
-    const onRoleChange = useCallback(
-      async (role, member) => {
-        setUpdating(member);
-        const updatedMembers = store.organization.selected.members.filter(
-          ({ email }) => email !== member.email
-        );
-        updatedMembers.push({
-          ...member,
-          role: role,
-        });
-        await onSubmit({
-          members: updatedMembers,
-        });
-        setUpdating();
-      },
-      [onSubmit]
-    );
+  const onRoleChange = useCallback(
+    async (role, member) => {
+      setUpdating(member);
+      const updatedMembers = store.organization.selected.members.filter(
+        ({ email }) => email !== member.email
+      );
+      updatedMembers.push({
+        ...member,
+        role: role,
+      });
+      await onSubmit({
+        members: updatedMembers,
+      });
+      setUpdating();
+    },
+    [onSubmit]
+  );
 
-    return (
-      <FormSection label={t('Manage access')}>
-        <Box py={2}>
-          <FormDialog
-            members={store.organization.selected?.members}
-            onSubmit={onAddMember}
-          />
-        </Box>
-        <Paper variant="outlined" square>
-          <Table aria-label="member table">
-            <TableHead>
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell>
-                  <Typography>{t('Member')}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography>{t('Email')}</Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Typography>{t('Role')}</Typography>
-                </TableCell>
-                <TableCell></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(store.organization.selected?.members || []).map((member) => {
-                const isCurrentUser = store.user.email === member.email;
-                const isAdministrator = member.role === roles[0];
-                const isRegistered = member.registered;
-                return (
-                  <TableRow hover size="small" key={member.email}>
-                    <TableCell align="center">
-                      {updating === member ? (
-                        <CircularProgress size={20} />
-                      ) : isAdministrator ? (
-                        <SupervisorAccountIcon />
-                      ) : (
-                        <PersonIcon />
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {isRegistered ? (
-                        <Typography noWrap>{member.name}</Typography>
-                      ) : (
-                        <Box
-                          color="warning.dark"
-                          display="flex"
-                          alignItems="center"
-                        >
-                          <WarningIcon fontSize="small" />
-                          <Box pl={1}>
-                            <Typography noWrap>
-                              {t('User not registered')}
-                            </Typography>
-                          </Box>
+  return (
+    <FormSection label={t('Manage access')}>
+      <Box py={2}>
+        <FormDialog
+          members={store.organization.selected?.members}
+          onSubmit={onAddMember}
+        />
+      </Box>
+      <Paper variant="outlined" square>
+        <Table aria-label="member table">
+          <TableHead>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell>
+                <Typography>{t('Member')}</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>{t('Email')}</Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Typography>{t('Role')}</Typography>
+              </TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(store.organization.selected?.members || []).map((member) => {
+              const isCurrentUser = store.user.email === member.email;
+              const isAdministrator = member.role === roles[0];
+              const isRegistered = member.registered;
+              return (
+                <TableRow hover size="small" key={member.email}>
+                  <TableCell align="center">
+                    {updating === member ? (
+                      <CircularProgress size={20} />
+                    ) : isAdministrator ? (
+                      <SupervisorAccountIcon />
+                    ) : (
+                      <PersonIcon />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isRegistered ? (
+                      <Typography noWrap>{member.name}</Typography>
+                    ) : (
+                      <Box
+                        color="warning.dark"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <WarningIcon fontSize="small" />
+                        <Box pl={1}>
+                          <Typography noWrap>
+                            {t('User not registered')}
+                          </Typography>
                         </Box>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Typography noWrap>{member.email}</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      {isCurrentUser || !store.user.isAdministrator ? (
-                        <Typography noWrap>{t(member.role)}</Typography>
-                      ) : (
-                        <Select
-                          defaultValue={member.role}
-                          onChange={(event) =>
-                            onRoleChange(event.target.value, member)
-                          }
-                          displayEmpty
-                          disabled={!!updating}
-                        >
-                          {roles.map((role) => (
-                            <MenuItem key={role} value={role}>
-                              {t(role)}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {!isCurrentUser && (
-                        <RestrictIconButton
-                          aria-label="delete"
-                          onlyRoles={allowedRoles}
-                          onClick={() => setMemberToRemove(member)}
-                          disabled={!!updating}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </RestrictIconButton>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <ConfirmDialog
-            open={memberToRemove}
-            setOpen={setMemberToRemove}
-            onConfirm={removeMember}
-          >
-            <Typography>{t('Are you sure to remove this member?')}</Typography>
-            <Box py={2}>
-              <Typography variant="h6" align="center">
-                {memberToRemove.name}
-              </Typography>
-            </Box>
-          </ConfirmDialog>
-        </Paper>
-      </FormSection>
-    );
-  })
-);
+                      </Box>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography noWrap>{member.email}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    {isCurrentUser || !store.user.isAdministrator ? (
+                      <Typography noWrap>{t(member.role)}</Typography>
+                    ) : (
+                      <Select
+                        defaultValue={member.role}
+                        onChange={(event) =>
+                          onRoleChange(event.target.value, member)
+                        }
+                        displayEmpty
+                        disabled={!!updating}
+                      >
+                        {roles.map((role) => (
+                          <MenuItem key={role} value={role}>
+                            {t(role)}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {!isCurrentUser && (
+                      <RestrictIconButton
+                        aria-label="delete"
+                        onlyRoles={allowedRoles}
+                        onClick={() => setMemberToRemove(member)}
+                        disabled={!!updating}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </RestrictIconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        <ConfirmDialog
+          open={memberToRemove}
+          setOpen={setMemberToRemove}
+          onConfirm={removeMember}
+        >
+          <Typography>{t('Are you sure to remove this member?')}</Typography>
+          <Box py={2}>
+            <Typography variant="h6" align="center">
+              {memberToRemove.name}
+            </Typography>
+          </Box>
+        </ConfirmDialog>
+      </Paper>
+    </FormSection>
+  );
+});
 
 export default Members;

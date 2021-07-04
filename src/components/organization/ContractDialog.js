@@ -2,7 +2,6 @@ import jsesc from 'jsesc';
 import dynamic from 'next/dynamic';
 import { useCallback, useContext, useMemo } from 'react';
 import { Dialog, withStyles } from '@material-ui/core';
-import { withTranslation } from 'next-i18next';
 import { StoreContext } from '../../store';
 import { grayColor } from '../../styles/styles';
 
@@ -16,7 +15,7 @@ const RichTextEditorDialog = withStyles(() => ({
   },
 }))(Dialog);
 
-const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
+const ContractDialog = ({ open, setOpen, onSubmit }) => {
   const store = useContext(StoreContext);
 
   const handleClose = useCallback(() => {
@@ -40,7 +39,7 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
       //       t('')
       //     );
       //   case 404:
-      //     return setError(t('Template does not exist.'));
+      //     return setError(t('Template does not exist'));
       //   case 403:
       //     return setError(t(''));
       //   default:
@@ -71,7 +70,7 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
           //       t('')
           //     );
           //   case 404:
-          //     return setError(t('Template does not exist.'));
+          //     return setError(t('Template does not exist'));
           //   case 403:
           //     return setError(t(''));
           //   default:
@@ -98,7 +97,7 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
           //       t('')
           //     );
           //   case 404:
-          //     return setError(t('Template does not exist.'));
+          //     return setError(t('Template does not exist'));
           //   case 403:
           //     return setError(t(''));
           //   default:
@@ -115,137 +114,137 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
   const fields = useMemo(
     () => [
       {
-        _id: 'current.place',
+        _id: 'current_place',
         marker: '{{current.place}}',
         type: 'string',
       },
       {
-        _id: 'current.date',
+        _id: 'current_date',
         marker: '{{current.date}}',
         type: 'date',
       },
       {
-        _id: 'landlord.name',
+        _id: 'landlord_name',
         marker: '{{landlord.name}}',
         type: 'string',
       },
       {
-        _id: 'landlord.contact.phones',
+        _id: 'landlord_contact_phones',
         marker: '{{landlord.contact.phones}}',
         type: 'array',
       },
       {
-        _id: 'landlord.contact.emails',
+        _id: 'landlord_contact_emails',
         marker: '{{landlord.contact.emails}}',
         type: 'array',
       },
       {
-        _id: 'landlord.address',
+        _id: 'landlord_address',
         marker: '{{landlord.address}}',
         type: 'string',
       },
       {
-        _id: 'landlord.companyInfo.legalRepresentative',
+        _id: 'landlord_companyInfo_legalRepresentative',
         marker: '{{landlord.companyInfo.legalRepresentative}}',
         type: 'string',
       },
       {
-        _id: 'landlord.companyInfo.legalStructure',
+        _id: 'landlord_companyInfo_legalStructure',
         marker: '{{landlord.companyInfo.legalStructure}}',
         type: 'string',
       },
       {
-        _id: 'landlord.companyInfo.capital',
+        _id: 'landlord_companyInfo_capital',
         marker: '{{landlord.companyInfo.capital}}',
         type: 'amount',
       },
       {
-        _id: 'landlord.companyInfo.ein',
+        _id: 'landlord_companyInfo_ein',
         marker: '{{landlord.companyInfo.ein}}',
         type: 'string',
       },
       {
-        _id: 'landlord.companyInfo.dos',
+        _id: 'landlord_companyInfo_dos',
         marker: '{{landlord.companyInfo.dos}}',
         type: 'string',
       },
       {
-        _id: 'tenant.name',
+        _id: 'tenant_name',
         marker: '{{tenant.name}}',
         type: 'string',
       },
       {
-        _id: 'tenant.contact.phones',
+        _id: 'tenant_contact_phones',
         marker: '{{tenant.contact.phones}}',
         type: 'array',
       },
       {
-        _id: 'tenant.contact.emails',
+        _id: 'tenant_contact_emails',
         marker: '{{tenant.contact.emails}}',
         type: 'array',
       },
       {
-        _id: 'tenant.address',
+        _id: 'tenant_address',
         marker: '{{tenant.address}}',
         type: 'string',
       },
       {
-        _id: 'tenant.companyInfo.legalRepresentative',
+        _id: 'tenant_companyInfo_legalRepresentative',
         marker: '{{tenant.companyInfo.legalRepresentative}}',
         type: 'string',
       },
       {
-        _id: 'tenant.companyInfo.legalStructure',
+        _id: 'tenant_companyInfo_legalStructure',
         marker: '{{tenant.companyInfo.legalStructure}}',
         type: 'string',
       },
       {
-        _id: 'tenant.companyInfo.capital',
+        _id: 'tenant_companyInfo_capital',
         marker: '{{tenant.companyInfo.capital}}',
         type: 'amount',
       },
       {
-        _id: 'tenant.companyInfo.ein',
+        _id: 'tenant_companyInfo_ein',
         marker: '{{tenant.companyInfo.ein}}',
         type: 'string',
       },
       {
-        _id: 'tenant.companyInfo.dos',
+        _id: 'tenant_companyInfo_dos',
         marker: '{{tenant.companyInfo.dos}}',
         type: 'string',
       },
       {
-        _id: 'property.address',
+        _id: 'property_address',
         marker: '{{property.address}}',
         type: 'string',
       },
       {
-        _id: 'property.surface',
+        _id: 'property_surface',
         marker: '{{property.surface}}',
         type: 'surface',
       },
       {
-        _id: 'lease.beginDate',
+        _id: 'lease_beginDate',
         marker: '{{lease.beginDate}}',
         type: 'date',
       },
       {
-        _id: 'lease.endDate',
+        _id: 'lease_endDate',
         marker: '{{lease.endDate}}',
         type: 'date',
       },
       {
-        _id: 'lease.rent',
+        _id: 'lease_rent',
         marker: '{{lease.rent}}',
         type: 'amount',
       },
       {
-        _id: 'lease.expenses',
+        _id: 'lease_expenses',
         marker: '{{lease.expenses}}',
         type: 'array',
       },
       {
-        _id: 'lease.deposit',
+        _id: 'lease_deposit',
         marker: '{{lease.deposit}}',
         type: 'amount',
       },
@@ -273,6 +272,6 @@ const ContractDialog = withTranslation()(({ open, setOpen, onSubmit }) => {
       />
     </RichTextEditorDialog>
   );
-});
+};
 
 export default ContractDialog;

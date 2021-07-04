@@ -20,7 +20,7 @@ import {
 
 import { withAuthentication } from '../../../components/Authentication';
 import Page from '../../../components/Page';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { getStoreInstance, StoreContext } from '../../../store';
 import { isServer } from '../../../utils';
 import SearchFilterBar from '../../../components/SearchFilterBar';
@@ -57,7 +57,8 @@ const Properties = memo(function Properties({ tenant }) {
   );
 });
 
-const TenantList = withTranslation()(({ t }) => {
+const TenantList = () => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const router = useRouter();
   const classes = useStyles();
@@ -152,67 +153,66 @@ const TenantList = withTranslation()(({ t }) => {
       )}
     </List>
   );
-});
+};
 
-const Tenants = withTranslation()(
-  observer(({ t }) => {
-    const store = useContext(StoreContext);
-    const [openNewTenantDialog, setOpenNewTenantDialog] = useState(false);
-    const router = useRouter();
+const Tenants = observer(() => {
+  const { t } = useTranslation('common');
+  const store = useContext(StoreContext);
+  const [openNewTenantDialog, setOpenNewTenantDialog] = useState(false);
+  const router = useRouter();
 
-    const onSearch = useCallback((status, searchText) => {
-      store.tenant.setFilters({ status, searchText });
-    }, []);
+  const onSearch = useCallback((status, searchText) => {
+    store.tenant.setFilters({ status, searchText });
+  }, []);
 
-    const onNewTenant = useCallback(() => {
-      setOpenNewTenantDialog(true);
-    }, []);
+  const onNewTenant = useCallback(() => {
+    setOpenNewTenantDialog(true);
+  }, []);
 
-    const onCreateTenant = useCallback(async (tenant) => {
-      store.tenant.setSelected(tenant);
-      await router.push(
-        `/${store.organization.selected.name}/tenants/${tenant._id}`
-      );
-    }, []);
-
-    return (
-      <Page
-        PrimaryToolbar={
-          <Typography color="textSecondary" variant="h5" noWrap>
-            {t('Tenants')}
-          </Typography>
-        }
-        SecondaryToolbar={
-          <Box display="flex">
-            <Box mr={1} flexGrow={1}>
-              <SearchFilterBar
-                filters={[
-                  { id: '', label: t('All') },
-                  { id: 'inprogress', label: t('In progress') },
-                  { id: 'stopped', label: t('Terminated') },
-                ]}
-                defaultValue={store.tenant.filters}
-                onSearch={onSearch}
-              />
-            </Box>
-            <Box>
-              <Button variant="contained" onClick={onNewTenant}>
-                {t('New tenant')}
-              </Button>
-            </Box>
-          </Box>
-        }
-      >
-        <TenantList />
-        <NewTenantDialog
-          open={openNewTenantDialog}
-          setOpen={setOpenNewTenantDialog}
-          onConfirm={onCreateTenant}
-        />
-      </Page>
+  const onCreateTenant = useCallback(async (tenant) => {
+    store.tenant.setSelected(tenant);
+    await router.push(
+      `/${store.organization.selected.name}/tenants/${tenant._id}`
     );
-  })
-);
+  }, []);
+
+  return (
+    <Page
+      PrimaryToolbar={
+        <Typography color="textSecondary" variant="h5" noWrap>
+          {t('Tenants')}
+        </Typography>
+      }
+      SecondaryToolbar={
+        <Box display="flex">
+          <Box mr={1} flexGrow={1}>
+            <SearchFilterBar
+              filters={[
+                { id: '', label: t('All') },
+                { id: 'inprogress', label: t('In progress') },
+                { id: 'stopped', label: t('Terminated') },
+              ]}
+              defaultValue={store.tenant.filters}
+              onSearch={onSearch}
+            />
+          </Box>
+          <Box>
+            <Button variant="contained" onClick={onNewTenant}>
+              {t('New tenant')}
+            </Button>
+          </Box>
+        </Box>
+      }
+    >
+      <TenantList />
+      <NewTenantDialog
+        open={openNewTenantDialog}
+        setOpen={setOpenNewTenantDialog}
+        onConfirm={onCreateTenant}
+      />
+    </Page>
+  );
+});
 
 Tenants.getInitialProps = async (context) => {
   console.log('Tenants.getInitialProps');

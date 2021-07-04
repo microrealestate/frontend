@@ -5,7 +5,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Form, Formik } from 'formik';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { Box, DialogTitle } from '@material-ui/core';
 import {
   CheckboxField,
@@ -32,7 +32,8 @@ const initialValues = {
   isCopyFrom: false,
 };
 
-const NewTenantDialog = withTranslation()(({ t, open, setOpen, onConfirm }) => {
+const NewTenantDialog = ({ open, setOpen, onConfirm }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
 
@@ -73,11 +74,11 @@ const NewTenantDialog = withTranslation()(({ t, open, setOpen, onConfirm }) => {
     if (status !== 200) {
       switch (status) {
         case 422:
-          return setError(t('Tenant name is missing.'));
+          return setError(t('Tenant name is missing'));
         case 403:
-          return setError(t('You are not allowed to create a tenant.'));
+          return setError(t('You are not allowed to create a tenant'));
         case 409:
-          return setError(t('The tenant already exists.'));
+          return setError(t('The tenant already exists'));
         default:
           return setError(t('Something went wrong'));
       }
@@ -156,6 +157,6 @@ const NewTenantDialog = withTranslation()(({ t, open, setOpen, onConfirm }) => {
       </Box>
     </Dialog>
   );
-});
+};
 
 export default NewTenantDialog;

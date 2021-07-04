@@ -7,6 +7,8 @@ const {
 export const isServer = () => typeof window === 'undefined';
 
 export const redirect = (context, path) => {
-  context.res.writeHead(302, { Location: `${BASE_PATH}${path}` });
+  context.res.writeHead(302, {
+    Location: `${BASE_PATH}/${context.locale}${path}`,
+  });
   context.res.end();
 };

@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { makeObservable, observable, reaction } from 'mobx';
+import setLanguage from 'next-translate/setLanguage';
 
 import User from './User';
 import Organization from './Organization';
@@ -10,7 +11,6 @@ import Lease from './Lease';
 import Template from './Template';
 import { setApiHeaders } from '../utils/fetch';
 import { isServer } from '../utils';
-import { i18n } from '../utils/i18n';
 
 export default class Store {
   user = new User();
@@ -72,17 +72,23 @@ export default class Store {
       async (organization) => {
         setApiHeaders({
           accessToken: this.user.token,
-          organizationId: organization ? organization._id : undefined,
+          organizationId: organization?._id,
         });
-        moment.locale(this.organization.selected.locale || 'en');
-        await i18n.changeLanguage(this.organization.selected.locale || 'en');
+        const selectedLocale = this.organization.selected?.locale || 'en';
+        moment.locale(selectedLocale);
+        if (!isServer()) {
+          await setLanguage(selectedLocale);
+        }
       }
     );
     reaction(
       () => this.organization.selected?.locale,
       async (locale) => {
-        moment.locale(locale || 'en');
-        await i18n.changeLanguage(locale || 'en');
+        const selectedLocale = locale || 'en';
+        moment.locale(selectedLocale);
+        if (!isServer()) {
+          await setLanguage(selectedLocale);
+        }
       }
     );
   }

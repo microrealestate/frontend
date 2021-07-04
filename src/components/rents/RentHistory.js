@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { Children, useContext, useEffect, useRef, useState } from 'react';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { Box, Paper, Typography } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -13,7 +13,8 @@ import RequestError from '../RequestError';
 import Loading from '../Loading';
 import { getPeriod } from './RentPeriod';
 
-const RentHistory = withTranslation()(({ t, tenantId }) => {
+const RentHistory = ({ tenantId }) => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
@@ -152,6 +153,6 @@ const RentHistory = withTranslation()(({ t, tenantId }) => {
       )}
     </>
   );
-});
+};
 
 export default RentHistory;

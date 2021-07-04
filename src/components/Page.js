@@ -8,6 +8,8 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import getConfig from 'next/config';
+import useTranslation from 'next-translate/useTranslation';
+import { useRouter } from 'next/router';
 import {
   IconButton,
   Box,
@@ -21,60 +23,56 @@ import {
 } from '@material-ui/core';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
-import { withTranslation } from 'next-i18next';
 import OrganizationSwitcher from './organization/OrganizationSwitcher';
 import { StoreContext } from '../store';
 import Loading from './Loading';
-import { useRouter } from 'next/router';
 
 const {
   publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH },
 } = getConfig();
 
-const Demonstrationbar = memo(
-  withTranslation()(({ t }) => {
-    return DEMO_MODE ? (
-      <Box color="primary.contrastText" bgcolor="success.dark">
-        <Typography variant="button" component="div" align="center">
-          {t('Demonstration mode')}
-        </Typography>
+const Demonstrationbar = memo(function Demonstrationbar() {
+  const { t } = useTranslation('common');
+  return DEMO_MODE ? (
+    <Box color="primary.contrastText" bgcolor="success.dark">
+      <Typography variant="button" component="div" align="center">
+        {t('Demonstration mode')}
+      </Typography>
+    </Box>
+  ) : null;
+});
+
+const MainToolbar = memo(function MainToolbar() {
+  const { t } = useTranslation('common');
+  const store = useContext(StoreContext);
+
+  const signOut = useCallback(async (event) => {
+    event.preventDefault();
+    await store.user.signOut();
+    window.location.assign(BASE_PATH); // will be redirected to /signin
+  }, []);
+
+  return (
+    <Box
+      width="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+    >
+      <Typography variant="h5">{APP_NAME}</Typography>
+      <Box display="flex" alignItems="center">
+        {!!(store.organization.items && store.organization.items.length) && (
+          <OrganizationSwitcher />
+        )}
+        <Tooltip title={t('Sign out')} aria-label="sign out">
+          <IconButton aria-label="sign out" onClick={signOut} color="default">
+            <PowerSettingsNewIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
-    ) : null;
-  })
-);
-
-const MainToolbar = memo(
-  withTranslation()(({ t }) => {
-    const store = useContext(StoreContext);
-
-    const signOut = useCallback(async (event) => {
-      event.preventDefault();
-      await store.user.signOut();
-      window.location.assign(`${BASE_PATH}/signin`);
-    }, []);
-
-    return (
-      <Box
-        width="100%"
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Typography variant="h5">{APP_NAME}</Typography>
-        <Box display="flex" alignItems="center">
-          {!!(store.organization.items && store.organization.items.length) && (
-            <OrganizationSwitcher />
-          )}
-          <Tooltip title={t('Sign out')} aria-label="sign out">
-            <IconButton aria-label="sign out" onClick={signOut} color="default">
-              <PowerSettingsNewIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-    );
-  })
-);
+    </Box>
+  );
+});
 
 const ElevationScroll = memo(({ children }) => {
   const trigger = useScrollTrigger({

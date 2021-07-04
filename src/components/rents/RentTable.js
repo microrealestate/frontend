@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 import { autorun } from 'mobx';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -34,133 +34,133 @@ import SearchFilterBar from '../SearchFilterBar';
 import DownloadLink from '../DownloadLink';
 import RequestError from '../RequestError';
 
-const TableToolbar = memo(
-  withTranslation()(({ t, selected = [], onSend = () => {} }) => {
-    const [sendingEmail, setSendingEmail] = useState({
-      rentcall: '',
-      rentcall_reminder: '',
-      rentcall_last_reminder: '',
-      invoice: '',
-    });
+const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
+  const { t } = useTranslation('common');
+  const [sendingEmail, setSendingEmail] = useState({
+    rentcall: '',
+    rentcall_reminder: '',
+    rentcall_last_reminder: '',
+    invoice: '',
+  });
 
-    const onClick = useCallback(
-      async (docName) => {
-        setSendingEmail({
-          rentcall: docName === 'rentcall' ? 'sending' : 'disabled',
-          rentcall_reminder:
-            docName === 'rentcall_reminder' ? 'sending' : 'disabled',
-          rentcall_last_reminder:
-            docName === 'rentcall_last_reminder' ? 'sending' : 'disabled',
-          invoice: docName === 'invoice' ? 'sending' : 'disabled',
-        });
+  const onClick = useCallback(
+    async (docName) => {
+      setSendingEmail({
+        rentcall: docName === 'rentcall' ? 'sending' : 'disabled',
+        rentcall_reminder:
+          docName === 'rentcall_reminder' ? 'sending' : 'disabled',
+        rentcall_last_reminder:
+          docName === 'rentcall_last_reminder' ? 'sending' : 'disabled',
+        invoice: docName === 'invoice' ? 'sending' : 'disabled',
+      });
 
-        await onSend(docName);
+      await onSend(docName);
 
-        setSendingEmail({
-          rentcall: '',
-          rentcall_reminder: '',
-          rentcall_last_reminder: '',
-          invoice: '',
-        });
-      },
-      [onSend]
-    );
+      setSendingEmail({
+        rentcall: '',
+        rentcall_reminder: '',
+        rentcall_last_reminder: '',
+        invoice: '',
+      });
+    },
+    [onSend]
+  );
 
-    return (
-      <Toolbar>
-        <Grid container spacing={1} alignItems="center">
-          {selected.length === 0 ? (
-            <Grid item>
-              <Typography variant="h6" component="div">
-                {t('Rents')}
+  return (
+    <Toolbar>
+      <Grid container spacing={1} alignItems="center">
+        {selected.length === 0 ? (
+          <Grid item>
+            <Typography variant="h6" component="div">
+              {t('Rents')}
+            </Typography>
+          </Grid>
+        ) : (
+          <>
+            <Grid item xs={3}>
+              <Typography
+                color="inherit"
+                variant="subtitle1"
+                component="div"
+                noWrap
+              >
+                {t('{{count}} selected', { count: selected.length })}
               </Typography>
             </Grid>
-          ) : (
-            <>
-              <Grid item xs={3}>
-                <Typography
-                  color="inherit"
-                  variant="subtitle1"
-                  component="div"
-                  noWrap
-                >
-                  {t('{{count}} selected', { count: selected.length })}
-                </Typography>
-              </Grid>
-              <Grid item xs={9}>
-                <Grid
-                  container
-                  spacing={1}
-                  alignItems="center"
-                  justify="flex-end"
-                >
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      disabled={sendingEmail.rentcall !== ''}
-                      endIcon={
-                        sendingEmail.rentcall === 'sending' ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null
-                      }
-                      onClick={() => onClick('rentcall')}
-                    >
-                      Send first notice
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      disabled={sendingEmail.rentcall_reminder !== ''}
-                      endIcon={
-                        sendingEmail.rentcall_reminder === 'sending' ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null
-                      }
-                      onClick={() => onClick('rentcall_reminder')}
-                    >
-                      Send second notice
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      disabled={sendingEmail.rentcall_last_reminder !== ''}
-                      endIcon={
-                        sendingEmail.rentcall_last_reminder === 'sending' ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null
-                      }
-                      onClick={() => onClick('rentcall_last_reminder')}
-                    >
-                      Send last notice
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      disabled={sendingEmail.invoice !== ''}
-                      endIcon={
-                        sendingEmail.invoice === 'sending' ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null
-                      }
-                      onClick={() => onClick('invoice')}
-                    >
-                      Send receipt
-                    </Button>
-                  </Grid>
+            <Grid item xs={9}>
+              <Grid
+                container
+                spacing={1}
+                alignItems="center"
+                justify="flex-end"
+              >
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    disabled={sendingEmail.rentcall !== ''}
+                    endIcon={
+                      sendingEmail.rentcall === 'sending' ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null
+                    }
+                    onClick={() => onClick('rentcall')}
+                  >
+                    Send first notice
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    disabled={sendingEmail.rentcall_reminder !== ''}
+                    endIcon={
+                      sendingEmail.rentcall_reminder === 'sending' ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null
+                    }
+                    onClick={() => onClick('rentcall_reminder')}
+                  >
+                    Send second notice
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    disabled={sendingEmail.rentcall_last_reminder !== ''}
+                    endIcon={
+                      sendingEmail.rentcall_last_reminder === 'sending' ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null
+                    }
+                    onClick={() => onClick('rentcall_last_reminder')}
+                  >
+                    Send last notice
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    disabled={sendingEmail.invoice !== ''}
+                    endIcon={
+                      sendingEmail.invoice === 'sending' ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null
+                    }
+                    onClick={() => onClick('invoice')}
+                  >
+                    Send receipt
+                  </Button>
                 </Grid>
               </Grid>
-            </>
-          )}
-        </Grid>
-      </Toolbar>
-    );
-  })
-);
+            </Grid>
+          </>
+        )}
+      </Grid>
+    </Toolbar>
+  );
+});
 
-const RentTable = withTranslation()(({ t }) => {
+const RentTable = () => {
+  const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [rents, setRents] = useState(store.rent.items);
   const [filteredRents, setFilteredRents] = useState(rents);
@@ -236,7 +236,7 @@ const RentTable = withTranslation()(({ t }) => {
       });
       if (sendStatus !== 200) {
         // TODO check error code to show a more detail error message
-        return setError(t('Email service cannot send emails.'));
+        return setError(t('Email service cannot send emails'));
       }
 
       const response = await store.rent.fetch();
@@ -476,6 +476,6 @@ const RentTable = withTranslation()(({ t }) => {
       </Paper>
     </>
   );
-});
+};
 
 export default RentTable;

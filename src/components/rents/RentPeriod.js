@@ -2,7 +2,7 @@ import moment from 'moment';
 import { memo, useMemo } from 'react';
 
 import { Typography } from '@material-ui/core';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 
 export const getPeriod = (t, term, frequency) => {
   const termMoment = moment(term, 'YYYYMMDDHH');
@@ -27,10 +27,11 @@ export const getPeriod = (t, term, frequency) => {
   }
 };
 
-const RentPeriod = withTranslation()(({ t, term, frequency }) => {
+const RentPeriod = ({ term, frequency }) => {
+  const { t } = useTranslation('common');
   const period = useMemo(() => getPeriod(t, term, frequency), []);
 
   return <Typography>{period}</Typography>;
-});
+};
 
 export default memo(RentPeriod);

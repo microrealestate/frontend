@@ -13,7 +13,9 @@ const OrganizationSwitcher = () => {
 
   const onChange = useCallback(({ id }) => {
     const organization = store.organization.items.find(({ _id }) => _id === id);
-    window.location.assign(`${BASE_PATH}/${organization.name}/dashboard`);
+    window.location.assign(
+      `${BASE_PATH}/${organization.locale}/${organization.name}/dashboard`
+    );
   }, []);
 
   const options = useMemo(

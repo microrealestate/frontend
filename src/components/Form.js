@@ -1,5 +1,6 @@
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
+import useTranslation from 'next-translate/useTranslation';
 import { useField, useFormikContext } from 'formik';
 import {
   Select,
@@ -27,7 +28,6 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
-import { withTranslation } from 'next-i18next';
 
 export const FormTextField = RestrictedComponent(
   ({ label, disabled, showHidePassword = true, ...props }) => {
@@ -300,56 +300,55 @@ export const FormSection = ({ label, children }) => {
   );
 };
 
-export const ContactForm = withTranslation()(
-  ({
-    t,
-    contactName,
-    emailName,
-    phone1Name,
-    phone2Name,
-    onlyRoles,
-    disabled,
-  }) => {
-    return (
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <FormTextField
-            label={t('Contact')}
-            name={contactName || 'contact'}
-            onlyRoles={onlyRoles}
-            disabled={disabled}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <FormTextField
-            label={t('Email')}
-            name={emailName || 'email'}
-            onlyRoles={onlyRoles}
-            disabled={disabled}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <FormTextField
-            label={t('Phone 1')}
-            name={phone1Name || 'phone1'}
-            onlyRoles={onlyRoles}
-            disabled={disabled}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <FormTextField
-            label={t('Phone 2')}
-            name={phone2Name || 'phone2'}
-            onlyRoles={onlyRoles}
-            disabled={disabled}
-          />
-        </Grid>
+export const ContactForm = ({
+  contactName,
+  emailName,
+  phone1Name,
+  phone2Name,
+  onlyRoles,
+  disabled,
+}) => {
+  const { t } = useTranslation('common');
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <FormTextField
+          label={t('Contact')}
+          name={contactName || 'contact'}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
       </Grid>
-    );
-  }
-);
+      <Grid item xs={12} md={4}>
+        <FormTextField
+          label={t('Email')}
+          name={emailName || 'email'}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <FormTextField
+          label={t('Phone 1')}
+          name={phone1Name || 'phone1'}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <FormTextField
+          label={t('Phone 2')}
+          name={phone2Name || 'phone2'}
+          onlyRoles={onlyRoles}
+          disabled={disabled}
+        />
+      </Grid>
+    </Grid>
+  );
+};
 
-export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
+export const AddressField = ({ onlyRoles, disabled }) => {
+  const { t } = useTranslation('common');
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -402,4 +401,4 @@ export const AddressField = withTranslation()(({ t, onlyRoles, disabled }) => {
       </Grid>
     </Grid>
   );
-});
+};

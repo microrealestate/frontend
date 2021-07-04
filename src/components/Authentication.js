@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 import { isServer, redirect } from '../utils';
+import { useRouter } from 'next/router';
 
 const {
   publicRuntimeConfig: { BASE_PATH },
@@ -18,7 +19,7 @@ export function withAuthentication(PageComponent) {
 
     useEffect(() => {
       if (pageProps.error?.statusCode === 403) {
-        window.location.assign(`${BASE_PATH}/signin`);
+        window.location.assign(BASE_PATH); // will be redirected to /signin
       }
     }, []);
 

@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { withTranslation } from 'next-i18next';
+import useTranslation from 'next-translate/useTranslation';
 import { TextField, InputAdornment } from '@material-ui/core';
 
 import SearchIcon from '@material-ui/icons/Search';
 
-const SearchBar = withTranslation()(({ t, onSearch, defaultValue = '' }) => {
+const SearchBar = ({ onSearch, defaultValue = '' }) => {
+  const { t } = useTranslation('common');
   const [searchText, setSearchText] = useState(defaultValue);
 
   useEffect(() => {
@@ -34,6 +35,6 @@ const SearchBar = withTranslation()(({ t, onSearch, defaultValue = '' }) => {
       onChange={onChange}
     />
   );
-});
+};
 
 export default SearchBar;

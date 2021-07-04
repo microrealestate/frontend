@@ -80,8 +80,8 @@ export const printHandler = () => {
   const links = document.head.getElementsByTagName('link');
   const styles = document.head.getElementsByTagName('style');
   let linkHTML = '';
-  links.forEach((link) => (linkHTML += link.outerHTML));
-  styles.forEach((style) => (linkHTML += style.outerHTML));
+  Array.from(links).forEach((link) => (linkHTML += link.outerHTML));
+  Array.from(styles).forEach((style) => (linkHTML += style.outerHTML));
 
   printDocument.write(`
   <!DOCTYPE html>
