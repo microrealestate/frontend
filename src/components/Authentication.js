@@ -6,7 +6,6 @@ import { toJS } from 'mobx';
 import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 import { isServer, redirect } from '../utils';
-import { useRouter } from 'next/router';
 
 const {
   publicRuntimeConfig: { BASE_PATH },

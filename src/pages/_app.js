@@ -13,6 +13,9 @@ import theme from '../styles/theme';
 import 'quill/dist/quill.snow.css';
 import '../components/RichTextEditor/richtexteditor.css';
 
+import 'moment/locale/fr';
+import 'moment/locale/pt';
+
 Yup.addMethod(Yup.string, 'emails', function (message) {
   return this.test({
     name: 'emails',

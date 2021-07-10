@@ -75,7 +75,6 @@ export default class Store {
           organizationId: organization?._id,
         });
         const selectedLocale = this.organization.selected?.locale || 'en';
-        moment.locale(selectedLocale);
         if (!isServer()) {
           await setLanguage(selectedLocale);
         }
@@ -85,7 +84,6 @@ export default class Store {
       () => this.organization.selected?.locale,
       async (locale) => {
         const selectedLocale = locale || 'en';
-        moment.locale(selectedLocale);
         if (!isServer()) {
           await setLanguage(selectedLocale);
         }
