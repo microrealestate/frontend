@@ -1,16 +1,16 @@
-import useTranslation from 'next-translate/useTranslation';
-import React, { useContext, useState } from 'react';
-import { useRouter } from 'next/router';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import { Typography, Box, Paper } from '@material-ui/core';
-
-import { withAuthentication } from '../components/Authentication';
+import { Box, Paper, Typography } from '@material-ui/core';
 import { getStoreInstance, StoreContext } from '../store';
-import Page from '../components/Page';
 import { isServer, redirect } from '../utils';
-import RequestError from '../components/RequestError';
+import React, { useContext, useState } from 'react';
+
 import Landlord from '../components/organization/LandlordForm';
+import { observer } from 'mobx-react-lite';
+import Page from '../components/Page';
+import RequestError from '../components/RequestError';
+import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import { withAuthentication } from '../components/Authentication';
 
 const FirstAccess = observer(() => {
   const { t } = useTranslation('common');

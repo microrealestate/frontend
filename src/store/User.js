@@ -1,7 +1,12 @@
-import { observable, flow, computed, action, makeObservable } from 'mobx';
-const jwt = require('jsonwebtoken');
+import { action, computed, flow, makeObservable, observable } from 'mobx';
 import { useApiFetch, useAuthApiFetch } from '../utils/fetch';
+
 import { isServer } from '../utils';
+const jwt = require('jsonwebtoken');
+
+export const ADMIN_ROLE = 'administrator';
+export const RENTER_ROLE = 'renter';
+export const ROLES = [ADMIN_ROLE, RENTER_ROLE];
 export default class User {
   token;
   tokenExpiry;

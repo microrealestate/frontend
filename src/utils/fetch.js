@@ -1,7 +1,6 @@
 import axios from 'axios';
-import getConfig from 'next/config';
 import FileDownload from 'js-file-download';
-
+import getConfig from 'next/config';
 import { isServer } from './index';
 
 const { publicRuntimeConfig, serverRuntimeConfig } = getConfig();
@@ -9,9 +8,11 @@ let apiFetch;
 let authApiFetch;
 const withCredentials = publicRuntimeConfig.CORS_ENABLED;
 
-export const setApiHeaders = ({ accessToken, organizationId }) => {
-  // console.log('set api headers');
-  // console.log({accessToken, organizationId});
+export const setApiHeaders = ({
+  accessToken,
+  organizationId,
+  acceptLanguage,
+}) => {
   if (accessToken) {
     useApiFetch();
     apiFetch.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -24,6 +25,11 @@ export const setApiHeaders = ({ accessToken, organizationId }) => {
     apiFetch.defaults.headers.organizationId = organizationId;
   } else if (apiFetch) {
     delete apiFetch.defaults.headers.organizationId;
+  }
+
+  if (acceptLanguage) {
+    useApiFetch();
+    apiFetch.defaults.headers['Accept-Language'] = acceptLanguage;
   }
 };
 

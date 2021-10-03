@@ -1,8 +1,5 @@
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { useCallback, useContext, useMemo } from 'react';
-import { observer } from 'mobx-react-lite';
-import useTranslation from 'next-translate/useTranslation';
+
 import {
   AddressField,
   ContactForm,
@@ -10,7 +7,13 @@ import {
   FormTextField,
   SubmitButton,
 } from '../Form';
+import { Form, Formik } from 'formik';
+import { useCallback, useContext, useMemo } from 'react';
+
+import { ADMIN_ROLE } from '../../store/User';
+import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   vatNumber: Yup.string(),
@@ -30,7 +33,7 @@ const validationSchema = Yup.object().shape({
   }),
 });
 
-const allowedRoles = ['administrator'];
+const allowedRoles = [ADMIN_ROLE];
 
 const BillingForm = observer(({ onSubmit }) => {
   const store = useContext(StoreContext);

@@ -5,7 +5,7 @@ const { Grid, Typography, useTheme } = require('@material-ui/core');
 const IconTypography = ({
   Icon,
   children,
-  fontSize = 'default',
+  fontSize = 'medium',
   className,
   ...props
 }) => {

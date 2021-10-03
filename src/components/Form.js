@@ -1,33 +1,33 @@
-import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
-import useTranslation from 'next-translate/useTranslation';
-import { useField, useFormikContext } from 'formik';
 import {
-  Select,
-  MenuItem,
+  Box,
+  Checkbox,
   CircularProgress,
-  FormLabel,
-  RadioGroup,
-  Radio,
-  Input,
-  InputLabel,
+  Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
-  InputAdornment,
-  IconButton,
-  Checkbox,
-  Typography,
-  Divider,
-  Box,
+  FormLabel,
   Grid,
-  TextField,
+  IconButton,
+  Input,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
   Switch,
+  Typography,
 } from '@material-ui/core';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
+import { useField, useFormikContext } from 'formik';
+
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
+import useTranslation from 'next-translate/useTranslation';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 
 export const FormTextField = RestrictedComponent(
   ({ label, disabled, showHidePassword = true, ...props }) => {
@@ -188,9 +188,8 @@ export const SwitchField = RestrictedComponent(
 
 export const DateField = RestrictedComponent(({ disabled, ...props }) => {
   const [field, meta] = useField(props.name);
-  const { setFieldValue, setFieldTouched, handleBlur, isSubmitting } =
-    useFormikContext();
-  const hasError = !!(meta.touched && meta.error);
+  const { setFieldValue, isSubmitting } = useFormikContext();
+  const hasError = !!(field.value?.isValid() && meta.error);
 
   return (
     <FormControl margin="normal" fullWidth>
@@ -200,15 +199,9 @@ export const DateField = RestrictedComponent(({ disabled, ...props }) => {
         format={moment.localeData().longDateFormat('L')}
         error={hasError}
         helperText={hasError ? meta.error : ''}
-        onChange={(date) => {
-          setFieldValue(field.name, date);
-          setFieldTouched(field.name, true);
-        }}
+        onChange={(date) => setFieldValue(field.name, date, false)}
         autoOk
         disabled={disabled || isSubmitting}
-        TextFieldComponent={(textProps) => (
-          <TextField {...textProps} onBlur={handleBlur} />
-        )}
         {...props}
       />
     </FormControl>
@@ -232,7 +225,7 @@ export const DateRangeField = ({
   const [endField] = useField(endName);
 
   useEffect(() => {
-    if (duration && beginField.value) {
+    if (duration && beginField.value?.isValid()) {
       const newEndDate = moment(beginField.value.startOf('day'))
         .add(duration)
         .subtract(1, 'second');
@@ -248,8 +241,14 @@ export const DateRangeField = ({
         <DateField
           label={beginLabel}
           name={beginName}
-          minDate={(minDate || defaultMinDate).toISOString()}
-          maxDate={(maxDate || defaultMaxDate).toISOString()}
+          minDate={(
+            (minDate?.isValid() && minDate) ||
+            defaultMinDate
+          ).toISOString()}
+          maxDate={(
+            (maxDate?.isValid() && maxDate) ||
+            defaultMaxDate
+          ).toISOString()}
           disabled={disabled}
         />
       </Grid>

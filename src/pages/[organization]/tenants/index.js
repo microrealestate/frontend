@@ -1,8 +1,3 @@
-import _ from 'lodash';
-import moment from 'moment';
-import { Children, memo, useCallback, useContext, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import {
   Box,
   Button,
@@ -17,17 +12,22 @@ import {
   Paper,
   Typography,
 } from '@material-ui/core';
-
-import { withAuthentication } from '../../../components/Authentication';
-import Page from '../../../components/Page';
-import useTranslation from 'next-translate/useTranslation';
+import { Children, memo, useCallback, useContext, useState } from 'react';
 import { getStoreInstance, StoreContext } from '../../../store';
+
+import _ from 'lodash';
 import { isServer } from '../../../utils';
-import SearchFilterBar from '../../../components/SearchFilterBar';
-import { useRouter } from 'next/router';
+import moment from 'moment';
 import NewTenantDialog from '../../../components/tenants/NewTenantDialog';
+import { observer } from 'mobx-react-lite';
+import Page from '../../../components/Page';
 import PropertyIcon from '../../../components/properties/PropertyIcon';
+import SearchFilterBar from '../../../components/SearchFilterBar';
 import TenantAvatar from '../../../components/tenants/TenantAvatar';
+import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import { withAuthentication } from '../../../components/Authentication';
 
 const useStyles = makeStyles((theme) => ({
   avatarInProgress: {

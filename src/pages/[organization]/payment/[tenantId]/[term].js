@@ -1,14 +1,8 @@
-import moment from 'moment';
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import useTranslation from 'next-translate/useTranslation';
 import {
   Box,
   Breadcrumbs,
   Divider,
   Grid,
-  Hidden,
   List,
   ListItem,
   Paper,
@@ -17,28 +11,34 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import SendIcon from '@material-ui/icons/Send';
-import HistoryIcon from '@material-ui/icons/History';
-
-import Page from '../../../../components/Page';
-import { withAuthentication } from '../../../../components/Authentication';
-import { getStoreInstance, StoreContext } from '../../../../store';
-import { isServer } from '../../../../utils';
 import { CardRow, DashboardCard } from '../../../../components/Cards';
-import { NumberFormat } from '../../../../utils/numberformat';
-import Link from '../../../../components/Link';
-import SendRentEmailMenu from '../../../../components/rents/SendRentEmailMenu';
-import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
-import RequestError from '../../../../components/RequestError';
-import DownloadLink from '../../../../components/DownloadLink';
-import RentHistory from '../../../../components/rents/RentHistory';
-import { useRouter } from 'next/router';
-import BalanceBar from '../../../../components/rents/BalanceBar';
-import { TabPanel } from '../../../../components/Tabs';
-import PaymentForm from '../../../../components/payment/PaymentForm';
+import { getStoreInstance, StoreContext } from '../../../../store';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import { TabPanel, useTabChangeHelper } from '../../../../components/Tabs';
+
 import AdditionalCostDiscountForm from '../../../../components/payment/AdditionalCostDiscountForm';
+import BalanceBar from '../../../../components/rents/BalanceBar';
+import DownloadLink from '../../../../components/DownloadLink';
+import { EmptyIllustration } from '../../../../components/Illustrations';
+import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
+import HistoryIcon from '@material-ui/icons/History';
 import InternalNoteForm from '../../../../components/payment/InternalNoteForm';
+import { isServer } from '../../../../utils';
+import Link from '../../../../components/Link';
+import moment from 'moment';
+import { NumberFormat } from '../../../../utils/numberformat';
+import { observer } from 'mobx-react-lite';
+import Page from '../../../../components/Page';
+import PaymentForm from '../../../../components/payment/PaymentForm';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import RentHistory from '../../../../components/rents/RentHistory';
+import RequestError from '../../../../components/RequestError';
+import SendIcon from '@material-ui/icons/Send';
+import SendRentEmailMenu from '../../../../components/rents/SendRentEmailMenu';
+import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import { withAuthentication } from '../../../../components/Authentication';
 
 const BreadcrumbBar = memo(function BreadcrumbBar({ backPath }) {
   const { t } = useTranslation('common');
@@ -168,13 +168,46 @@ export const PaymentBalance = () => {
   );
 };
 
+const hashes = ['payments', 'costanddiscount', 'internalnote'];
+
+const PaymentTabs = ({ onSubmit }) => {
+  const { t } = useTranslation('common');
+  const { handleTabChange, tabSelectedIndex, tabsReady } =
+    useTabChangeHelper(hashes);
+
+  return (
+    tabsReady && (
+      <>
+        <Tabs
+          variant="scrollable"
+          value={tabSelectedIndex}
+          onChange={handleTabChange}
+          aria-label="Tenant tabs"
+        >
+          <Tab label={t('Payments')} />
+          <Tab label={t('Additional cost and discount')} />
+          <Tab label={t('Internal note')} />
+        </Tabs>
+        <TabPanel value={tabSelectedIndex} index={0}>
+          <PaymentForm onSubmit={onSubmit} />
+        </TabPanel>
+        <TabPanel value={tabSelectedIndex} index={1}>
+          <AdditionalCostDiscountForm onSubmit={onSubmit} />
+        </TabPanel>
+        <TabPanel value={tabSelectedIndex} index={2}>
+          <InternalNoteForm onSubmit={onSubmit} />
+        </TabPanel>
+      </>
+    )
+  );
+};
+
 const RentPayment = observer(() => {
   console.log('RentPayment functional component');
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const router = useRouter();
   const [error /*setError*/] = useState('');
-  const [tabSelected, setTabSelected] = useState(0);
 
   const backPath = useMemo(() => {
     let backPath = `/${store.organization.selected.name}/rents/${store.rent.period}`;
@@ -184,10 +217,6 @@ const RentPayment = observer(() => {
       )}&status=${encodeURIComponent(store.rent.filters.status)}`;
     }
     return backPath;
-  }, []);
-
-  const onTabChange = useCallback((event, newValue) => {
-    setTabSelected(newValue);
   }, []);
 
   const onSubmit = useCallback(async (paymentPart) => {
@@ -215,157 +244,134 @@ const RentPayment = observer(() => {
   }, []);
 
   return (
-    <Page
-      PrimaryToolbar={<BreadcrumbBar backPath={backPath} />}
-      SecondaryToolbar={
-        <Box display="flex" width="100%" align="right">
-          <Box mr={1.5}>
-            <FullScreenDialogButton
-              variant="contained"
-              buttonLabel={t('Rents')}
-              startIcon={<HistoryIcon />}
-              dialogTitle={t('Rents history')}
-              cancelButtonLabel={t('Close')}
-              showCancel
-            >
-              <RentHistory tenantId={store.rent.selected.occupant._id} />
-            </FullScreenDialogButton>
-          </Box>
-          <SendRentEmailMenu
-            tenantIds={[store.rent.selected.occupant._id]}
-            terms={[store.rent.selected.term]}
-            period={store.rent._period}
-            variant="contained"
-            startIcon={<SendIcon />}
-          />
-        </Box>
-      }
-    >
+    <Page PrimaryToolbar={<BreadcrumbBar backPath={backPath} />}>
       <RequestError error={error} />
       <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
           <Paper>
-            <Tabs
-              variant="scrollable"
-              value={tabSelected}
-              onChange={onTabChange}
-              aria-label="Property tabs"
-            >
-              <Tab label={t('Payments')} />
-              <Tab label={t('Additional cost and discount')} />
-              <Tab label={t('Internal note')} />
-            </Tabs>
-            <TabPanel value={tabSelected} index={0}>
-              <PaymentForm onSubmit={onSubmit} />
-            </TabPanel>
-            <TabPanel value={tabSelected} index={1}>
-              <AdditionalCostDiscountForm onSubmit={onSubmit} />
-            </TabPanel>
-            <TabPanel value={tabSelected} index={2}>
-              <InternalNoteForm onSubmit={onSubmit} />
-            </TabPanel>
+            <PaymentTabs onSubmit={onSubmit} />
           </Paper>
         </Grid>
-        <Hidden smDown>
-          <Grid item md={4}>
-            <Box pb={4}>
-              <DashboardCard Icon={ReceiptIcon} title={t('Rent')}>
-                <Box pb={1}>
-                  <BalanceBar rent={store.rent.selected} hideTooltip={true} />
-                </Box>
-                <Divider />
-                <Box pt={1}>
-                  <PaymentBalance />
-                </Box>
-              </DashboardCard>
-            </Box>
-            <DashboardCard Icon={SendIcon} title={t('Documents sent')}>
-              {store.rent.selected.emailStatus ? (
-                <List>
-                  {store.rent.selected.emailStatus.status?.rentcall && (
-                    <StyledListItem>
-                      <DownloadLink
-                        label={t('First notice sent on {{datetime}}', {
-                          datetime: moment(
-                            store.rent.selected.emailStatus.last.rentcall
-                              .sentDate
-                          ).format('L hh:mm'),
-                        })}
-                        url={`/rentcall/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                        documentName={`${store.rent.selected.occupant.name}-${t(
-                          'first notice'
-                        )}.pdf`}
-                        variant="body2"
-                        color="textSecondary"
-                      />
-                    </StyledListItem>
-                  )}
-
-                  {store.rent.selected.emailStatus.status
-                    ?.rentcall_reminder && (
-                    <StyledListItem>
-                      <DownloadLink
-                        label={t('Second notice sent on {{datetime}}', {
-                          datetime: moment(
-                            store.rent.selected.emailStatus.last
-                              .rentcall_reminder.sentDate
-                          ).format('L hh:mm'),
-                        })}
-                        url={`/rentcall_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                        documentName={`${store.rent.selected.occupant.name}-${t(
-                          'second notice'
-                        )}.pdf`}
-                        variant="body2"
-                        color="textSecondary"
-                      />
-                    </StyledListItem>
-                  )}
-                  {store.rent.selected.emailStatus.status
-                    ?.rentcall_last_reminder && (
-                    <StyledListItem>
-                      <DownloadLink
-                        label={t('Last notice sent on {{datetime}}', {
-                          datetime: moment(
-                            store.rent.selected.emailStatus.last
-                              .rentcall_last_reminder.sentDate
-                          ).format('L hh:mm'),
-                        })}
-                        url={`/rentcall_last_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                        documentName={`${store.rent.selected.occupant.name}-${t(
-                          'last notice'
-                        )}.pdf`}
-                        variant="body2"
-                        color="textSecondary"
-                      />
-                    </StyledListItem>
-                  )}
-                  {store.rent.selected.emailStatus.status?.invoice && (
-                    <StyledListItem>
-                      <DownloadLink
-                        label={t('Receipt sent on {{datetime}}', {
-                          datetime: moment(
-                            store.rent.selected.emailStatus.last.invoice
-                              .sentDate
-                          ).format('L hh:mm'),
-                        })}
-                        url={`/invoice/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
-                        documentName={`${store.rent.selected.occupant.name}-${t(
-                          'invoice'
-                        )}.pdf`}
-                        variant="body2"
-                        color="textSecondary"
-                      />
-                    </StyledListItem>
-                  )}
-                </List>
-              ) : (
-                <Typography color="textSecondary">
-                  {t('No documents sent')}
-                </Typography>
-              )}
+        <Grid item sm={12} md={4}>
+          <Box pb={4}>
+            <DashboardCard
+              Icon={ReceiptIcon}
+              title={t('Rent')}
+              Toolbar={
+                <FullScreenDialogButton
+                  variant="contained"
+                  buttonLabel={t('Rents history')}
+                  size="small"
+                  startIcon={<HistoryIcon />}
+                  dialogTitle={t('Rents history')}
+                  cancelButtonLabel={t('Close')}
+                  showCancel
+                >
+                  <RentHistory tenantId={store.rent.selected.occupant._id} />
+                </FullScreenDialogButton>
+              }
+            >
+              <Box pb={1}>
+                <BalanceBar rent={store.rent.selected} hideTooltip={true} />
+              </Box>
+              <Divider />
+              <Box pt={1}>
+                <PaymentBalance />
+              </Box>
             </DashboardCard>
-          </Grid>
-        </Hidden>
+          </Box>
+          <DashboardCard
+            Icon={SendIcon}
+            title={t('Documents sent')}
+            Toolbar={
+              <SendRentEmailMenu
+                tenant={store.rent.selected.occupant}
+                terms={[store.rent.selected.term]}
+                period={store.rent._period}
+                onError={() => {}}
+              />
+            }
+          >
+            {store.rent.selected.emailStatus ? (
+              <List>
+                {store.rent.selected.emailStatus.status?.rentcall && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('First notice sent on {{datetime}}', {
+                        datetime: moment(
+                          store.rent.selected.emailStatus.last.rentcall.sentDate
+                        ).format('L hh:mm'),
+                      })}
+                      url={`/rentcall/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t(
+                        'first notice'
+                      )}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+
+                {store.rent.selected.emailStatus.status?.rentcall_reminder && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Second notice sent on {{datetime}}', {
+                        datetime: moment(
+                          store.rent.selected.emailStatus.last.rentcall_reminder
+                            .sentDate
+                        ).format('L hh:mm'),
+                      })}
+                      url={`/rentcall_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t(
+                        'second notice'
+                      )}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+                {store.rent.selected.emailStatus.status
+                  ?.rentcall_last_reminder && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Last notice sent on {{datetime}}', {
+                        datetime: moment(
+                          store.rent.selected.emailStatus.last
+                            .rentcall_last_reminder.sentDate
+                        ).format('L hh:mm'),
+                      })}
+                      url={`/rentcall_last_reminder/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t(
+                        'last notice'
+                      )}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+                {store.rent.selected.emailStatus.status?.invoice && (
+                  <StyledListItem>
+                    <DownloadLink
+                      label={t('Receipt sent on {{datetime}}', {
+                        datetime: moment(
+                          store.rent.selected.emailStatus.last.invoice.sentDate
+                        ).format('L hh:mm'),
+                      })}
+                      url={`/invoice/${store.rent.selected.occupant._id}/${store.rent.selected.term}`}
+                      documentName={`${store.rent.selected.occupant.name}-${t(
+                        'invoice'
+                      )}.pdf`}
+                      variant="body2"
+                      color="textSecondary"
+                    />
+                  </StyledListItem>
+                )}
+              </List>
+            ) : (
+              <EmptyIllustration label={t('No emails sent')} />
+            )}
+          </DashboardCard>
+        </Grid>
       </Grid>
     </Page>
   );

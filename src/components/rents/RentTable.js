@@ -1,20 +1,3 @@
-import moment from 'moment';
-import {
-  Children,
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import { autorun } from 'mobx';
-import useTranslation from 'next-translate/useTranslation';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import {
   Box,
   Button,
@@ -28,11 +11,29 @@ import {
   Typography,
   useTheme,
 } from '@material-ui/core';
-import { StoreContext } from '../../store';
-import { NumberFormat } from '../../utils/numberformat';
-import SearchFilterBar from '../SearchFilterBar';
+import {
+  Children,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import { autorun } from 'mobx';
 import DownloadLink from '../DownloadLink';
+import moment from 'moment';
+import { NumberFormat } from '../../utils/numberformat';
 import RequestError from '../RequestError';
+import SearchFilterBar from '../SearchFilterBar';
+import { StoreContext } from '../../store';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import useTranslation from 'next-translate/useTranslation';
 
 const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
   const { t } = useTranslation('common');
@@ -92,7 +93,7 @@ const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
                 container
                 spacing={1}
                 alignItems="center"
-                justify="flex-end"
+                justifyContent="flex-end"
               >
                 <Grid item>
                   <Button

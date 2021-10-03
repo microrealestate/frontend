@@ -1,8 +1,9 @@
 import { memo, useCallback, useState } from 'react';
+
 import Button from '@material-ui/core/Button';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Typography } from '@material-ui/core';
 
 const ToggleMenu = ({ startIcon, options, value, onChange = () => {} }) => {

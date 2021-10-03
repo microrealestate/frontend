@@ -1,9 +1,10 @@
+import { isServer, redirect } from '../utils';
+
+import { getStoreInstance } from '../store';
+import { toJS } from 'mobx';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { toJS } from 'mobx';
 import { withAuthentication } from '../components/Authentication';
-import { getStoreInstance } from '../store';
-import { isServer, redirect } from '../utils';
 
 const Index = (props) => {
   const { redirectPath } = props;

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import useTranslation from 'next-translate/useTranslation';
+import { Box, InputAdornment, TextField } from '@material-ui/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SearchIcon from '@material-ui/icons/Search';
-import { Box, TextField, InputAdornment } from '@material-ui/core';
 import ToggleMenu from './ToggleMenu';
+import useTranslation from 'next-translate/useTranslation';
 
 const SearchFilterBar = ({
   filters,

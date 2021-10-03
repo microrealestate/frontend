@@ -1,19 +1,26 @@
-import { useCallback, useContext, useMemo } from 'react';
-import useTranslation from 'next-translate/useTranslation';
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { observer } from 'mobx-react-lite';
-import cc from 'currency-codes';
-import getSymbolFromCurrency from 'currency-symbol-map';
+
+import { Form, Formik } from 'formik';
 import {
-  FormTextField,
-  SubmitButton,
-  RadioFieldGroup,
-  RadioField,
-  SelectField,
   FormSection,
+  FormTextField,
+  RadioField,
+  RadioFieldGroup,
+  SelectField,
+  SubmitButton,
 } from '../Form';
+import { useCallback, useContext, useMemo } from 'react';
+
+import cc from 'currency-codes';
+import getConfig from 'next/config';
+import getSymbolFromCurrency from 'currency-symbol-map';
+import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
+import useTranslation from 'next-translate/useTranslation';
+
+const {
+  publicRuntimeConfig: { BASE_PATH },
+} = getConfig();
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required(),
@@ -109,6 +116,16 @@ const LandlordForm = observer(({ onSubmit }) => {
       }
 
       await onSubmit(updatedSettings);
+
+      if (updatedSettings.name !== initialValues.name) {
+        return window.location.assign(
+          `${BASE_PATH}/${store.organization.selected.locale}/${store.organization.selected.name}/settings`
+        );
+      }
+
+      if (updatedSettings.locale !== initialValues.locale) {
+        window.location.reload();
+      }
     },
     [onSubmit]
   );

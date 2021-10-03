@@ -1,19 +1,20 @@
-import React, { useContext, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import ErrorPage from 'next/error';
-import { useRouter } from 'next/router';
-import getConfig from 'next/config';
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { Box, Typography, Paper } from '@material-ui/core';
-import LocationCityIcon from '@material-ui/icons/LocationCity';
 
+import { Box, Paper, Typography } from '@material-ui/core';
+import { Form, Formik } from 'formik';
 import { FormTextField, SubmitButton } from '../components/Form';
-import useTranslation from 'next-translate/useTranslation';
-import { StoreContext } from '../store';
+import React, { useContext, useState } from 'react';
+
+import ErrorPage from 'next/error';
+import getConfig from 'next/config';
 import Link from '../components/Link';
-import RequestError from '../components/RequestError';
+import LocationCityIcon from '@material-ui/icons/LocationCity';
+import { observer } from 'mobx-react-lite';
 import Page from '../components/Page';
+import RequestError from '../components/RequestError';
+import { StoreContext } from '../store';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
 
 const {
   publicRuntimeConfig: { APP_NAME, SIGNUP },

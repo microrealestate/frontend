@@ -1,9 +1,11 @@
-import { useCallback, useContext, useMemo } from 'react';
-import useTranslation from 'next-translate/useTranslation';
 import * as Yup from 'yup';
+
 import { Form, Formik } from 'formik';
 import { FormSection, FormTextField, SubmitButton } from '../Form';
+import { useCallback, useContext, useMemo } from 'react';
+
 import { StoreContext } from '../../store';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   description: Yup.string(),

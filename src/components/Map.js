@@ -1,12 +1,10 @@
-import axios from 'axios';
-import getConfig from 'next/config';
-import { useTheme } from '@material-ui/core';
+import { Marker, Map as PigeonMap } from 'pigeon-maps';
 import { memo, useEffect, useState } from 'react';
-import { Map as PigeonMap, Marker } from 'pigeon-maps';
 
-const {
-  publicRuntimeConfig: { BASE_PATH },
-} = getConfig();
+import axios from 'axios';
+import { LocationIllustration } from './Illustrations';
+import { useTheme } from '@material-ui/core';
+
 const nominatimBaseURL = 'https://nominatim.openstreetmap.org';
 
 const Map = memo(function Map({ address, height = 300, zoom = 16 }) {
@@ -70,13 +68,7 @@ const Map = memo(function Map({ address, height = 300, zoom = 16 }) {
           />
         </PigeonMap>
       )}
-      {!loading && !center && (
-        <img
-          src={`${BASE_PATH}/undraw_Location_tracking.svg`}
-          width="100%"
-          height={height}
-        />
-      )}
+      {!loading && !center && <LocationIllustration height={height} />}
     </>
   );
 });

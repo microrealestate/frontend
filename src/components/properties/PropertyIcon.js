@@ -1,12 +1,11 @@
-import { memo } from 'react';
-
-import TerrainIcon from '@material-ui/icons/Terrain';
-import StoreIcon from '@material-ui/icons/StorefrontOutlined';
-import ParkingIcon from '@material-ui/icons/LocalParkingOutlined';
-import EmojiTransportationOutlinedIcon from '@material-ui/icons/EmojiTransportationOutlined';
-import MarkunreadMailboxIcon from '@material-ui/icons/MarkunreadMailboxOutlined';
 import ApartmentIcon from '@material-ui/icons/ApartmentOutlined';
+import EmojiTransportationOutlinedIcon from '@material-ui/icons/EmojiTransportationOutlined';
 import HomeIcon from '@material-ui/icons/HomeOutlined';
+import MarkunreadMailboxIcon from '@material-ui/icons/MarkunreadMailboxOutlined';
+import { memo } from 'react';
+import ParkingIcon from '@material-ui/icons/LocalParkingOutlined';
+import StoreIcon from '@material-ui/icons/StorefrontOutlined';
+import TerrainIcon from '@material-ui/icons/Terrain';
 
 const PropertyIcon = ({ type, ...props }) => {
   let TypeIcon = TerrainIcon;

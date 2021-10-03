@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import useTranslation from 'next-translate/useTranslation';
-import { TextField, InputAdornment } from '@material-ui/core';
+import { InputAdornment, TextField } from '@material-ui/core';
+import { useCallback, useEffect, useState } from 'react';
 
 import SearchIcon from '@material-ui/icons/Search';
+import useTranslation from 'next-translate/useTranslation';
 
 const SearchBar = ({ onSearch, defaultValue = '' }) => {
   const { t } = useTranslation('common');

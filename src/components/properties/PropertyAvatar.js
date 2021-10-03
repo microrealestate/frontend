@@ -1,6 +1,6 @@
-import { memo } from 'react';
 import { Avatar, makeStyles } from '@material-ui/core';
 
+import { memo } from 'react';
 import PropertyIcon from './PropertyIcon';
 
 const useStyles = makeStyles((theme) => ({

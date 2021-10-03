@@ -1,7 +1,8 @@
-import { downloadDocument } from '../utils/fetch';
-import VerticalAlignBottomIcon from '@material-ui/icons/VerticalAlignBottom';
 import { Box, IconButton, Link, Tooltip, Typography } from '@material-ui/core';
 import { memo, useCallback } from 'react';
+
+import { downloadDocument } from '../utils/fetch';
+import VerticalAlignBottomIcon from '@material-ui/icons/VerticalAlignBottom';
 
 const DownloadLink = ({
   label,

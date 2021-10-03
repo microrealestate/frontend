@@ -1,8 +1,15 @@
-import moment from 'moment';
 import * as Yup from 'yup';
-import { Children, useContext, useMemo, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+
 import { Box, Button, Grid } from '@material-ui/core';
+import { Children, useContext, useMemo, useState } from 'react';
+import {
+  DateField,
+  DateRangeField,
+  FormSection,
+  FormTextField,
+  SelectField,
+  SubmitButton,
+} from '../Form';
 import {
   FieldArray,
   Form,
@@ -10,14 +17,9 @@ import {
   validateYupSchema,
   yupToFormErrors,
 } from 'formik';
-import {
-  FormTextField,
-  SubmitButton,
-  FormSection,
-  DateField,
-  DateRangeField,
-  SelectField,
-} from '../Form';
+
+import moment from 'moment';
+import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -85,7 +87,8 @@ const emptyProperty = {
   exitDate: null,
 };
 
-const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
+const LeaseContractForm = observer((props) => {
+  const { readOnly, onSubmit } = props;
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [contractDuration, setContractDuration] = useState();
@@ -122,8 +125,8 @@ const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
             };
           })
         : [emptyProperty],
-      guaranty: store.tenant.selected?.guaranty,
-      guarantyPayback: store.tenant.selected?.guarantyPayback,
+      guaranty: store.tenant.selected?.guaranty || '',
+      guarantyPayback: store.tenant.selected?.guarantyPayback || '',
     };
   }, [store.tenant.selected]);
 
@@ -222,7 +225,7 @@ const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
             previousProperty.rent = property.price || '';
             previousProperty.expense =
               property?.expense > 0
-                ? { title: '', amount: property.expense }
+                ? { title: t('General expense'), amount: property.expense }
                 : emptyExpense;
           }
           handleChange(evt);
@@ -260,12 +263,12 @@ const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
                 endLabel={t('End date')}
                 endName="endDate"
                 duration={contractDuration}
-                disabled={readOnly}
+                disabled={!values.leaseId || readOnly}
               />
               <FormTextField
                 label={t('Deposit')}
                 name="guaranty"
-                disabled={readOnly}
+                disabled={!values.leaseId || readOnly}
               />
             </FormSection>
             <FormSection label={t('Properties')}>
@@ -292,21 +295,27 @@ const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
                               <FormTextField
                                 label={t('Rent')}
                                 name={`properties[${index}].rent`}
-                                disabled={readOnly}
+                                disabled={
+                                  !values.properties[index]?._id || readOnly
+                                }
                               />
                             </Grid>
                             <Grid item xs={12} md={9}>
                               <FormTextField
                                 label={t('Expense')}
                                 name={`properties[${index}].expense.title`}
-                                disabled={readOnly}
+                                disabled={
+                                  !values.properties[index]?._id || readOnly
+                                }
                               />
                             </Grid>
                             <Grid item xs={12} md={3}>
                               <FormTextField
                                 label={t('Amount')}
                                 name={`properties[${index}].expense.amount`}
-                                disabled={readOnly}
+                                disabled={
+                                  !values.properties[index]?._id || readOnly
+                                }
                               />
                             </Grid>
                             <Grid item xs={12}>
@@ -317,7 +326,9 @@ const LeaseContractForm = observer(({ readOnly, onSubmit }) => {
                                 endName={`properties[${index}].exitDate`}
                                 minDate={values?.beginDate}
                                 maxDate={values?.endDate}
-                                disabled={readOnly}
+                                disabled={
+                                  !values.properties[index]?._id || readOnly
+                                }
                               />
                             </Grid>
                           </Grid>

@@ -1,9 +1,9 @@
-import { nanoid } from 'nanoid';
-import getConfig from 'next/config';
-import { detect } from 'detect-browser';
-import Quill from 'quill';
 import './TemplateField';
 import './TemplateLoopBlock';
+
+import { detect } from 'detect-browser';
+import getConfig from 'next/config';
+import Quill from 'quill';
 
 const {
   publicRuntimeConfig: { BASE_PATH },
@@ -194,62 +194,82 @@ export const destroyTextEditor = () => {
   EDITOR.wrapper = null;
 };
 
-const _insertTemplateField = (field) => {
-  if (!EDITOR.instance) {
-    return;
-  }
+// const _insertTemplateField = (field) => {
+//   if (!EDITOR.instance) {
+//     return;
+//   }
 
-  const range = EDITOR.instance.getSelection(true);
-  EDITOR.instance.insertEmbed(
-    range.index,
-    'template-field',
-    {
-      ...field,
-    },
-    Quill.sources.USER
-  );
-  EDITOR.instance.insertText(range.index + 1, ' ', Quill.sources.USER);
-  EDITOR.instance.setSelection(range.index + 1, Quill.sources.SILENT);
-};
+//   const range = EDITOR.instance.getSelection(true);
+//   EDITOR.instance.insertEmbed(
+//     range.index,
+//     'template-field',
+//     {
+//       ...field,
+//     },
+//     Quill.sources.USER
+//   );
+//   EDITOR.instance.insertText(range.index + 1, ' ', Quill.sources.USER);
+//   EDITOR.instance.setSelection(range.index + 1, Quill.sources.SILENT);
+// };
 
-const _insertTemplateLoopBlock = (field) => {
-  if (!EDITOR.instance) {
-    return;
-  }
+// const _insertTemplateLoopBlock = (field) => {
+//   if (!EDITOR.instance) {
+//     return;
+//   }
 
-  const range = EDITOR.instance.getSelection(true);
-  EDITOR.instance.insertText(range.index, '\n', Quill.sources.USER);
-  EDITOR.instance.insertEmbed(
-    range.index + 1,
-    'template-loop-block',
-    {
-      id: nanoid(),
-      ...field,
-    },
-    Quill.sources.USER
-  );
-  EDITOR.instance.insertEmbed(
-    range.index + 1,
-    'template-field',
-    {
-      ...field,
-    },
-    Quill.sources.USER
-  );
-  EDITOR.instance.insertText(range.index + 2, '\n', Quill.sources.USER);
-  EDITOR.instance.setSelection(range.index + 2, Quill.sources.SILENT);
-};
+//   const range = EDITOR.instance.getSelection(true);
+//   EDITOR.instance.insertText(range.index, '\n', Quill.sources.USER);
+//   EDITOR.instance.insertEmbed(
+//     range.index + 1,
+//     'template-loop-block',
+//     {
+//       id: nanoid(),
+//       ...field,
+//     },
+//     Quill.sources.USER
+//   );
+//   EDITOR.instance.insertEmbed(
+//     range.index + 1,
+//     'template-field',
+//     {
+//       ...field,
+//     },
+//     Quill.sources.USER
+//   );
+//   EDITOR.instance.insertText(range.index + 2, '\n', Quill.sources.USER);
+//   EDITOR.instance.setSelection(range.index + 2, Quill.sources.SILENT);
+// };
 
 export const insertField = (field) => {
   if (!EDITOR.instance) {
     return;
   }
 
-  if (field.type !== 'array') {
-    _insertTemplateField(field);
-  } else {
-    _insertTemplateLoopBlock(field);
-  }
+  // if (field.type !== 'array') {
+  //   _insertTemplateField(field);
+  // } else {
+  //   _insertTemplateLoopBlock(field);
+  // }
+
+  const range = EDITOR.instance.getSelection(true);
+  // EDITOR.instance.insertEmbed(
+  //   range.index,
+  //   'template-field',
+  //   {
+  //     ...field,
+  //   },
+  //   Quill.sources.USER
+  // );
+  EDITOR.instance.insertText(range.index, field.marker, Quill.sources.USER);
+  // EDITOR.instance.insertText(
+  //   range.index + field.marker.length + 1,
+  //   ' ',
+  //   Quill.sources.USER
+  // );
+  EDITOR.instance.setSelection(
+    range.index + field.marker.length + 1,
+    Quill.sources.SILENT
+  );
 };
 
 export const getHTML = () => {

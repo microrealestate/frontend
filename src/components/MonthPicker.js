@@ -1,9 +1,10 @@
-import moment from 'moment';
-import { memo, useCallback, useState } from 'react';
 import { Box, IconButton } from '@material-ui/core';
-import { DatePicker } from '@material-ui/pickers';
+import { memo, useCallback, useState } from 'react';
+
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import { DatePicker } from '@material-ui/pickers';
+import moment from 'moment';
 
 const MonthPicker = ({ value, onChange }) => {
   const [selectedPeriod, setSelectedPeriod] = useState(value);

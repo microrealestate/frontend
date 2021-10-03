@@ -1,80 +1,35 @@
-import { observable, action, flow, computed, makeObservable } from 'mobx';
+import { action, flow, makeObservable, observable } from 'mobx';
+
 import { useApiFetch } from '../utils/fetch';
 
 export default class Template {
   selected = {};
-  filters = { searchText: '', type: '' };
   items = [];
+  fields = [];
 
   constructor() {
     makeObservable(this, {
       selected: observable,
-      filters: observable,
-      items: observable,
-      filteredItems: computed,
       setSelected: action,
-      setFilters: action,
+      items: observable,
       fetch: flow,
       fetchOne: flow,
       create: flow,
       update: flow,
       delete: flow,
+      fields: observable,
+      fetchFields: flow,
     });
   }
 
-  get filteredItems() {
-    let filteredItems =
-      this.filters.type === ''
-        ? this.items
-        : this.items.filter(({ type }) => {
-            if (type === this.filters.type) {
-              return true;
-            }
-
-            return false;
-          });
-
-    if (this.filters.searchText) {
-      const regExp = /\s|\.|-/gi;
-      const cleanedSearchText = this.filters.searchText
-        .toLowerCase()
-        .replace(regExp, '');
-
-      filteredItems = filteredItems.filter(({ name, description }) => {
-        // Search match name
-        let found =
-          name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) !=
-          -1;
-
-        // Search match manager
-        if (!found && description) {
-          found =
-            description
-              .replace(regExp, '')
-              .toLowerCase()
-              .indexOf(cleanedSearchText) != -1;
-        }
-
-        return found;
-      });
-    }
-    return filteredItems;
-  }
-
-  setSelected = (template) => (this.selected = template);
-
-  setFilters = ({ searchText = '', status = '' }) =>
-    (this.filters = { searchText, status });
+  setSelected = (lease) => (this.selected = lease);
 
   *fetch() {
     try {
       const response = yield useApiFetch().get('/templates');
-
       this.items = response.data;
-      if (this.selected._id) {
-        this.setSelected(
-          this.items.find((item) => item._id === this.selected._id) || {}
-        );
+      if (this.selected) {
+        this.selected = this.items.find(({ _id }) => this.selected._id === _id);
       }
       return { status: 200, data: response.data };
     } catch (error) {
@@ -85,8 +40,15 @@ export default class Template {
   *fetchOne(templateId) {
     try {
       const response = yield useApiFetch().get(`/templates/${templateId}`);
-
-      return { status: 200, data: response.data };
+      const updatedTemplate = response.data;
+      const index = this.items.findIndex((item) => item._id === templateId);
+      if (index > -1) {
+        this.items.splice(index, 1, updatedTemplate);
+      }
+      if (this.selected?._id === updatedTemplate._id) {
+        this.selected = updatedTemplate;
+      }
+      return { status: 200, data: updatedTemplate };
     } catch (error) {
       return { status: error.response.status };
     }
@@ -112,8 +74,8 @@ export default class Template {
       if (index > -1) {
         this.items.splice(index, 1, updatedTemplate);
       }
-      if (this.selected._id === updatedTemplate._id) {
-        this.setSelected(updatedTemplate);
+      if (this.selected?._id === updatedTemplate._id) {
+        this.selected = updatedTemplate;
       }
       return { status: 200, data: updatedTemplate };
     } catch (error) {
@@ -124,6 +86,20 @@ export default class Template {
   *delete(ids) {
     try {
       yield useApiFetch().delete(`/templates/${ids.join(',')}`);
+      this.items = this.items.filter((template) => !ids.includes(template._id));
+      if (ids.includes(this.selected?._id)) {
+        this.selected = null;
+      }
+      return { status: 200 };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  }
+
+  *fetchFields() {
+    try {
+      const response = yield useApiFetch().get('/templates/fields');
+      this.fields = response.data;
       return { status: 200 };
     } catch (error) {
       return { status: error.response.status };

@@ -1,29 +1,29 @@
 import {
-  useEffect,
-  useState,
-  useRef,
-  useContext,
-  useMemo,
-  useCallback,
-  memo,
   Children,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import { useRouter } from 'next/router';
-import useTranslation from 'next-translate/useTranslation';
+
+import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+import DashboardIcon from '@material-ui/icons/Dashboard';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import PeopleIcon from '@material-ui/icons/People';
-import SettingsIcon from '@material-ui/icons/Settings';
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-
-import { useStyles } from '../styles/components/Nav.styles';
 import { ListItemIcon } from '@material-ui/core';
+import ListItemText from '@material-ui/core/ListItemText';
+import PeopleIcon from '@material-ui/icons/People';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import SettingsIcon from '@material-ui/icons/Settings';
 import { StoreContext } from '../store';
+import { useRouter } from 'next/router';
+import { useStyles } from '../styles/components/Nav.styles';
+import useTranslation from 'next-translate/useTranslation';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 const Nav = () => {
   const classes = useStyles();

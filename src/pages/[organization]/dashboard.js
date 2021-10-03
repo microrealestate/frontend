@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite';
-
-import { withAuthentication } from '../../components/Authentication';
 import Page from '../../components/Page';
+import { withAuthentication } from '../../components/Authentication';
 
 const Dashboard = observer(() => {
   console.log('Dashboard functional component');

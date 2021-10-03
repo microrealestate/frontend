@@ -1,5 +1,12 @@
+import {
+  Box,
+  Divider,
+  Paper,
+  Typography,
+  Toolbar as UIToolbar,
+} from '@material-ui/core';
 import { Children, memo, useMemo } from 'react';
-import { Box, Divider, Paper, Typography } from '@material-ui/core';
+
 import IconTypography from './IconTypography';
 
 const _variantToBgColor = (variant) => {
@@ -64,6 +71,7 @@ export const DashboardCard = memo(function DashboardCard({
   Icon,
   title,
   info,
+  Toolbar,
   children,
 }) {
   return (
@@ -85,7 +93,22 @@ export const DashboardCard = memo(function DashboardCard({
           <IconTypography Icon={Icon}>{title}</IconTypography>
         </Box>
 
-        <Box p={1.8}>{children}</Box>
+        {!!Toolbar && (
+          <>
+            <UIToolbar>
+              <Box width="100%" display="flex" justifyContent="flex-end">
+                {Toolbar}
+              </Box>
+            </UIToolbar>
+            <Box pb={1}>
+              <Divider variant="middle" />
+            </Box>
+          </>
+        )}
+
+        <Box px={1.8} pb={1.8} pt={Toolbar ? 0 : 1.8}>
+          {children}
+        </Box>
         {info && (
           <>
             <Divider />

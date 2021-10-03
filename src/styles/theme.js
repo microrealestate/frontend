@@ -1,15 +1,16 @@
-import { createMuiTheme } from '@material-ui/core/styles';
 import {
-  whiteColor,
   blackColor,
   grayColor,
-  successColor,
-  primaryColor,
   hexToRgb,
+  primaryColor,
+  successColor,
+  whiteColor,
 } from './styles';
 
+import { createTheme } from '@material-ui/core/styles';
+
 // Create a theme instance.
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       light: primaryColor[0],

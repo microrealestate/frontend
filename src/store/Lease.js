@@ -1,11 +1,15 @@
-import { observable, flow, makeObservable } from 'mobx';
+import { action, flow, makeObservable, observable } from 'mobx';
+
 import { useApiFetch } from '../utils/fetch';
 
 export default class Lease {
+  selected = {};
   items = [];
 
   constructor() {
     makeObservable(this, {
+      selected: observable,
+      setSelected: action,
       items: observable,
       fetch: flow,
       fetchOne: flow,
@@ -15,11 +19,16 @@ export default class Lease {
     });
   }
 
+  setSelected = (lease) => (this.selected = lease);
+
   *fetch() {
     try {
       const response = yield useApiFetch().get('/leases');
 
       this.items = response.data;
+      if (this.selected) {
+        this.selected = this.items.find(({ _id }) => this.selected._id === _id);
+      }
       return { status: 200, data: response.data };
     } catch (error) {
       return { status: error.response.status };
@@ -29,8 +38,15 @@ export default class Lease {
   *fetchOne(leaseId) {
     try {
       const response = yield useApiFetch().get(`/leases/${leaseId}`);
-
-      return { status: 200, data: response.data };
+      const updatedLease = response.data;
+      const index = this.items.findIndex((item) => item._id === leaseId);
+      if (index > -1) {
+        this.items.splice(index, 1, updatedLease);
+      }
+      if (this.selected?._id === updatedLease._id) {
+        this.selected = updatedLease;
+      }
+      return { status: 200, data: updatedLease };
     } catch (error) {
       return { status: error.response.status };
     }
@@ -56,6 +72,9 @@ export default class Lease {
       if (index > -1) {
         this.items.splice(index, 1, updatedLease);
       }
+      if (this.selected?._id === updatedLease._id) {
+        this.selected = updatedLease;
+      }
       return { status: 200, data: updatedLease };
     } catch (error) {
       return { status: error.response.status };
@@ -66,6 +85,9 @@ export default class Lease {
     try {
       yield useApiFetch().delete(`/leases/${ids.join(',')}`);
       this.items = this.items.filter((lease) => !ids.includes(lease._id));
+      if (ids.includes(this.selected?._id)) {
+        this.selected = null;
+      }
       return { status: 200 };
     } catch (error) {
       return { status: error.response.status };

@@ -1,17 +1,19 @@
 import * as Yup from 'yup';
+
+import { Box, DialogTitle } from '@material-ui/core';
+import { DateField, FormTextField, SubmitButton } from '../Form';
+import { Form, Formik } from 'formik';
 import React, { useContext, useState } from 'react';
+
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import { Form, Formik } from 'formik';
-import useTranslation from 'next-translate/useTranslation';
-import { Box, DialogTitle } from '@material-ui/core';
-import { DateField, FormTextField, SubmitButton } from '../Form';
+import moment from 'moment';
+import RequestError from '../RequestError';
 import { StoreContext } from '../../store';
 import { toJS } from 'mobx';
-import RequestError from '../RequestError';
-import moment from 'moment';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   terminationDate: Yup.date().required(),

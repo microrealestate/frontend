@@ -1,9 +1,7 @@
-import moment from 'moment';
 import * as Yup from 'yup';
-import { FieldArray, Form, Formik } from 'formik';
-import { Children, useCallback, useContext, useMemo } from 'react';
-import useTranslation from 'next-translate/useTranslation';
+
 import { Box, Button, Grid } from '@material-ui/core';
+import { Children, useCallback, useContext, useMemo } from 'react';
 import {
   DateField,
   FormSection,
@@ -11,8 +9,12 @@ import {
   SelectField,
   SubmitButton,
 } from '../Form';
-import { StoreContext } from '../../store';
+import { FieldArray, Form, Formik } from 'formik';
+
 import _ from 'lodash';
+import moment from 'moment';
+import { StoreContext } from '../../store';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   payments: Yup.array()
@@ -36,7 +38,7 @@ const validationSchema = Yup.object().shape({
 const emptyPayment = {
   amount: '',
   date: moment(),
-  type: 'cash',
+  type: 'transfer',
   reference: '',
 };
 

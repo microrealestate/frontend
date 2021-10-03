@@ -1,7 +1,3 @@
-import _ from 'lodash';
-import moment from 'moment';
-import { memo, useCallback, useMemo } from 'react';
-import { observer } from 'mobx-react-lite';
 import {
   Box,
   Button,
@@ -16,14 +12,18 @@ import {
   Tooltip,
   Typography,
 } from '@material-ui/core';
-import useTranslation from 'next-translate/useTranslation';
-import { NumberFormat } from '../../utils/numberformat';
-import DownloadLink from '../DownloadLink';
-import { CardRow } from '../Cards';
-import SendRentEmailMenu from './SendRentEmailMenu';
+import { memo, useCallback, useMemo } from 'react';
 
-import { useStyles } from '../../styles/components/RentCards.styles';
+import _ from 'lodash';
 import BalanceBar from './BalanceBar';
+import { CardRow } from '../Cards';
+import DownloadLink from '../DownloadLink';
+import moment from 'moment';
+import { NumberFormat } from '../../utils/numberformat';
+import { observer } from 'mobx-react-lite';
+import SendRentEmailMenu from './SendRentEmailMenu';
+import { useStyles } from '../../styles/components/RentCards.styles';
+import useTranslation from 'next-translate/useTranslation';
 
 const Header = memo(function Header({ rent }) {
   const classes = useStyles();
@@ -249,10 +249,6 @@ const RentCard = observer(({ rent, onEdit }) => {
   const { t } = useTranslation('common');
   const _onEdit = useCallback(() => onEdit(rent), [rent]);
   const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
-  const { tenantIds, terms } = useMemo(
-    () => ({ tenantIds: [rent.occupant._id], terms: [rent.term] }),
-    [rent.occupant._id]
-  );
 
   return (
     <Card>
@@ -269,14 +265,14 @@ const RentCard = observer(({ rent, onEdit }) => {
         <CardRow width="100%">
           <SendRentEmailMenu
             period={period}
-            tenantIds={tenantIds}
-            terms={terms}
-            // onError={() => {}}
+            tenant={rent.occupant}
+            terms={[rent.term]}
             size="small"
-            color="primary"
+            variant="contained"
+            onError={() => {}}
           />
-          <Button onClick={_onEdit} size="small" color="primary">
-            {t('Edit')}
+          <Button onClick={_onEdit} size="small" variant="contained">
+            {t('Payment')}
           </Button>
         </CardRow>
       </CardActions>

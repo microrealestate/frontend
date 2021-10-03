@@ -1,31 +1,31 @@
 import {
-  useState,
-  useContext,
+  AppBar,
+  Box,
+  Container,
+  Grid,
+  IconButton,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useScrollTrigger,
+} from '@material-ui/core';
+import {
   cloneElement,
-  useEffect,
   memo,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
-import { observer } from 'mobx-react-lite';
-import getConfig from 'next/config';
-import useTranslation from 'next-translate/useTranslation';
-import { useRouter } from 'next/router';
-import {
-  IconButton,
-  Box,
-  Tooltip,
-  Container,
-  Toolbar,
-  AppBar,
-  useScrollTrigger,
-  Typography,
-  Grid,
-} from '@material-ui/core';
-import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
-import OrganizationSwitcher from './organization/OrganizationSwitcher';
-import { StoreContext } from '../store';
+import getConfig from 'next/config';
 import Loading from './Loading';
+import { observer } from 'mobx-react-lite';
+import OrganizationSwitcher from './organization/OrganizationSwitcher';
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+import { StoreContext } from '../store';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
 
 const {
   publicRuntimeConfig: { DEMO_MODE, APP_NAME, BASE_PATH },
@@ -132,7 +132,7 @@ const Page = observer(
                 <Grid
                   container
                   alignItems="center"
-                  justify="space-between"
+                  justifyContent="space-between"
                   wrap="nowrap"
                   spacing={5}
                 >

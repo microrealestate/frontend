@@ -1,16 +1,18 @@
 import * as Yup from 'yup';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+
+import { Box, DialogTitle, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
+import { FormTextField, SelectField, SubmitButton } from '../Form';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import { Box, DialogTitle, Grid } from '@material-ui/core';
-import types from './types';
 import RequestError from '../RequestError';
-import useTranslation from 'next-translate/useTranslation';
-import { FormTextField, SelectField, SubmitButton } from '../Form';
 import { StoreContext } from '../../store';
+import types from './types';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   type: Yup.string().required(),

@@ -1,4 +1,5 @@
-import { observable, action, flow, computed, makeObservable } from 'mobx';
+import { action, computed, flow, makeObservable, observable } from 'mobx';
+
 import { useApiFetch } from '../utils/fetch';
 
 export default class Tenant {

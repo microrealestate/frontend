@@ -1,17 +1,18 @@
-import moment from 'moment';
-import { Children, useContext, useEffect, useRef, useState } from 'react';
-import useTranslation from 'next-translate/useTranslation';
 import { Box, Paper, Typography } from '@material-ui/core';
+import { Children, useContext, useEffect, useRef, useState } from 'react';
+
+import { getPeriod } from './RentPeriod';
+import Loading from '../Loading';
+import moment from 'moment';
+import { NumberFormat } from '../../utils/numberformat';
+import RequestError from '../RequestError';
+import { StoreContext } from '../../store';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { StoreContext } from '../../store';
-import { NumberFormat } from '../../utils/numberformat';
-import RequestError from '../RequestError';
-import Loading from '../Loading';
-import { getPeriod } from './RentPeriod';
+import useTranslation from 'next-translate/useTranslation';
 
 const RentHistory = ({ tenantId }) => {
   const { t } = useTranslation('common');

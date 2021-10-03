@@ -1,4 +1,3 @@
-import { Children, useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -9,6 +8,8 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
+import { Children, useCallback, useMemo, useState } from 'react';
+
 import SearchBar from '../SearchBar';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -33,7 +34,7 @@ export default function FieldBar({ fields, onInsertField }) {
   const onSearch = useCallback(
     (text) => {
       setFilteredFields(
-        translatedFields.filter(({ title, description }) => {
+        translatedFields.filter(({ title /*, description */ }) => {
           if (!text) {
             return true;
           }
@@ -42,12 +43,12 @@ export default function FieldBar({ fields, onInsertField }) {
             return true;
           }
 
-          if (
-            description &&
-            description.toLowerCase().indexOf(text.toLowerCase()) !== -1
-          ) {
-            return true;
-          }
+          // if (
+          //   description &&
+          //   description.toLowerCase().indexOf(text.toLowerCase()) !== -1
+          // ) {
+          //   return true;
+          // }
           return false;
         })
       );
@@ -67,23 +68,14 @@ export default function FieldBar({ fields, onInsertField }) {
               return (
                 <ListItem button onClick={() => onInsertField(field)}>
                   <ListItemText
-                    primary={
-                      <Box
-                        p={0.2}
-                        bgcolor="#e0e0e0"
-                        component="span"
-                        whiteSpace="nowrap"
-                      >
-                        {field.title}
-                      </Box>
-                    }
-                    secondary={
-                      <Box pt={1}>
-                        <Typography variant="caption" noWrap={false}>
-                          {field.description}
-                        </Typography>
-                      </Box>
-                    }
+                    primary={<Typography noWrap>{field.title}</Typography>}
+                    // secondary={
+                    //   <Box pt={1}>
+                    //     <Typography variant="caption" noWrap={false}>
+                    //       {field.description}
+                    //     </Typography>
+                    //   </Box>
+                    // }
                     disableTypography
                   />
                 </ListItem>

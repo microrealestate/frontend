@@ -1,11 +1,13 @@
-import { useCallback, useContext, useMemo } from 'react';
-import { Form, Formik } from 'formik';
-import useTranslation from 'next-translate/useTranslation';
 import * as Yup from 'yup';
+
+import { Form, Formik } from 'formik';
+import { FormSection, FormTextField, SubmitButton } from '../Form';
+import { useCallback, useContext, useMemo } from 'react';
+
 import { observer } from 'mobx-react-lite';
-import { Typography } from '@material-ui/core';
-import { FormTextField, SubmitButton, FormSection } from '../Form';
 import { StoreContext } from '../../store';
+import { Typography } from '@material-ui/core';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   apiKey: Yup.string().required(),
@@ -35,12 +37,15 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
   );
 
   const _onSubmit = useCallback(
-    async (settings) => {
+    async ({ apiKey, domain, fromEmail, replyToEmail }) => {
       await onSubmit({
         thirdParties: {
           mailgun: {
-            ...settings,
-            apiKeyUpdated: settings.apiKey !== initialValues.apiKey,
+            apiKey,
+            apiKeyUpdated: apiKey !== initialValues.apiKey,
+            domain,
+            fromEmail,
+            replyToEmail,
           },
         },
       });
@@ -62,10 +67,10 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
       {({ values, isSubmitting }) => {
         return (
           <Form autoComplete="off">
-            <FormSection label={t('mailgun')}>
+            <FormSection label="Mailgun">
               <Typography>
                 {t(
-                  'Configuration required by the email service used for sending invoices, notices and all kind of communication to the tenants'
+                  'Configuration required for sending invoices, notices and all kind of communication to the tenants'
                 )}
               </Typography>
               <FormTextField

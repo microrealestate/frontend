@@ -1,10 +1,8 @@
-import { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
-
-import Nav from './Nav';
-
-import { StoreContext } from '../store';
 import { Box } from '@material-ui/core';
+import Nav from './Nav';
+import { observer } from 'mobx-react-lite';
+import { StoreContext } from '../store';
+import { useContext } from 'react';
 
 const Application = observer(({ children }) => {
   console.log('Application functional component');

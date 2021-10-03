@@ -1,6 +1,6 @@
-import moment from 'moment';
 import { memo, useMemo } from 'react';
 
+import moment from 'moment';
 import { Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 

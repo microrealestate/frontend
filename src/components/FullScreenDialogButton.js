@@ -1,10 +1,11 @@
+import { Box, Grid } from '@material-ui/core';
 import React, { useCallback } from 'react';
+
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
+import Slide from '@material-ui/core/Slide';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Slide from '@material-ui/core/Slide';
-import { Box, Grid } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 
 const Transition = React.forwardRef(function Transition(props, ref) {

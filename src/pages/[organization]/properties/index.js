@@ -1,7 +1,3 @@
-import { useRouter } from 'next/router';
-import { Children, useCallback, useContext, useMemo, useState } from 'react';
-import { toJS } from 'mobx';
-import { observer } from 'mobx-react-lite';
 import {
   Box,
   Button,
@@ -15,17 +11,21 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
-
+import { Children, useCallback, useContext, useMemo, useState } from 'react';
 import { getStoreInstance, StoreContext } from '../../../store';
-import useTranslation from 'next-translate/useTranslation';
-import Page from '../../../components/Page';
-import { withAuthentication } from '../../../components/Authentication';
-import RequestError from '../../../components/RequestError';
+
 import { isServer } from '../../../utils';
-import { NumberFormat } from '../../../utils/numberformat';
-import SearchFilterBar from '../../../components/SearchFilterBar';
-import PropertyAvatar from '../../../components/properties/PropertyAvatar';
 import NewPropertyDialog from '../../../components/properties/NewPropertyDialog';
+import { NumberFormat } from '../../../utils/numberformat';
+import { observer } from 'mobx-react-lite';
+import Page from '../../../components/Page';
+import PropertyAvatar from '../../../components/properties/PropertyAvatar';
+import RequestError from '../../../components/RequestError';
+import SearchFilterBar from '../../../components/SearchFilterBar';
+import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import { withAuthentication } from '../../../components/Authentication';
 
 const useStyles = makeStyles((theme) => ({
   vacant: {

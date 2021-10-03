@@ -1,16 +1,18 @@
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { useContext } from 'react';
-import { observer } from 'mobx-react-lite';
+
 import {
   CheckboxField,
   FormSection,
   FormTextField,
   SubmitButton,
 } from '../Form';
-import { StoreContext } from '../../store';
-import useTranslation from 'next-translate/useTranslation';
+import { Form, Formik } from 'formik';
+
 import { Box } from '@material-ui/core';
+import { observer } from 'mobx-react-lite';
+import { StoreContext } from '../../store';
+import { useContext } from 'react';
+import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
   reference: Yup.string().required(),

@@ -1,11 +1,13 @@
-import ErrorPage from 'next/error';
-import getConfig from 'next/config';
-import { useContext, useEffect } from 'react';
-import { Observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import Cookies from 'universal-cookie';
 import { getStoreInstance, StoreContext } from '../store';
 import { isServer, redirect } from '../utils';
+import { useContext, useEffect } from 'react';
+
+import Cookies from 'universal-cookie';
+import ErrorPage from 'next/error';
+import getConfig from 'next/config';
+import { Observer } from 'mobx-react-lite';
+import { setApiHeaders } from '../utils/fetch';
+import { toJS } from 'mobx';
 
 const {
   publicRuntimeConfig: { BASE_PATH },
@@ -39,6 +41,12 @@ export function withAuthentication(PageComponent) {
 
   WithAuth.getInitialProps = async (context) => {
     console.log('WithAuth.getInitialProps');
+    if (isServer()) {
+      // needed to update axios headers with Accept-Language for future requests done during SSR
+      // like that the targeted service requested will get this header
+      // see /api/documents, /api/templates
+      setApiHeaders({ acceptLanguage: context.req.headers['accept-language'] });
+    }
     const store = getStoreInstance();
     context.store = store;
     if (isServer()) {

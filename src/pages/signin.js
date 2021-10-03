@@ -1,18 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import getConfig from 'next/config';
-import { useRouter } from 'next/router';
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { Box, Paper, Typography } from '@material-ui/core';
-import LocationCityIcon from '@material-ui/icons/LocationCity';
 
+import { Box, Paper, Typography } from '@material-ui/core';
+import { Form, Formik } from 'formik';
 import { FormTextField, SubmitButton } from '../components/Form';
-import { StoreContext } from '../store';
-import useTranslation from 'next-translate/useTranslation';
+import React, { useContext, useEffect, useState } from 'react';
+
+import getConfig from 'next/config';
 import Link from '../components/Link';
-import RequestError from '../components/RequestError';
+import LocationCityIcon from '@material-ui/icons/LocationCity';
+import { observer } from 'mobx-react-lite';
 import Page from '../components/Page';
+import RequestError from '../components/RequestError';
+import { StoreContext } from '../store';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
 
 const {
   publicRuntimeConfig: { DEMO_MODE, SIGNUP, APP_NAME },

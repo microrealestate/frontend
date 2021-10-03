@@ -1,18 +1,20 @@
-import { useContext, useMemo } from 'react';
-import useTranslation from 'next-translate/useTranslation';
 import { Button, IconButton, Tooltip } from '@material-ui/core';
+import { useContext, useMemo } from 'react';
+
 import { StoreContext } from '../store';
+import useTranslation from 'next-translate/useTranslation';
 
 export function RestrictedComponent(Component) {
   return function RestrictedComponent({
     onlyRoles,
     disabled,
+    disabledTooltipTitle = '',
     children,
     ...props
   }) {
     const { t } = useTranslation('common');
     const store = useContext(StoreContext);
-    const isDisabled = useMemo(
+    const isNotAllowed = useMemo(
       () =>
         onlyRoles && store.user.role
           ? !onlyRoles.includes(store.user.role)
@@ -20,10 +22,10 @@ export function RestrictedComponent(Component) {
       [onlyRoles, store.user.role]
     );
 
-    return isDisabled ? (
+    return isNotAllowed ? (
       <Tooltip
-        title={t('Modification is not allowed with your current role')}
-        aria-label="restricted action"
+        title={t('Action is not allowed with your current role')}
+        aria-label="Action is not allowed with your current role"
       >
         <span>
           <Component {...props} disabled={true}>
@@ -31,10 +33,16 @@ export function RestrictedComponent(Component) {
           </Component>
         </span>
       </Tooltip>
+    ) : disabled ? (
+      <Tooltip title={disabledTooltipTitle} aria-label="restricted action">
+        <span>
+          <Component {...props} disabled={disabled}>
+            {children}
+          </Component>
+        </span>
+      </Tooltip>
     ) : (
-      <Component {...props} disabled={disabled}>
-        {children}
-      </Component>
+      <Component {...props}>{children}</Component>
     );
   };
 }

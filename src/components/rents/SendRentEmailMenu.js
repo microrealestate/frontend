@@ -1,35 +1,29 @@
-import { memo, useCallback, useContext, useState } from 'react';
-import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import { CircularProgress } from '@material-ui/core';
-import useTranslation from 'next-translate/useTranslation';
-import { StoreContext } from '../../store';
+import {
+  AlertIllustration,
+  Pending2Illustration,
+  PendingIllustration,
+  ReceiptIllustration,
+} from '../Illustrations';
+import { memo, useCallback, useContext } from 'react';
 
-const SendRentEmailMenu = ({
-  period,
-  tenantIds,
-  terms,
-  onError,
-  ...buttonProps
-}) => {
+import FullScreenDialogMenu from '../FullScreenDialogMenu';
+import SendIcon from '@material-ui/icons/Send';
+import { StoreContext } from '../../store';
+import useTranslation from 'next-translate/useTranslation';
+
+const SendRentEmailMenu = ({ period, tenant, terms, onError, ...props }) => {
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [sendingEmail, setSendingEmail] = useState(false);
 
   const onSend = useCallback(
     async (docName) => {
-      setSendingEmail(true);
-      handleClose();
       const sendStatus = await store.rent.sendEmail({
         document: docName,
-        tenantIds,
+        tenantIds: [tenant._id],
         terms,
       });
-      setSendingEmail(false);
       if (sendStatus !== 200) {
-        // TODO check error code to show a more detail error message
+        // TODO check error code to show a more detailed error message
         return onError(t('Email service cannot send emails'));
       }
 
@@ -39,51 +33,47 @@ const SendRentEmailMenu = ({
         return onError(t('Cannot fetch rents from server'));
       }
     },
-    [period, tenantIds]
+    [period, tenant]
   );
 
-  const handleClick = useCallback((event) => {
-    setAnchorEl(event.currentTarget);
-  }, []);
-
-  const handleClose = useCallback(async () => {
-    setAnchorEl(null);
-  }, []);
-
   return (
-    <>
-      <Button
-        aria-controls="rent-by-email-menu"
-        aria-haspopup="true"
-        endIcon={
-          sendingEmail ? <CircularProgress color="inherit" size={20} /> : null
-        }
-        onClick={handleClick}
-        {...buttonProps}
-      >
-        {sendingEmail ? t('Sending') : t('Send email')}
-      </Button>
-      <Menu
-        id="rent-by-email-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        <MenuItem onClick={() => onSend('rentcall')}>
-          {t('Send first notice')}
-        </MenuItem>
-        <MenuItem onClick={() => onSend('rentcall_reminder')}>
-          {t('Send second notice')}
-        </MenuItem>
-        <MenuItem onClick={() => onSend('rentcall_last_reminder')}>
-          {t('Send last notice')}
-        </MenuItem>
-        <MenuItem onClick={() => onSend('invoice')}>
-          {t('Send receipt')}
-        </MenuItem>
-      </Menu>
-    </>
+    <FullScreenDialogMenu
+      variant="contained"
+      buttonLabel={t('Send email')}
+      dialogTitle={t('Send a billing email to {{tenantName}}', {
+        tenantName: tenant.name,
+      })}
+      size="small"
+      startIcon={<SendIcon />}
+      menuItems={[
+        {
+          category: t('Reminder notices'),
+          label: t('First notice email'),
+          illustration: <PendingIllustration />,
+          value: 'rentcall',
+        },
+        {
+          category: t('Reminder notices'),
+          label: t('Second notice email'),
+          illustration: <Pending2Illustration />,
+          value: 'rentcall_last_reminder',
+        },
+        {
+          category: t('Reminder notices'),
+          label: t('Last notice email'),
+          illustration: <AlertIllustration />,
+          value: 'rentcall_reminder',
+        },
+        {
+          category: t('Receipt notice'),
+          label: t('Invoice by email'),
+          illustration: <ReceiptIllustration />,
+          value: 'invoice',
+        },
+      ]}
+      onClick={onSend}
+      {...props}
+    />
   );
 };
 

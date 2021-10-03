@@ -1,6 +1,8 @@
+import { action, computed, flow, makeObservable, observable } from 'mobx';
+
 import moment from 'moment';
-import { observable, action, flow, computed, makeObservable } from 'mobx';
 import { useApiFetch } from '../utils/fetch';
+
 export default class Rent {
   selected = {};
   filters = { searchText: '', status: '' };
@@ -62,7 +64,7 @@ export default class Rent {
         .replace(regExp, '');
 
       filteredItems = filteredItems.filter(
-        ({ occupant: { isCompany, name, manager, contacts } }) => {
+        ({ occupant: { isCompany, name, manager, contacts }, payments }) => {
           // Search match name
           let found =
             name.replace(regExp, '').toLowerCase().indexOf(cleanedSearchText) !=
@@ -92,6 +94,18 @@ export default class Rent {
                   phone.indexOf(cleanedSearchText) != -1
               ).length;
           }
+
+          // Search match in payment references
+          if (!found) {
+            found = !!payments?.find(
+              ({ reference = '' }) =>
+                reference
+                  .replace(regExp, '')
+                  .toLowerCase()
+                  .indexOf(cleanedSearchText) != -1
+            );
+          }
+
           return found;
         }
       );

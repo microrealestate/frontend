@@ -1,7 +1,7 @@
-import React from 'react';
 import clsx from 'clsx';
 import MuiLink from '@material-ui/core/Link';
 import NextLink from 'next/link';
+import React from 'react';
 import { useRouter } from 'next/router';
 
 const NextComposed = React.forwardRef(function NextComposed(props, ref) {

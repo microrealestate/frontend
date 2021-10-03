@@ -1,31 +1,33 @@
-import _ from 'lodash';
-import useTranslation from 'next-translate/useTranslation';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AppBar,
   Box,
   Button,
   Divider,
+  TextField,
   Toolbar,
   Typography,
   withStyles,
 } from '@material-ui/core';
-import UndoIcon from '@material-ui/icons/Undo';
-import RedoIcon from '@material-ui/icons/Redo';
-import PrintIcon from '@material-ui/icons/Print';
-import SaveIcon from '@material-ui/icons/SaveOutlined';
-import FieldBar from './FieldBar';
 import {
   createTextEditor,
-  insertField,
   destroyTextEditor,
   getHTML,
+  insertField,
   printHandler,
-  undoHandler,
   redoHandler,
+  undoHandler,
 } from './texteditor';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import _ from 'lodash';
+import FieldBar from './FieldBar';
+import jsesc from 'jsesc';
+import PrintIcon from '@material-ui/icons/Print';
+import RedoIcon from '@material-ui/icons/Redo';
+import SaveIcon from '@material-ui/icons/SaveOutlined';
 import { toHandlebars } from './transformer';
+import UndoIcon from '@material-ui/icons/Undo';
+import useTranslation from 'next-translate/useTranslation';
 
 const CHECK_CHANGE_INTERVAL_MS = 500;
 const SAVE_INTERVAL_MS = 500;
@@ -37,18 +39,18 @@ const RichTextEditorBar = withStyles((theme) => ({
   },
 }))(AppBar);
 
-let initialLoad = true;
 const RichTextEditor = ({
   onLoad,
   onSave,
   onClose,
-  title,
-  fields,
+  title: initialTitle,
+  fields = [],
   showPrintButton,
-  placeholder,
+  placeholder = '',
 }) => {
   const { t } = useTranslation('common');
   const [ready, setReady] = useState(false);
+  const [title, setTitle] = useState(initialTitle || t('Untitled document'));
   const [contents, setContents] = useState();
   const [saving, setSaving] = useState();
   const editorToolbarRef = useRef();
@@ -57,12 +59,7 @@ const RichTextEditor = ({
   const saveStateIntervalRef = useRef();
 
   useEffect(() => {
-    if (!contents) {
-      return;
-    }
-
-    if (initialLoad) {
-      initialLoad = false;
+    if (!ready) {
       return;
     }
 
@@ -75,7 +72,7 @@ const RichTextEditor = ({
     saveInterval = setInterval(async () => {
       try {
         setSaving(true);
-        await onSave(contents, await toHandlebars(getHTML()));
+        await onSave(title, contents, jsesc(await toHandlebars(getHTML())));
         setSaving((prevSaving) => {
           if (prevSaving === true) {
             saveStateInterval = setInterval(() => {
@@ -99,18 +96,28 @@ const RichTextEditor = ({
       clearInterval(saveInterval);
       clearInterval(saveStateInterval);
     };
-  }, [contents]);
+  }, [contents, title]);
 
   useEffect(() => {
     let interval;
+
     const load = async () => {
       // Create the HTML editor and TextEditor
       const toolbar = editorToolbarRef.current;
       const wrapper = editorWrapper.current;
       const textEditor = createTextEditor(toolbar, wrapper);
 
+      const updateContents = () => {
+        const newContents = textEditor.getContents();
+        setContents((prevContents) => {
+          if (!_.isEqual(prevContents, newContents)) {
+            return newContents;
+          }
+          return prevContents;
+        });
+      };
+
       // load document
-      initialLoad = true;
       const data = await onLoad();
       if (!data) {
         textEditor.setText(placeholder);
@@ -122,17 +129,13 @@ const RichTextEditor = ({
           textEditor.setContents(placeholder);
         }
       }
+
+      updateContents();
       setReady(true);
 
       // Setup the auto save
       interval = setInterval(() => {
-        const newContents = textEditor.getContents();
-        setContents((prevContents) => {
-          if (!_.isEqual(prevContents, newContents)) {
-            return newContents;
-          }
-          return prevContents;
-        });
+        updateContents();
       }, CHECK_CHANGE_INTERVAL_MS);
     };
     load();
@@ -162,9 +165,10 @@ const RichTextEditor = ({
             <Box display="flex" flexDirection="column" flexGrow={1}>
               <Box display="flex" alignItems="center" m={1}>
                 <Box>
-                  <Typography variant="h5">
-                    {title || t('Untitled document')}
-                  </Typography>
+                  <TextField
+                    value={title}
+                    onChange={(evt) => setTitle(evt.target.value)}
+                  />
                 </Box>
                 <Box color="text.disabled" ml={2}>
                   {saving === true && (
@@ -262,7 +266,9 @@ const RichTextEditor = ({
       <Box ml={8} mt={14} display="flex" ref={editorWrapper} />
 
       <Toolbar />
-      <FieldBar onInsertField={onInsertField} fields={fields} />
+      {!!fields.length && (
+        <FieldBar onInsertField={onInsertField} fields={fields} />
+      )}
     </>
   );
 };

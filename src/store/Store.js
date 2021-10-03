@@ -1,16 +1,17 @@
-import moment from 'moment';
 import { makeObservable, observable, reaction } from 'mobx';
-import setLanguage from 'next-translate/setLanguage';
 
-import User from './User';
-import Organization from './Organization';
-import Rent from './Rent';
-import Tenant from './Tenant';
-import Property from './Property';
-import Lease from './Lease';
-import Template from './Template';
-import { setApiHeaders } from '../utils/fetch';
+import Document from './Document';
 import { isServer } from '../utils';
+import Lease from './Lease';
+import moment from 'moment';
+import Organization from './Organization';
+import Property from './Property';
+import Rent from './Rent';
+import { setApiHeaders } from '../utils/fetch';
+import setLanguage from 'next-translate/setLanguage';
+import Template from './Template';
+import Tenant from './Tenant';
+import User from './User';
 
 export default class Store {
   user = new User();
@@ -20,6 +21,7 @@ export default class Store {
   tenant = new Tenant();
   property = new Property();
   template = new Template();
+  document = new Document();
 
   constructor() {
     makeObservable(this, {
@@ -30,6 +32,7 @@ export default class Store {
       tenant: observable,
       property: observable,
       template: observable,
+      document: observable,
     });
 
     let refreshTokenHandle;
@@ -39,10 +42,7 @@ export default class Store {
         // console.log('react to access token changed')
         setApiHeaders({
           accessToken: token,
-          organizationId:
-            this.organization && this.organization.selected
-              ? this.organization.selected._id
-              : undefined,
+          organizationId: this.organization?.selected?._id,
         });
 
         if (!isServer()) {
@@ -54,14 +54,14 @@ export default class Store {
             refreshTokenHandle = setTimeout(async () => {
               await this.user.refreshTokens();
               if (!this.user.signedIn) {
-                // TODO display a dialog before reloading
+                // TODO: display a dialog before reloading
                 window.location.reload();
               }
             }, this.user.tokenExpiry * 1000 - Date.now() - 10000);
           } else {
             if (refreshTokenHandle) {
               clearTimeout(refreshTokenHandle);
-              refreshTokenHandle = undefined;
+              refreshTokenHandle = null;
             }
           }
         }
@@ -75,16 +75,6 @@ export default class Store {
           organizationId: organization?._id,
         });
         const selectedLocale = this.organization.selected?.locale || 'en';
-        moment.locale(selectedLocale);
-        if (!isServer()) {
-          await setLanguage(selectedLocale);
-        }
-      }
-    );
-    reaction(
-      () => this.organization.selected?.locale,
-      async (locale) => {
-        const selectedLocale = locale || 'en';
         moment.locale(selectedLocale);
         if (!isServer()) {
           await setLanguage(selectedLocale);
@@ -118,6 +108,10 @@ export default class Store {
       },
       template = {
         items: [],
+        fields: [],
+      },
+      document = {
+        items: [],
       },
     } = initialData;
 
@@ -132,6 +126,7 @@ export default class Store {
     this.organization.selected = organization.selected;
 
     this.lease.items = lease.items;
+    this.lease.selected = lease.selected;
 
     this.rent.items = rent.items;
     this.rent.selected = rent.selected;
@@ -155,6 +150,9 @@ export default class Store {
 
     this.template.items = template.items;
     this.template.selected = template.selected;
-    this.template.filters = template.filters;
+    this.template.fields = template.fields;
+
+    this.document.items = document.items;
+    this.document.selected = document.selected;
   }
 }

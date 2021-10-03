@@ -1,4 +1,5 @@
-import { observable, action, flow, makeObservable } from 'mobx';
+import { action, flow, makeObservable, observable } from 'mobx';
+
 import { useApiFetch } from '../utils/fetch';
 
 export default class Organization {

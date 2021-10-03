@@ -1,12 +1,6 @@
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
-import useTranslation from 'next-translate/useTranslation';
-import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { observer } from 'mobx-react-lite';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
+
+import { ADMIN_ROLE, RENTER_ROLE, ROLES } from '../../store/User';
 import {
   Box,
   Button,
@@ -23,22 +17,29 @@ import {
   TableHead,
   Typography,
 } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import PersonIcon from '@material-ui/icons/Person';
-import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Form, Formik } from 'formik';
+import { FormSection, FormTextField, SelectField, SubmitButton } from '../Form';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { RestrictButton, RestrictIconButton } from '../RestrictedComponents';
-import { FormTextField, SubmitButton, SelectField, FormSection } from '../Form';
-import { StoreContext } from '../../store';
+
 import ConfirmDialog from '../ConfirmDialog';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { observer } from 'mobx-react-lite';
+import PersonIcon from '@material-ui/icons/Person';
+import { StoreContext } from '../../store';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import useTranslation from 'next-translate/useTranslation';
+import WarningIcon from '@material-ui/icons/Warning';
 
-const roles = ['administrator', 'renter'];
-
-const allowedRoles = [roles[0]];
+const allowedRoles = [ADMIN_ROLE];
 
 const initialValues = {
   email: '',
-  role: roles[1],
+  role: RENTER_ROLE,
 };
 
 const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
@@ -74,7 +75,7 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
   );
 
   const roleValues = useMemo(
-    () => roles.map((role) => ({ id: role, label: t(role), value: role })),
+    () => ROLES.map((role) => ({ id: role, label: t(role), value: role })),
     []
   );
 
@@ -215,7 +216,7 @@ const Members = observer(({ onSubmit }) => {
           <TableBody>
             {(store.organization.selected?.members || []).map((member) => {
               const isCurrentUser = store.user.email === member.email;
-              const isAdministrator = member.role === roles[0];
+              const isAdministrator = member.role === ADMIN_ROLE;
               const isRegistered = member.registered;
               return (
                 <TableRow hover size="small" key={member.email}>
@@ -261,7 +262,7 @@ const Members = observer(({ onSubmit }) => {
                         displayEmpty
                         disabled={!!updating}
                       >
-                        {roles.map((role) => (
+                        {ROLES.map((role) => (
                           <MenuItem key={role} value={role}>
                             {t(role)}
                           </MenuItem>
@@ -287,17 +288,12 @@ const Members = observer(({ onSubmit }) => {
           </TableBody>
         </Table>
         <ConfirmDialog
+          title={t('Are you sure to remove this member?')}
+          subTitle={memberToRemove.name}
           open={memberToRemove}
           setOpen={setMemberToRemove}
           onConfirm={removeMember}
-        >
-          <Typography>{t('Are you sure to remove this member?')}</Typography>
-          <Box py={2}>
-            <Typography variant="h6" align="center">
-              {memberToRemove.name}
-            </Typography>
-          </Box>
-        </ConfirmDialog>
+        />
       </Paper>
     </FormSection>
   );

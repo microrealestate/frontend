@@ -1,21 +1,8 @@
-import moment from 'moment';
-import {
-  Children,
-  memo,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import useTranslation from 'next-translate/useTranslation';
 import {
   Box,
   Breadcrumbs,
   Button,
   Grid,
-  Hidden,
   List,
   ListItem,
   ListItemAvatar,
@@ -26,25 +13,36 @@ import {
   Tabs,
   Typography,
 } from '@material-ui/core';
-import HistoryIcon from '@material-ui/icons/History';
-import DeleteIcon from '@material-ui/icons/Delete';
-import WarningIcon from '@material-ui/icons/ReportProblemOutlined';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
-
-import Page from '../../../components/Page';
-import { withAuthentication } from '../../../components/Authentication';
+import { CardRow, DashboardCard } from '../../../components/Cards';
+import {
+  Children,
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 import { getStoreInstance, StoreContext } from '../../../store';
+import { TabPanel, useTabChangeHelper } from '../../../components/Tabs';
+
+import ConfirmDialog from '../../../components/ConfirmDialog';
+import DeleteIcon from '@material-ui/icons/Delete';
+import HistoryIcon from '@material-ui/icons/History';
 import { isServer } from '../../../utils';
 import Link from '../../../components/Link';
-import RequestError from '../../../components/RequestError';
-import { TabPanel } from '../../../components/Tabs';
-import { CardRow, DashboardCard } from '../../../components/Cards';
-import { NumberFormat } from '../../../utils/numberformat';
-import { useRouter } from 'next/router';
-import ConfirmDialog from '../../../components/ConfirmDialog';
-import PropertyForm from '../../../components/properties/PropertyForm';
 import Map from '../../../components/Map';
+import moment from 'moment';
+import { NumberFormat } from '../../../utils/numberformat';
+import { observer } from 'mobx-react-lite';
+import Page from '../../../components/Page';
+import PropertyForm from '../../../components/properties/PropertyForm';
+import RequestError from '../../../components/RequestError';
 import TenantAvatar from '../../../components/tenants/TenantAvatar';
+import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { withAuthentication } from '../../../components/Authentication';
 
 const BreadcrumbBar = memo(function BreadcrumbBar({ backPath }) {
   const { t } = useTranslation('common');
@@ -123,20 +121,17 @@ const OccupancyHistory = () => {
   );
 };
 
+const hashes = ['property'];
 const Property = observer(() => {
   console.log('Property functional component');
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const router = useRouter();
+  const { handleTabChange, tabSelectedIndex, tabsReady } =
+    useTabChangeHelper(hashes);
   const [error, setError] = useState('');
-
-  const [tabSelected, setTabSelected] = useState(0);
   const [openConfirmDeleteProperty, setOpenConfirmDeleteProperty] =
     useState(false);
-
-  const onTabChange = useCallback((event, newValue) => {
-    setTabSelected(newValue);
-  }, []);
 
   const backPath = useMemo(() => {
     let backPath = `/${store.organization.selected.name}/properties`;
@@ -237,53 +232,40 @@ const Property = observer(() => {
       <RequestError error={error} />
       <Grid container spacing={5}>
         <Grid item sm={12} md={8}>
-          <Paper>
-            <Tabs
-              variant="scrollable"
-              value={tabSelected}
-              onChange={onTabChange}
-              aria-label="Property tabs"
-            >
-              <Tab label={t('Property')} />
-            </Tabs>
-            <TabPanel value={tabSelected} index={0}>
-              <PropertyForm onSubmit={onSubmit} />
-            </TabPanel>
-          </Paper>
+          {tabsReady && (
+            <Paper>
+              <Tabs
+                variant="scrollable"
+                value={tabSelectedIndex}
+                onChange={handleTabChange}
+                aria-label="Property tabs"
+              >
+                <Tab label={t('Property')} />
+              </Tabs>
+              <TabPanel value={tabSelectedIndex} index={0}>
+                <PropertyForm onSubmit={onSubmit} />
+              </TabPanel>
+            </Paper>
+          )}
         </Grid>
-
-        <Hidden smDown>
-          <Grid item md={4}>
-            <Box pb={2}>
-              <DashboardCard Icon={VpnKeyIcon} title={t('Property')}>
-                <PropertyOverview />
-              </DashboardCard>
-            </Box>
-            <DashboardCard Icon={HistoryIcon} title={t('Occupancy history')}>
-              <OccupancyHistory />
+        <Grid item sm={12} md={4}>
+          <Box pb={2}>
+            <DashboardCard Icon={VpnKeyIcon} title={t('Property')}>
+              <PropertyOverview />
             </DashboardCard>
-          </Grid>
-        </Hidden>
+          </Box>
+          <DashboardCard Icon={HistoryIcon} title={t('Occupancy history')}>
+            <OccupancyHistory />
+          </DashboardCard>
+        </Grid>
       </Grid>
       <ConfirmDialog
+        title={t('Are you sure to definitely remove this property?')}
+        subTitle={store.property.selected.name}
         open={openConfirmDeleteProperty}
         setOpen={setOpenConfirmDeleteProperty}
         onConfirm={onDeleteProperty}
-      >
-        <Box display="flex" alignItems="center">
-          <Box pr={1}>
-            <WarningIcon fontSize="large" color="secondary" />
-          </Box>
-          <Typography variant="h6">
-            {t('Are you sure to definitely remove this property?')}
-          </Typography>
-        </Box>
-        <Box py={2}>
-          <Typography variant="h6" align="center">
-            {store.property.selected.name}
-          </Typography>
-        </Box>
-      </ConfirmDialog>
+      />
     </Page>
   );
 });

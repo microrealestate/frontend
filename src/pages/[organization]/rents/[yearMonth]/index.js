@@ -1,27 +1,26 @@
-import { Children, useCallback, useContext, useMemo } from 'react';
-import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
-import { useRouter } from 'next/router';
-import moment from 'moment';
 import { Box, Grid, Hidden, Typography } from '@material-ui/core';
-import TrendingDownIcon from '@material-ui/icons/TrendingDown';
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
-import ReceiptIcon from '@material-ui/icons/Receipt';
+import { Children, useCallback, useContext, useMemo } from 'react';
+import { getStoreInstance, StoreContext } from '../../../../store';
 
-import { StoreContext, getStoreInstance } from '../../../../store';
-import { withAuthentication } from '../../../../components/Authentication';
-import { isServer } from '../../../../utils';
-import useTranslation from 'next-translate/useTranslation';
-import SendIcon from '@material-ui/icons/Send';
-import Page from '../../../../components/Page';
-import RentCard from '../../../../components/rents/RentCard';
-
-import MonthPicker from '../../../../components/MonthPicker';
-import { PageCard } from '../../../../components/Cards';
-import { NumberFormat } from '../../../../utils/numberformat';
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
+import { isServer } from '../../../../utils';
+import moment from 'moment';
+import MonthPicker from '../../../../components/MonthPicker';
+import { NumberFormat } from '../../../../utils/numberformat';
+import { observer } from 'mobx-react-lite';
+import Page from '../../../../components/Page';
+import { PageCard } from '../../../../components/Cards';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import RentCard from '../../../../components/rents/RentCard';
 import RentTable from '../../../../components/rents/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
+import SendIcon from '@material-ui/icons/Send';
+import { toJS } from 'mobx';
+import TrendingDownIcon from '@material-ui/icons/TrendingDown';
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+import { useRouter } from 'next/router';
+import useTranslation from 'next-translate/useTranslation';
+import { withAuthentication } from '../../../../components/Authentication';
 
 const PeriodToolbar = ({ onChange }) => {
   const { t } = useTranslation('common');

@@ -1,9 +1,10 @@
-import { memo, useMemo } from 'react';
-import { Box, Tooltip, Typography, useTheme } from '@material-ui/core';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import RentPeriod from './RentPeriod';
+import { Box, Tooltip, Typography, useTheme } from '@material-ui/core';
+import { memo, useMemo } from 'react';
+
 import { CardRow } from '../Cards';
 import { NumberFormat } from '../../utils/numberformat';
+import RentPeriod from './RentPeriod';
 import useTranslation from 'next-translate/useTranslation';
 
 const BalanceBar = memo(function BalanceBar({ rent, hideTooltip }) {
