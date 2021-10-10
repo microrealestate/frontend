@@ -1,6 +1,14 @@
 import * as Yup from 'yup';
 
-import { Box, DialogTitle } from '@material-ui/core';
+import {
+  Box,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from '@material-ui/core';
 import { DateField, FormTextField, SubmitButton } from '../Form';
 import { Form, Formik } from 'formik';
 import React, { useContext, useState } from 'react';
@@ -20,25 +28,31 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
-const TerminateLeaseDialog = ({ open, setOpen }) => {
+const TerminateLeaseDialog = ({ open, setOpen, tenantList }) => {
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
+  const [selectedTenant, setSelectedTenant] = useState({});
 
   const initialValues = {
-    terminationDate: store.tenant.selected?.terminationDate
-      ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY')
-      : null,
-    guarantyPayback: store.tenant.selected?.guarantyPayback,
+    terminationDate:
+      !tenantList && store.tenant.selected?.terminationDate
+        ? moment(store.tenant.selected.terminationDate, 'DD/MM/YYYY')
+        : null,
+    guarantyPayback: !tenantList ? store.tenant.selected?.guarantyPayback : '',
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
+  const onTenantChange = (event) => {
+    setSelectedTenant(event.target.value);
+  };
+
   const _onSubmit = async (tenantPart) => {
     const tenant = {
-      ...toJS(store.tenant.selected),
+      ...toJS(selectedTenant._id ? selectedTenant : store.tenant.selected),
       terminationDate: tenantPart.terminationDate.format('DD/MM/YYYY'),
       guarantyPayback: tenantPart.guarantyPayback || 0,
     };
@@ -72,12 +86,32 @@ const TerminateLeaseDialog = ({ open, setOpen }) => {
       aria-labelledby="new-tenant-dialog"
     >
       <DialogTitle>
-        {t("Terminate {{tenant}}'s lease", {
-          tenant: store.tenant.selected.name,
-        })}
+        {tenantList
+          ? t('Terminate a contract')
+          : t("Terminate {{tenant}}'s contract", {
+              tenant: store.tenant.selected.name,
+            })}
       </DialogTitle>
       <Box p={1}>
         <RequestError error={error} />
+        {!!tenantList && (
+          <DialogContent>
+            <FormControl fullWidth>
+              <InputLabel>{t('Tenant')}</InputLabel>
+              <Select value={selectedTenant} onChange={onTenantChange}>
+                {tenantList
+                  .sort((t1, t2) => {
+                    t1.name.localeCompare(t2.name);
+                  })
+                  .map((tenant) => (
+                    <MenuItem key={tenant._id} value={tenant}>
+                      <Typography>{tenant.name}</Typography>
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </DialogContent>
+        )}
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -112,6 +146,7 @@ const TerminateLeaseDialog = ({ open, setOpen }) => {
                   </Button>
                   <SubmitButton
                     label={!isSubmitting ? t('Terminate') : t('Terminating')}
+                    disabled={tenantList && !!selectedTenant._id === false}
                   />
                 </DialogActions>
               </Form>

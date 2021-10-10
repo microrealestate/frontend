@@ -12,15 +12,10 @@ import {
 import { useCallback, useContext, useMemo } from 'react';
 
 import cc from 'currency-codes';
-import getConfig from 'next/config';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
-
-const {
-  publicRuntimeConfig: { BASE_PATH },
-} = getConfig();
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required(),
@@ -74,7 +69,7 @@ const languages = [
   { id: 'fr-FR', label: 'Français (France)', value: 'fr-FR' },
 ];
 
-const LandlordForm = observer(({ onSubmit }) => {
+const LandlordForm = observer(({ onSubmit, onSubmitted }) => {
   const store = useContext(StoreContext);
   const { t } = useTranslation('common');
 
@@ -117,17 +112,12 @@ const LandlordForm = observer(({ onSubmit }) => {
 
       await onSubmit(updatedSettings);
 
-      if (updatedSettings.name !== initialValues.name) {
-        return window.location.assign(
-          `${BASE_PATH}/${store.organization.selected.locale}/${store.organization.selected.name}/settings`
-        );
-      }
-
-      if (updatedSettings.locale !== initialValues.locale) {
-        window.location.reload();
-      }
+      onSubmitted?.({
+        isOrgNameChanged: updatedSettings.name !== initialValues.name,
+        isLocaleChanged: updatedSettings.locale !== initialValues.locale,
+      });
     },
-    [onSubmit]
+    [onSubmit, onSubmitted]
   );
 
   const allowedRoles = useMemo(

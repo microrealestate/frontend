@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
 import Button from '@material-ui/core/Button';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -9,6 +9,10 @@ import { Typography } from '@material-ui/core';
 const ToggleMenu = ({ startIcon, options, value, onChange = () => {} }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedOption, setSelectedOption] = useState(value);
+
+  useEffect(() => {
+    setSelectedOption(value);
+  }, [value]);
 
   const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
@@ -26,10 +30,6 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => {} }) => {
     },
     [onChange]
   );
-
-  // useEffect(() => {
-  //     onChange(selectedOption);
-  // }, [selectedOption])
 
   return (
     <>

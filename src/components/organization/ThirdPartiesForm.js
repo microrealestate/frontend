@@ -14,6 +14,8 @@ const validationSchema = Yup.object().shape({
   domain: Yup.string().required(),
   fromEmail: Yup.string().email().required(),
   replyToEmail: Yup.string().email().required(),
+  // applicationKeyId: Yup.string().required(),
+  // applicationKey: Yup.string().required(),
 });
 
 const ThirdPartiesForm = observer(({ onSubmit }) => {
@@ -32,12 +34,23 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
         store.organization.selected.thirdParties?.mailgun?.replyToEmail ||
         store.organization.selected?.contacts?.[0].email ||
         '',
+      // applicationKeyId:
+      //   store.organization.selected.thirdParties?.b2?.applicationKeyId,
+      // applicationKey:
+      //   store.organization.selected.thirdParties?.b2?.applicationKey,
     }),
     [store.organization.selected]
   );
 
   const _onSubmit = useCallback(
-    async ({ apiKey, domain, fromEmail, replyToEmail }) => {
+    async ({
+      apiKey,
+      domain,
+      fromEmail,
+      replyToEmail,
+      // applicationKeyId,
+      // applicationKey,
+    }) => {
       await onSubmit({
         thirdParties: {
           mailgun: {
@@ -47,6 +60,14 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
             fromEmail,
             replyToEmail,
           },
+          // b2: {
+          //   applicationKeyId,
+          //   applicationKey,
+          //   applicationKeyIdUpdated:
+          //     applicationKeyId !== initialValues.applicationKeyId,
+          //   applicationKeyUpdated:
+          //     applicationKey !== initialValues.applicationKey,
+          // },
         },
       });
     },
@@ -96,6 +117,29 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
                 onlyRoles={allowedRoles}
               />
             </FormSection>
+            {/* <FormSection label="Backblaze B2">
+              <Typography>
+                {t('Configuration required to store documents in the cloud')}
+              </Typography>
+              <FormTextField
+                label={t('Master application key Id')}
+                name="applicationKeyId"
+                type="password"
+                showHidePassword={
+                  values.applicationKeyId !== initialValues.applicationKeyId
+                }
+                onlyRoles={allowedRoles}
+              />
+              <FormTextField
+                label={t('Application key')}
+                name="applicationKey"
+                type="password"
+                showHidePassword={
+                  values.applicationKey !== initialValues.applicationKey
+                }
+                onlyRoles={allowedRoles}
+              />
+            </FormSection> */}
             <SubmitButton
               size="large"
               label={!isSubmitting ? t('Save') : t('Saving')}

@@ -58,11 +58,11 @@ const Nav = () => {
         pathname: '/properties',
         icon: <VpnKeyIcon />,
       },
-      {
-        value: t('Accounting'),
-        pathname: '/accounting',
-        icon: <AccountBalanceWalletIcon />,
-      },
+      // {
+      //   value: t('Accounting'),
+      //   pathname: '/accounting',
+      //   icon: <AccountBalanceWalletIcon />,
+      // },
       {
         value: t('Settings'),
         pathname: '/settings',

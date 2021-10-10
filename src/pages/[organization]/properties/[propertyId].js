@@ -249,7 +249,7 @@ const Property = observer(() => {
           )}
         </Grid>
         <Grid item sm={12} md={4}>
-          <Box pb={2}>
+          <Box pb={4}>
             <DashboardCard Icon={VpnKeyIcon} title={t('Property')}>
               <PropertyOverview />
             </DashboardCard>

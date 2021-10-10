@@ -115,7 +115,7 @@ const Rents = observer(() => {
       {!store.rent.filters.searchText && (
         <Hidden smDown>
           <Box pb={5}>
-            <Grid container spacing={3}>
+            <Grid container spacing={10}>
               <Grid item xs={4}>
                 <PageCard
                   variant="info"

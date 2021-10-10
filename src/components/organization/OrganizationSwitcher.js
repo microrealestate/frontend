@@ -1,6 +1,8 @@
 import { useCallback, useContext, useMemo } from 'react';
+
 import getConfig from 'next/config';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
+import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
 import ToggleMenu from '../ToggleMenu';
 
@@ -8,7 +10,7 @@ const {
   publicRuntimeConfig: { BASE_PATH },
 } = getConfig();
 
-const OrganizationSwitcher = () => {
+const OrganizationSwitcher = observer(() => {
   const store = useContext(StoreContext);
 
   const onChange = useCallback(({ id }) => {
@@ -29,7 +31,7 @@ const OrganizationSwitcher = () => {
 
   const value = useMemo(
     () => options.find(({ id }) => id === store.organization.selected._id),
-    [options]
+    [options, store.organization.selected]
   );
 
   return (
@@ -40,6 +42,6 @@ const OrganizationSwitcher = () => {
       onChange={onChange}
     />
   );
-};
+});
 
 export default OrganizationSwitcher;

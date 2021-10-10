@@ -33,6 +33,7 @@ export default class Rent {
       setSelected: action,
       setFilters: action,
       setPeriod: action,
+      fetchWithoutUpdatingStore: flow,
       fetch: flow,
       fetchOneTenantRent: flow,
       fetchTenantRents: flow,
@@ -119,12 +120,21 @@ export default class Rent {
 
   setPeriod = (period) => (this._period = period);
 
-  *fetch() {
+  *fetchWithoutUpdatingStore(period = moment()) {
     try {
-      const year = this._period.year();
-      const month = this._period.month() + 1;
+      const year = period.year();
+      const month = period.month() + 1;
 
       const response = yield useApiFetch().get(`/rents/${year}/${month}`);
+      return { status: 200, data: response.data };
+    } catch (error) {
+      return { status: error.response.status };
+    }
+  }
+
+  *fetch() {
+    try {
+      const response = yield this.fetchWithoutUpdatingStore(this._period);
 
       this.countAll = response.data.overview.countAll;
       this.countPaid = response.data.overview.countPaid;
@@ -140,9 +150,9 @@ export default class Rent {
           this.items.find((item) => item._id === this.selected._id) || {}
         );
       }
-      return { status: 200, data: response.data };
+      return response;
     } catch (error) {
-      return { status: error.response.status };
+      return error;
     }
   }
 

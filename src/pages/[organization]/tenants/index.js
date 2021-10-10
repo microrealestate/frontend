@@ -88,7 +88,9 @@ const TenantList = () => {
                     <TenantAvatar
                       tenant={tenant}
                       className={
-                        !tenant.terminated ? classes.avatarInProgress : null
+                        !!tenant.beginDate && !tenant.terminated
+                          ? classes.avatarInProgress
+                          : null
                       }
                     />
                   </ListItemAvatar>
@@ -112,33 +114,38 @@ const TenantList = () => {
                           color="textSecondary"
                           component="div"
                         >
-                          {t(
-                            'Contract {{contract}} - from {{startDate}} to {{endDate}}',
-                            {
-                              contract: tenant.contract,
-                              startDate: moment(
-                                tenant.beginDate,
-                                'DD/MM/YYYY'
-                              ).format('L'),
-                              endDate: moment(
-                                tenant.terminationDate || tenant.endDate,
-                                'DD/MM/YYYY'
-                              ).format('L'),
+                          {!!tenant.beginDate
+                            ? t(
+                                'Contract {{contract}} - from {{startDate}} to {{endDate}}',
+                                {
+                                  contract: tenant.contract,
+                                  startDate: moment(
+                                    tenant.beginDate,
+                                    'DD/MM/YYYY'
+                                  ).format('L'),
+                                  endDate: moment(
+                                    tenant.terminationDate || tenant.endDate,
+                                    'DD/MM/YYYY'
+                                  ).format('L'),
+                                }
+                              )
+                            : t('No associated contract')}
+                        </Typography>
+
+                        {!!tenant.beginDate && (
+                          <Typography
+                            variant="caption"
+                            color="textSecondary"
+                            component="div"
+                            className={
+                              !tenant.terminated ? classes.inProgress : null
                             }
-                          )}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="textSecondary"
-                          component="div"
-                          className={
-                            !tenant.terminated ? classes.inProgress : null
-                          }
-                        >
-                          {tenant.terminated
-                            ? t('Terminated')
-                            : t('In progress')}
-                        </Typography>
+                          >
+                            {tenant.terminated
+                              ? t('Terminated')
+                              : t('In progress')}
+                          </Typography>
+                        )}
                       </Grid>
                       <Grid item xs={12} md={8}>
                         <Properties tenant={tenant} />

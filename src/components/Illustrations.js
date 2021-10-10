@@ -1,6 +1,7 @@
 import { Box, Typography } from '@material-ui/core';
 
 import getConfig from 'next/config';
+import Image from 'next/image';
 import useTranslation from 'next-translate/useTranslation';
 
 const {
@@ -9,7 +10,7 @@ const {
 
 const Illustration = ({ imgName, label, width = '100%', height = '100%' }) => (
   <>
-    <img src={`${BASE_PATH}/${imgName}.svg`} width={width} height={height} />
+    <Image src={`${BASE_PATH}/${imgName}.svg`} width={width} height={height} />
     {!!label && (
       <Box pt={1} color="text.disabled">
         <Typography align="center" variant="caption" component="p">

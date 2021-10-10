@@ -1,5 +1,7 @@
 import {
   Box,
+  Card,
+  CardActionArea,
   Divider,
   Paper,
   Typography,
@@ -73,57 +75,69 @@ export const DashboardCard = memo(function DashboardCard({
   info,
   Toolbar,
   children,
+  onClick,
 }) {
-  return (
-    <Paper
-      style={{
-        display: 'flex',
-        marginTop: 16,
-      }}
-    >
-      <Box width="100%">
-        <Box
-          px={1}
-          mt={-2}
-          mx={2}
-          borderRadius={3}
-          color="primary.contrastText"
-          bgcolor={_variantToBgColor(variant)}
-        >
-          <IconTypography Icon={Icon}>{title}</IconTypography>
-        </Box>
-
-        {!!Toolbar && (
-          <>
-            <UIToolbar>
-              <Box width="100%" display="flex" justifyContent="flex-end">
-                {Toolbar}
-              </Box>
-            </UIToolbar>
-            <Box pb={1}>
-              <Divider variant="middle" />
+  const CardContent = () => (
+    <Box mt={1.8}>
+      {!!Toolbar && (
+        <>
+          <UIToolbar>
+            <Box width="100%" display="flex" justifyContent="flex-end">
+              {Toolbar}
             </Box>
-          </>
-        )}
+          </UIToolbar>
+          <Box pb={1}>
+            <Divider variant="middle" />
+          </Box>
+        </>
+      )}
 
-        <Box px={1.8} pb={1.8} pt={Toolbar ? 0 : 1.8}>
-          {children}
-        </Box>
-        {info && (
-          <>
-            <Divider />
-            <Box p={1}>
-              <Typography
-                component="div"
-                color="textSecondary"
-                variant="caption"
-              >
-                {info}
-              </Typography>
-            </Box>
-          </>
-        )}
+      <Box px={1.8} pb={1.8} pt={Toolbar ? 0 : 1.8}>
+        {children}
       </Box>
-    </Paper>
+
+      {info && (
+        <>
+          <Divider />
+          <Box p={1}>
+            <Typography component="div" color="textSecondary" variant="caption">
+              {info}
+            </Typography>
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+
+  return (
+    <Box position="relative">
+      {onClick ? (
+        <Card onClick={onClick}>
+          <CardActionArea>
+            <CardContent />
+          </CardActionArea>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent />
+        </Card>
+      )}
+      <Box
+        display="flex"
+        alignItems="center"
+        position="absolute"
+        top={-12}
+        left={20}
+        right={20}
+        px={1}
+        borderRadius={3}
+        color="primary.contrastText"
+        bgcolor={_variantToBgColor(variant)}
+      >
+        <IconTypography Icon={Icon} noWrap>
+          {title}
+        </IconTypography>
+      </Box>
+    </Box>
   );
 });

@@ -2,13 +2,14 @@ import { Box, Paper, Typography } from '@material-ui/core';
 import { getStoreInstance, StoreContext } from '../store';
 import { isServer, redirect } from '../utils';
 import React, { useContext, useState } from 'react';
+import router, { useRouter } from 'next/router';
 
+import getConfig from 'next/config';
 import Landlord from '../components/organization/LandlordForm';
 import { observer } from 'mobx-react-lite';
 import Page from '../components/Page';
 import RequestError from '../components/RequestError';
 import { toJS } from 'mobx';
-import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 import { withAuthentication } from '../components/Authentication';
 
@@ -41,7 +42,6 @@ const FirstAccess = observer(() => {
         }
       }
       store.organization.setSelected(data, store.user);
-      router.push(`${store.organization.selected.name}/dashboard`);
       store.organization.setItems([data]);
     } catch (error) {
       console.error(error);
@@ -49,9 +49,15 @@ const FirstAccess = observer(() => {
     }
   };
 
-  return (
+  const onSubmitted = () => {
+    router.push(
+      `/${store.organization.selected.locale}/${store.organization.selected.name}/dashboard`
+    );
+  };
+
+  return !store.organization.selected?.name ? (
     <Page maxWidth="sm">
-      <Box paddingTop={2} paddingBottom={2}>
+      <Box py={2}>
         <Typography component="h1" variant="h4" align="center">
           {t('Welcome {{firstName}} {{lastName}}!', {
             firstName: store.user.firstName,
@@ -59,7 +65,7 @@ const FirstAccess = observer(() => {
           })}
         </Typography>
       </Box>
-      <Box paddingBottom={4}>
+      <Box pb={4}>
         <Typography variant="subtitle2" align="center" color="textSecondary">
           {t('One more step, tell us who will rent the properties')}
         </Typography>
@@ -67,11 +73,11 @@ const FirstAccess = observer(() => {
       <Paper>
         <Box px={4} pb={4} pt={2}>
           <RequestError error={error} />
-          <Landlord onSubmit={onSubmit} />
+          <Landlord onSubmit={onSubmit} onSubmitted={onSubmitted} />
         </Box>
       </Paper>
     </Page>
-  );
+  ) : null;
 });
 
 FirstAccess.getInitialProps = async (context) => {

@@ -13,15 +13,24 @@ import Page from '../../../components/Page';
 import RequestError from '../../../components/RequestError';
 import ThirdPartiesForm from '../../../components/organization/ThirdPartiesForm';
 import { toJS } from 'mobx';
+import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 import { withAuthentication } from '../../../components/Authentication';
 
 const hashes = ['landlord', 'billing', 'leases', 'access', 'third-parties'];
 
 const SettingTabs = observer(({ onSubmit, setError }) => {
+  const router = useRouter();
+  const store = useContext(StoreContext);
   const { t } = useTranslation('common');
   const { handleTabChange, tabSelectedIndex, tabsReady } =
     useTabChangeHelper(hashes);
+
+  const onSubmitted = ({ isOrgNameChanged }) => {
+    if (isOrgNameChanged) {
+      router.push(`/${store.organization.selected.name}/settings`);
+    }
+  };
 
   return (
     tabsReady && (
@@ -39,7 +48,7 @@ const SettingTabs = observer(({ onSubmit, setError }) => {
           <Tab label={t('Third-parties')} />
         </Tabs>
         <TabPanel value={tabSelectedIndex} index={0}>
-          <LandlordForm onSubmit={onSubmit} />
+          <LandlordForm onSubmit={onSubmit} onSubmitted={onSubmitted} />
         </TabPanel>
         <TabPanel value={tabSelectedIndex} index={1}>
           <BillingForm onSubmit={onSubmit} />
@@ -70,7 +79,10 @@ const Settings = observer(() => {
 
     const organization = {
       // Do not update keys when the thirdParties is not touched
-      thirdParties: { mailgun: { apiKeyUpdated: false } },
+      thirdParties: {
+        mailgun: { apiKeyUpdated: false },
+        b2: { applicationKeyIdUpdated: false, applicationKeyUpdated: false },
+      },
       ...store.organization.selected,
       ...orgPart,
     };

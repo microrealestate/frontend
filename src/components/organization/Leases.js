@@ -1,9 +1,10 @@
 import { Box, Paper, Switch, TableHead, Typography } from '@material-ui/core';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
 import { ADMIN_ROLE } from '../../store/User';
 import { FormSection } from '../Form';
 import Link from '../Link';
+import NewLeaseDialog from './NewLeaseDialog';
 import { observer } from 'mobx-react-lite';
 import { RestrictButton } from '../RestrictedComponents';
 import { StoreContext } from '../../store';
@@ -18,6 +19,7 @@ const Leases = observer(({ setError }) => {
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
   const router = useRouter();
+  const [openNewLeaseDialog, setOpenNewLeaseDialog] = useState(false);
 
   const onLeaseChange = useCallback(
     async (active, lease) => {
@@ -42,14 +44,10 @@ const Leases = observer(({ setError }) => {
     [setError]
   );
 
-  const onAddLease = useCallback(async () => {
-    const { /*status,*/ data: createdLease } = await store.lease.create({
-      name: t('New lease'),
-    });
-    // TODO: handle the error
-    store.lease.setSelected(createdLease);
-    router.push(
-      `/${store.organization.selected.name}/settings/lease/${createdLease._id}`
+  const onCreateLease = useCallback(async (lease) => {
+    store.lease.setSelected(lease);
+    await router.push(
+      `/${store.organization.selected.name}/settings/lease/${lease._id}`
     );
   }, []);
 
@@ -59,7 +57,7 @@ const Leases = observer(({ setError }) => {
         <RestrictButton
           variant="contained"
           color="primary"
-          onClick={onAddLease}
+          onClick={() => setOpenNewLeaseDialog(true)}
           onlyRoles={[ADMIN_ROLE]}
         >
           {t('Add lease')}
@@ -125,6 +123,7 @@ const Leases = observer(({ setError }) => {
                         onChange={(evt) =>
                           onLeaseChange(evt.target.checked, lease)
                         }
+                        disabled={!!lease.numberOfTerms === false}
                       />
                     </TableCell>
                   </TableRow>
@@ -134,6 +133,11 @@ const Leases = observer(({ setError }) => {
           </TableBody>
         </Table>
       </Paper>
+      <NewLeaseDialog
+        open={openNewLeaseDialog}
+        setOpen={setOpenNewLeaseDialog}
+        onConfirm={onCreateLease}
+      />
     </FormSection>
   );
 });

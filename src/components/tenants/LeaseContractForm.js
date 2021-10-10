@@ -21,6 +21,7 @@ import {
 import moment from 'moment';
 import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
+import { toJS } from 'mobx';
 import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
@@ -77,7 +78,7 @@ const validationSchema = Yup.object().shape({
   guarantyPayback: Yup.number().min(0),
 });
 
-const emptyExpense = { title: '', amount: '' };
+const emptyExpense = { title: '', amount: 0 };
 
 const emptyProperty = {
   _id: '',
@@ -169,14 +170,19 @@ const LeaseContractForm = observer((props) => {
       leaseId: lease.leaseId,
       frequency: store.lease.items.find(({ _id }) => _id === lease.leaseId)
         .timeRange,
-      beginDate: lease.beginDate?.format('DD/MM/YYYY'),
-      endDate: lease.endDate?.format('DD/MM/YYYY'),
-      terminationDate: lease.terminationDate?.format('DD/MM/YYYY'),
+      beginDate: lease.beginDate?.format('DD/MM/YYYY') || '',
+      endDate: lease.endDate?.format('DD/MM/YYYY') || '',
+      terminationDate: lease.terminationDate?.format('DD/MM/YYYY') || '',
       guaranty: lease.guaranty || 0,
       guarantyPayback: lease.guarantyPayback || 0,
       properties: lease.properties
         .filter((property) => !!property._id)
         .map((property) => {
+          // hack to avoid passing a string in place of a number to the backend
+          // weird that formik doesn't handle this properly...
+          if (property.expense?.title) {
+            property.expense.amount = Number(property.expense.amount);
+          }
           return {
             propertyId: property._id,
             rent: property.rent,

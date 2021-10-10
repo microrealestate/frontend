@@ -1,5 +1,6 @@
 import { makeObservable, observable, reaction } from 'mobx';
 
+import Dashboard from './Dashboard';
 import Document from './Document';
 import { isServer } from '../utils';
 import Lease from './Lease';
@@ -22,6 +23,7 @@ export default class Store {
   property = new Property();
   template = new Template();
   document = new Document();
+  dashboard = new Dashboard();
 
   constructor() {
     makeObservable(this, {
@@ -33,6 +35,7 @@ export default class Store {
       property: observable,
       template: observable,
       document: observable,
+      dashboard: observable,
     });
 
     let refreshTokenHandle;
@@ -113,6 +116,9 @@ export default class Store {
       document = {
         items: [],
       },
+      dashboard = {
+        data: {},
+      },
     } = initialData;
 
     this.user.firstName = user.firstName;
@@ -154,5 +160,7 @@ export default class Store {
 
     this.document.items = document.items;
     this.document.selected = document.selected;
+
+    this.dashboard.data = dashboard.data;
   }
 }

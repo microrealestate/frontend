@@ -269,14 +269,14 @@ export const DateRangeField = ({
   );
 };
 
-export const SubmitButton = ({ label, ...props }) => {
+export const SubmitButton = ({ label, disabled, ...props }) => {
   const { isValid, isSubmitting } = useFormikContext();
   return (
     <RestrictButton
       type="submit"
       variant="contained"
       color="primary"
-      disabled={!isValid || isSubmitting}
+      disabled={!isValid || isSubmitting || disabled}
       endIcon={
         isSubmitting ? <CircularProgress color="inherit" size={20} /> : null
       }

@@ -498,12 +498,12 @@ const Tenant = observer(() => {
         </Grid>
         {!!store.tenant.selected.properties && (
           <Grid item sm={12} md={4}>
-            <Box pb={2}>
+            <Box pb={4}>
               <DashboardCard Icon={SubjectIcon} title={t('Lease')}>
                 <ContractOverview />
               </DashboardCard>
             </Box>
-            <Box pb={2}>
+            <Box pb={4}>
               <DashboardCard
                 Icon={ReceiptIcon}
                 title={t('Rental')}

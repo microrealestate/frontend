@@ -14,15 +14,30 @@ export const formatNumber = (locale, currency, value) => {
 export const useFormatNumber = () => {
   const store = useContext(StoreContext);
 
-  return (value) =>
-    formatNumber(
-      store.organization.selected.locale,
-      store.organization.selected.currency,
-      value
-    );
+  return (value, style = 'currency') => {
+    if (style === 'currency') {
+      return formatNumber(
+        store.organization.selected.locale,
+        store.organization.selected.currency,
+        value
+      );
+    }
+
+    if (style === 'percent') {
+      return Number(value).toLocaleString(store.organization.selected.locale, {
+        style: 'percent',
+        minimumFractionDigits: 2,
+      });
+    }
+  };
 };
 
-export const NumberFormat = ({ value, withColor, ...props }) => {
+export const NumberFormat = ({
+  value,
+  style = 'currency',
+  withColor,
+  ...props
+}) => {
   const formatNumber = useFormatNumber();
 
   const StyledTypography = withStyles((theme) => {
@@ -38,7 +53,7 @@ export const NumberFormat = ({ value, withColor, ...props }) => {
 
   return (
     <StyledTypography noWrap {...props}>
-      {formatNumber(value)}
+      {value !== undefined && value != null ? formatNumber(value, style) : '--'}
     </StyledTypography>
   );
 };
