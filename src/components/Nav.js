@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+//import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';

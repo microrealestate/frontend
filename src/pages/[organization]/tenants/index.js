@@ -114,7 +114,7 @@ const TenantList = () => {
                           color="textSecondary"
                           component="div"
                         >
-                          {!!tenant.beginDate
+                          {tenant.beginDate
                             ? t(
                                 'Contract {{contract}} - from {{startDate}} to {{endDate}}',
                                 {
