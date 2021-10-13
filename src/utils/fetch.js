@@ -1,5 +1,5 @@
-import axios from 'axios';
 import FileDownload from 'js-file-download';
+import axios from 'axios';
 import getConfig from 'next/config';
 import { isServer } from './index';
 
@@ -51,6 +51,18 @@ export const useApiFetch = () => {
     }
 
     // add interceptors
+    if (process.env.NODE_ENV === 'development') {
+      apiFetch.interceptors.request.use(
+        function (config) {
+          console.log(config);
+          return config;
+        },
+        function (error) {
+          return Promise.reject(error);
+        }
+      );
+    }
+
     apiFetch.interceptors.response.use(
       (response) => {
         console.log(
@@ -61,12 +73,16 @@ export const useApiFetch = () => {
         return response;
       },
       (error) => {
-        console.error(
-          `${error.config.method.toUpperCase()} ${error.config.url} ${
-            error.response.status
-          }`
-        );
-        return Promise.reject(error);
+        if (error.config?.method && error.response?.status) {
+          console.error(
+            `${error.config.method.toUpperCase()} ${error.config.url} ${
+              error.response.status
+            }`
+          );
+          return Promise.reject(error);
+        }
+        console.error(error);
+        return Promise.reject({ error });
       }
     );
   }
