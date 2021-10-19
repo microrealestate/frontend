@@ -11,9 +11,9 @@ import {
 } from '../Form';
 import { FieldArray, Form, Formik } from 'formik';
 
+import { StoreContext } from '../../store';
 import _ from 'lodash';
 import moment from 'moment';
-import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
@@ -64,30 +64,59 @@ const PaymentForm = ({ onSubmit }) => {
     [store.rent.selected]
   );
 
-  const _onSubmit = useCallback(async (values) => {
-    const clonedValues = _.cloneDeep(values);
+  const paymentTypes = useMemo(
+    () => [
+      {
+        id: 'cheque',
+        label: t('Cheque'),
+        value: 'cheque',
+      },
+      {
+        id: 'cash',
+        label: t('Cash'),
+        value: 'cash',
+      },
+      {
+        id: 'levy',
+        label: t('Levy'),
+        value: 'levy',
+      },
+      {
+        id: 'transfer',
+        label: t('Transfer'),
+        value: 'transfer',
+      },
+    ],
+    []
+  );
 
-    const paymentPart = {
-      payments: clonedValues.payments
-        .filter(({ amount }) => amount > 0)
-        .map((payment) => {
-          // convert moment into string for the DB
-          payment.date = payment.date.format('DD/MM/YYYY');
-          if (payment.type === 'cash') {
-            delete payment.reference;
-          }
-          return payment;
-        }),
-    };
-    try {
-      await onSubmit(paymentPart);
-    } finally {
-      // clean fields if empty amounts were saved
-      if (clonedValues.payments.length === 0) {
-        values.payments = [emptyPayment];
+  const _onSubmit = useCallback(
+    async (values) => {
+      const clonedValues = _.cloneDeep(values);
+
+      const paymentPart = {
+        payments: clonedValues.payments
+          .filter(({ amount }) => amount > 0)
+          .map((payment) => {
+            // convert moment into string for the DB
+            payment.date = payment.date.format('DD/MM/YYYY');
+            if (payment.type === 'cash') {
+              delete payment.reference;
+            }
+            return payment;
+          }),
+      };
+      try {
+        await onSubmit(paymentPart);
+      } finally {
+        // clean fields if empty amounts were saved
+        if (clonedValues.payments.length === 0) {
+          values.payments = [emptyPayment];
+        }
       }
-    }
-  }, []);
+    },
+    [onSubmit]
+  );
 
   return (
     <Formik
@@ -99,107 +128,83 @@ const PaymentForm = ({ onSubmit }) => {
         return (
           <Form autoComplete="off">
             <FormSection label={t('Payments')}>
-              <FieldArray
-                name="payments"
-                render={(arrayHelpers) => (
-                  <div>
-                    {Children.toArray(
-                      payments.map((payment, index) => (
-                        <>
-                          <Grid container spacing={2}>
+              <FieldArray name="payments">
+                {({ form, ...arrayHelpers }) => {
+                  return Children.toArray(
+                    payments.map((payment, index) => (
+                      <>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <FormTextField
+                              label={t('Amount')}
+                              name={`payments[${index}].amount`}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <DateField
+                              label={t('Date')}
+                              name={`payments[${index}].date`}
+                              minDate={store.rent._period
+                                .startOf('month')
+                                .toISOString()}
+                              maxDate={store.rent._period
+                                .endOf('month')
+                                .toISOString()}
+                            />
+                          </Grid>
+                        </Grid>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <SelectField
+                              label={t('Type')}
+                              name={`payments[${index}].type`}
+                              values={paymentTypes}
+                            />
+                          </Grid>
+                          {payments[index].type !== 'cash' && (
                             <Grid item xs={6}>
                               <FormTextField
-                                label={t('Amount')}
-                                name={`payments[${index}].amount`}
+                                label={t('Reference')}
+                                name={`payments[${index}].reference`}
                               />
                             </Grid>
-                            <Grid item xs={6}>
-                              <DateField
-                                label={t('Date')}
-                                name={`payments[${index}].date`}
-                                minDate={store.rent._period
-                                  .startOf('month')
-                                  .toISOString()}
-                                maxDate={store.rent._period
-                                  .endOf('month')
-                                  .toISOString()}
-                              />
-                            </Grid>
-                          </Grid>
-                          <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                              <SelectField
-                                label={t('Type')}
-                                name={`payments[${index}].type`}
-                                values={[
-                                  {
-                                    id: 'cheque',
-                                    label: t('Cheque'),
-                                    value: 'cheque',
-                                  },
-                                  {
-                                    id: 'cash',
-                                    label: t('Cash'),
-                                    value: 'cash',
-                                  },
-                                  {
-                                    id: 'levy',
-                                    label: t('Levy'),
-                                    value: 'levy',
-                                  },
-                                  {
-                                    id: 'transfer',
-                                    label: t('Transfer'),
-                                    value: 'transfer',
-                                  },
-                                ]}
-                              />
-                            </Grid>
-                            {payments[index].type !== 'cash' && (
-                              <Grid item xs={6}>
-                                <FormTextField
-                                  label={t('Reference')}
-                                  name={`payments[${index}].reference`}
-                                />
-                              </Grid>
-                            )}
-                          </Grid>
-                          <Box
-                            pb={2}
-                            display="flex"
-                            justifyContent={
-                              payments.length === index + 1
-                                ? 'space-between'
-                                : 'flex-end'
-                            }
-                          >
-                            {payments.length === index + 1 && (
-                              <Button
-                                // variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={() => arrayHelpers.push(emptyPayment)}
-                              >
-                                {t('Add payment')}
-                              </Button>
-                            )}
-                            {payments.length > 1 && (
-                              <Button
-                                // variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={() => arrayHelpers.remove(index)}
-                              >
-                                {t('Remove payment')}
-                              </Button>
-                            )}
-                          </Box>
-                        </>
-                      ))
-                    )}
-                  </div>
-                )}
-              />
+                          )}
+                        </Grid>
+                        <Box
+                          pb={2}
+                          display="flex"
+                          justifyContent={
+                            payments.length === index + 1
+                              ? 'space-between'
+                              : 'flex-end'
+                          }
+                        >
+                          {payments.length === index + 1 && (
+                            <Button
+                              // variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => arrayHelpers.push(emptyPayment)}
+                            >
+                              {t('Add payment')}
+                            </Button>
+                          )}
+                          {payments.length > 1 && (
+                            <Button
+                              // variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => arrayHelpers.remove(index)}
+                            >
+                              {t('Remove payment')}
+                            </Button>
+                          )}
+                        </Box>
+                      </>
+                    ))
+                  );
+                }}
+              </FieldArray>
             </FormSection>
             <SubmitButton label={!isSubmitting ? t('Save') : t('Saving')} />
           </Form>
@@ -210,206 +215,3 @@ const PaymentForm = ({ onSubmit }) => {
 };
 
 export default PaymentForm;
-
-//   const PaymentForm = () => {
-//     const { t } = useTranslation('common');
-//     const store = useContext(StoreContext);
-//     const router = useRouter();
-
-//     const onSubmit = useCallback(async (values, actions) => {
-//       const { term } = router.query;
-//       // clone to avoid changing the form fields
-//       const clonedValues = _.cloneDeep(values);
-
-//       // Save only payments
-//       clonedValues.payments = clonedValues.payments.filter(({ amount }) => amount > 0).map(payment => {
-//         // convert moment into string for the DB
-//         payment.date = payment.date.format('DD/MM/YYYY');
-//         if (payment.type === 'cash') {
-//           delete payment.reference;
-//         }
-//         return payment;
-//       });
-//       clonedValues.month = store.rent.selected.month;
-//       clonedValues.year = store.rent.selected.year;
-//       clonedValues._id = store.rent.selected._id;
-//       try {
-//         await store.rent.pay(term, clonedValues);
-
-//         // clean fields if empty amounts were saved
-//         if (clonedValues.payments.length === 0) {
-//           values.payments = [emptyPayment];
-//         }
-//         if (!clonedValues.extracharge || clonedValues.extracharge === '0') {
-//           values.extracharge = '';
-//           values.noteextracharge = '';
-//         }
-//         if (!clonedValues.promo || clonedValues.promo === '0') {
-//           values.promo = '';
-//           values.notepromo = '';
-//         }
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     });
-
-//     const initialValues = useMemo(() => ({
-//       payments: store.rent.selected.payments.length ? store.rent.selected.payments.map(({ amount, date, type, reference }) => {
-//         return {
-//           amount: amount === 0 ? '' : amount,
-//           date: date ? moment(date, 'DD/MM/YYYY') : null,
-//           type: type,
-//           reference: reference || ''
-//         }
-//       }) : [emptyPayment],
-//       extracharge: store.rent.selected.extracharge !== 0 ? store.rent.selected.extracharge : '',
-//       noteextracharge: store.rent.selected.noteextracharge || '',
-//       promo: store.rent.selected.promo !== 0 ? store.rent.selected.promo : '',
-//       notepromo: store.rent.selected.notepromo || '',
-//       description: store.rent.selected.description || ''
-//     }), [store.rent.selected]);
-
-//     return (
-//       <Formik
-//         initialValues={initialValues}
-//         validationSchema={validationSchema}
-//         onSubmit={onSubmit}
-//       >
-//         {({ isSubmitting, values: { payments, extracharge, noteextracharge, promo, notepromo, description } }) => {
-//           return (
-//             <Form autoComplete="off">
-
-//               <FormSection label={t('Payments')} defaultExpanded>
-//                 <FieldArray
-//                   name="payments"
-//                   render={arrayHelpers => (
-//                     <div>
-//                       {Children.toArray(payments.map((payment, index) => (
-//                         <>
-//                           <Grid container spacing={2}>
-//                             <Grid item xs={6}>
-//                               <FormTextField
-//                                 label={t('Amount')}
-//                                 name={`payments[${index}].amount`}
-//                               />
-//                             </Grid>
-//                             <Grid item xs={6}>
-//                               <DateField
-//                                 label={t('Date')}
-//                                 name={`payments[${index}].date`}
-//                                 minDate={store.rent._period.startOf('month').toISOString()}
-//                                 maxDate={store.rent._period.endOf('month').toISOString()}
-//                               />
-//                             </Grid>
-//                           </Grid>
-//                           <Grid container spacing={2}>
-//                             <Grid item xs={6}>
-//                               <SelectField
-//                                 label={t('Type')}
-//                                 name={`payments[${index}].type`}
-//                                 values={[
-//                                   { id: 'cheque', label: t('Cheque'), value: 'cheque' },
-//                                   { id: 'cash', label: t('Cash'), value: 'cash' },
-//                                   { id: 'levy', label: t('Levy'), value: 'levy' },
-//                                   { id: 'transfer', label: t('Transfer'), value: 'transfer' }
-//                                 ]}
-//                               />
-//                             </Grid>
-//                             {(payments[index].type !== 'cash') && (
-//                               <Grid item xs={6}>
-//                                 <FormTextField
-//                                   label={t('Reference')}
-//                                   name={`payments[${index}].reference`}
-//                                 />
-//                               </Grid>
-//                             )}
-//                           </Grid>
-//                           { payments.length > 1 && (
-//                             <Box pb={2} display="flex" justifyContent="flex-end">
-//                               <Button
-//                                 // variant="contained"
-//                                 color="primary"
-//                                 size="small"
-//                                 onClick={() => arrayHelpers.remove(index)}
-//                               >
-//                                 {t('Remove payment')}
-//                               </Button>
-//                             </Box>
-//                           )}
-//                         </>
-//                       )))}
-//                       <Box display="flex" justifyContent="space-between">
-//                         <SubmitButton
-//                           size="small"
-//                           label={!isSubmitting ? t('Save') : t('Saving')}
-//                         />
-//                         <Button
-//                           // variant="contained"
-//                           color="primary"
-//                           size="small"
-//                           onClick={() => arrayHelpers.push(emptyPayment)}
-//                         >
-//                           {t('Add payment')}
-//                         </Button>
-//                       </Box>
-//                     </div>
-//                   )}
-//                 />
-//               </FormSection>
-//               <FormSection label={t('Additional cost')} defaultExpanded={!!initialValues.extracharge}>
-//                 <FormTextField
-//                   label={t('Amount')}
-//                   name="extracharge"
-//                   value={extracharge}
-//                 />
-//                 <FormTextField
-//                   label={t('Description')}
-//                   name="noteextracharge"
-//                   value={noteextracharge}
-//                   multiline
-//                   rows={3}
-//                 />
-//                 <SubmitButton
-//                   size="small"
-//                   label={!isSubmitting ? t('Save') : t('Saving')}
-//                 />
-//               </FormSection>
-
-//               <FormSection label={t('Discount')} defaultExpanded={!!initialValues.promo}>
-//                 <FormTextField
-//                   label={t('Discount')}
-//                   name="promo"
-//                   value={promo}
-//                 />
-//                 <FormTextField
-//                   label={t('Description')}
-//                   name="notepromo"
-//                   value={notepromo}
-//                   multiline
-//                   rows={3}
-//                 />
-//                 <SubmitButton
-//                   size="small"
-//                   label={!isSubmitting ? t('Save') : t('Saving')}
-//                 />
-//               </FormSection>
-
-//               <FormSection label={t('Internal note')} defaultExpanded={!!initialValues.description}>
-//                 <FormTextField
-//                   label={t('Note')}
-//                   name="description"
-//                   value={description}
-//                   multiline
-//                   rows={3}
-//                 />
-//                 <SubmitButton
-//                   size="small"
-//                   label={!isSubmitting ? t('Save') : t('Saving')}
-//                 />
-//               </FormSection>
-//             </Form>
-//           )
-//         }}
-//       </Formik>
-//     )
-//   };

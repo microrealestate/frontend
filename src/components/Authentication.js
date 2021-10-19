@@ -22,7 +22,7 @@ export function withAuthentication(PageComponent) {
       if (pageProps.error?.statusCode === 403) {
         window.location.assign(BASE_PATH); // will be redirected to /signin
       }
-    }, []);
+    }, [pageProps.error?.statusCode]);
 
     if (pageProps.error) {
       if (pageProps.error.statusCode === 403) {

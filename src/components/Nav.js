@@ -1,5 +1,4 @@
 import {
-  Children,
   memo,
   useCallback,
   useContext,
@@ -20,17 +19,18 @@ import PeopleIcon from '@material-ui/icons/People';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { StoreContext } from '../store';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { nanoid } from 'nanoid';
 import { useRouter } from 'next/router';
 import { useStyles } from '../styles/components/Nav.styles';
+import { useTimeout } from '../utils/hooks';
 import useTranslation from 'next-translate/useTranslation';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 
 const Nav = () => {
   const classes = useStyles();
   const { t } = useTranslation('common');
   const [open, setOpen] = useState(false);
   const [openDebounced, setOpenDebounced] = useState(false);
-  const timerRef = useRef();
   const store = useContext(StoreContext);
 
   const router = useRouter();
@@ -72,19 +72,27 @@ const Nav = () => {
     []
   );
 
+  const triggerOpen = useTimeout(() => {
+    setOpenDebounced(open);
+  }, 1000);
+
   useEffect(() => {
-    timerRef.current = setTimeout(() => setOpenDebounced(open), 1000);
-    return () => timerRef.current && clearTimeout(timerRef.current);
+    triggerOpen.start();
   }, [open]);
 
-  const handleMenuClick = useCallback((menuItem) => {
-    timerRef.current && clearTimeout(timerRef.current);
-    const pathname = menuItem.pathname.replace(
-      '[yearMonth]',
-      store.rent.period
-    );
-    router.push(`/${store.organization.selected.name}${pathname}`);
-  }, []);
+  const handleMenuClick = useCallback(
+    (menuItem) => {
+      triggerOpen.clear();
+      if (store.organization.selected?.name && store.rent?.period) {
+        const pathname = menuItem.pathname.replace(
+          '[yearMonth]',
+          store.rent.period
+        );
+        router.push(`/${store.organization.selected.name}${pathname}`);
+      }
+    },
+    [store.organization.selected?.name, store.rent?.period]
+  );
 
   return (
     <Drawer
@@ -95,36 +103,33 @@ const Nav = () => {
       }}
     >
       <List className={classes.list}>
-        {Children.toArray(
-          menuItems.map((item) => {
-            const isSelected = useMemo(
-              () => pathname.indexOf(item.pathname) !== -1,
-              [pathname]
-            );
-            return (
-              <ListItem
-                className={`${classes.item} ${
-                  isSelected ? classes.itemSelected : ''
+        {menuItems.map((item) => {
+          const isSelected = pathname.indexOf(item.pathname) !== -1;
+
+          return (
+            <ListItem
+              key={nanoid()}
+              className={`${classes.item} ${
+                isSelected ? classes.itemSelected : ''
+              }`}
+              button
+              selected={isSelected}
+              onClick={() => handleMenuClick(item)}
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+            >
+              <ListItemIcon classes={{ root: classes.itemIcon }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                className={`${classes.itemText} ${
+                  openDebounced ? classes.itemTextOpen : classes.itemTextClose
                 }`}
-                button
-                selected={isSelected}
-                onClick={() => handleMenuClick(item)}
-                onMouseOver={() => setOpen(true)}
-                onMouseOut={() => setOpen(false)}
-              >
-                <ListItemIcon classes={{ root: classes.itemIcon }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  className={`${classes.itemText} ${
-                    openDebounced ? classes.itemTextOpen : classes.itemTextClose
-                  }`}
-                  primary={item.value}
-                />
-              </ListItem>
-            );
-          })
-        )}
+                primary={item.value}
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </Drawer>
   );

@@ -28,7 +28,7 @@ const ToggleMenu = ({ startIcon, options, value, onChange = () => {} }) => {
       onChange(option);
       handleClose();
     },
-    [onChange]
+    [onChange, handleClose]
   );
 
   return (

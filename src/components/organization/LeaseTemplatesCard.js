@@ -6,7 +6,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
 } from '@material-ui/core';
-import { Children, useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 
 import AddIcon from '@material-ui/icons/Add';
 import ConfirmDialog from '../ConfirmDialog';
@@ -14,10 +14,42 @@ import { DashboardCard } from '../Cards';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DescriptionIcon from '@material-ui/icons/DescriptionOutlined';
 import { EmptyIllustration } from '../Illustrations';
-import { observer } from 'mobx-react-lite';
 import RichTextEditorDialog from '../RichTextEditor/RichTextEditorDialog';
 import { StoreContext } from '../../store';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import useTranslation from 'next-translate/useTranslation';
+
+const TemplateList = observer(({ onEdit, onDelete }) => {
+  const store = useContext(StoreContext);
+  const { t } = useTranslation('common');
+
+  // TODO: optimize to not recompute the template list on each rendered
+  const templates = store.template.items.filter(({ linkedResourceIds = [] }) =>
+    linkedResourceIds.includes(store.lease.selected?._id)
+  );
+
+  return templates.length > 0 ? (
+    <List dense>
+      {templates.map((template) => (
+        <ListItem key={nanoid()} button onClick={() => onEdit(template)}>
+          <ListItemText id={template._id} primary={template.name} />
+          <ListItemSecondaryAction>
+            <IconButton
+              edge="end"
+              aria-label="comments"
+              onClick={() => onDelete(template)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      ))}
+    </List>
+  ) : (
+    <EmptyIllustration label={t('No document templates defined')} />
+  );
+});
 
 const LeaseTemplatesCard = () => {
   const { t } = useTranslation('common');
@@ -119,12 +151,12 @@ const LeaseTemplatesCard = () => {
           : templateToRemove.linkedResourceIds,
       });
     }
-  }, [templateToRemove, store.lease.selected]);
-
-  // TODO: optimize to not recompute the template list on each rendered
-  const templates = store.template.items.filter(({ linkedResourceIds = [] }) =>
-    linkedResourceIds.includes(store.lease.selected?._id)
-  );
+  }, [
+    templateToRemove,
+    store.lease.selected,
+    store.template,
+    editTemplate.linkedResourceIds,
+  ]);
 
   return (
     <DashboardCard
@@ -141,28 +173,10 @@ const LeaseTemplatesCard = () => {
         </Button>
       }
     >
-      {templates.length > 0 ? (
-        <List dense>
-          {Children.toArray(
-            templates.map((template) => (
-              <ListItem button onClick={() => setEditTemplate(template)}>
-                <ListItemText id={template._id} primary={template.name} />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    aria-label="comments"
-                    onClick={() => setTemplateToRemove(template)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))
-          )}
-        </List>
-      ) : (
-        <EmptyIllustration label={t('No document templates defined')} />
-      )}
+      <TemplateList
+        onEdit={(template) => setEditTemplate(template)}
+        onDelete={(template) => setTemplateToRemove(template)}
+      />
       <RichTextEditorDialog
         open={editTemplate}
         setOpen={setEditTemplate}
@@ -182,4 +196,4 @@ const LeaseTemplatesCard = () => {
   );
 };
 
-export default observer(LeaseTemplatesCard);
+export default LeaseTemplatesCard;

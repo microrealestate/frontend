@@ -217,31 +217,39 @@ const RentPayment = observer(() => {
       )}&status=${encodeURIComponent(store.rent.filters.status)}`;
     }
     return backPath;
-  }, []);
+  }, [
+    store.organization.selected.name,
+    store.rent.filters.searchText,
+    store.rent.filters.status,
+    store.rent.period,
+  ]);
 
-  const onSubmit = useCallback(async (paymentPart) => {
-    const { term } = router.query;
+  const onSubmit = useCallback(
+    async (paymentPart) => {
+      const { term } = router.query;
 
-    const payment = {
-      _id: store.rent.selected._id,
-      month: store.rent.selected.month,
-      year: store.rent.selected.year,
-      payments: toJS(store.rent.selected.payments),
-      extracharge: store.rent.selected.extracharge,
-      noteextracharge: store.rent.selected.noteextracharge,
-      promo: store.rent.selected.promo,
-      notepromo: store.rent.selected.notepromo,
-      description: store.rent.selected.description,
-      ...paymentPart,
-    };
+      const payment = {
+        _id: store.rent.selected._id,
+        month: store.rent.selected.month,
+        year: store.rent.selected.year,
+        payments: toJS(store.rent.selected.payments),
+        extracharge: store.rent.selected.extracharge,
+        noteextracharge: store.rent.selected.noteextracharge,
+        promo: store.rent.selected.promo,
+        notepromo: store.rent.selected.notepromo,
+        description: store.rent.selected.description,
+        ...paymentPart,
+      };
 
-    try {
-      await store.rent.pay(term, payment);
-    } catch (error) {
-      //TODO manage errors
-      console.error(error);
-    }
-  }, []);
+      try {
+        await store.rent.pay(term, payment);
+      } catch (error) {
+        //TODO manage errors
+        console.error(error);
+      }
+    },
+    [router.query, store.rent]
+  );
 
   return (
     <Page PrimaryToolbar={<BreadcrumbBar backPath={backPath} />}>
@@ -288,6 +296,7 @@ const RentPayment = observer(() => {
                 tenant={store.rent.selected.occupant}
                 terms={[store.rent.selected.term]}
                 period={store.rent._period}
+                // TODO: handle errors
                 onError={() => {}}
               />
             }

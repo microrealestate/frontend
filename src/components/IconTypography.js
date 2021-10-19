@@ -17,7 +17,7 @@ const IconTypography = ({
       iconStyle.color = theme.palette.text.secondary;
     }
     return iconStyle;
-  }, [props.color]);
+  }, [props.color, theme.palette.text.secondary]);
 
   return (
     <Grid container wrap="nowrap" alignItems="center" spacing={1}>

@@ -100,13 +100,7 @@ const ContractOverview = () => {
             {t('Start date')}
           </Typography>
           <Typography color="textSecondary" noWrap>
-            {useMemo(
-              () =>
-                moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').format(
-                  'L'
-                ),
-              []
-            )}
+            {moment(store.tenant.selected.beginDate, 'DD/MM/YYYY').format('L')}
           </Typography>
         </CardRow>
       )}
@@ -117,15 +111,11 @@ const ContractOverview = () => {
             {t('End date')}
           </Typography>
           <Typography color="textSecondary" noWrap>
-            {useMemo(
-              () =>
-                moment(
-                  store.tenant.selected.terminationDate ||
-                    store.tenant.selected.endDate,
-                  'DD/MM/YYYY'
-                ).format('L'),
-              []
-            )}
+            {moment(
+              store.tenant.selected.terminationDate ||
+                store.tenant.selected.endDate,
+              'DD/MM/YYYY'
+            ).format('L')}
           </Typography>
         </CardRow>
       )}
@@ -308,61 +298,64 @@ const Tenant = observer(() => {
     }
 
     await router.push(backPath);
-  }, []);
+  }, [backPath, store.tenant]);
 
-  const onSubmit = useCallback(async (tenantPart) => {
-    let tenant = toJS(store.tenant.selected);
+  const onSubmit = useCallback(
+    async (tenantPart) => {
+      let tenant = toJS(store.tenant.selected);
 
-    tenant.properties = tenant.properties || [];
-    tenant = {
-      isCompany: false,
-      isVat: false,
-      ...tenant,
-      properties: tenant.properties.map(
-        ({ propertyId, entryDate, exitDate }) => ({
-          propertyId,
-          entryDate,
-          exitDate,
-        })
-      ),
-      ...tenantPart,
-    };
+      tenant.properties = tenant.properties || [];
+      tenant = {
+        isCompany: false,
+        isVat: false,
+        ...tenant,
+        properties: tenant.properties.map(
+          ({ propertyId, entryDate, exitDate }) => ({
+            propertyId,
+            entryDate,
+            exitDate,
+          })
+        ),
+        ...tenantPart,
+      };
 
-    setError('');
+      setError('');
 
-    if (tenant._id) {
-      const { status, data } = await store.tenant.update(tenant);
-      if (status !== 200) {
-        switch (status) {
-          case 422:
-            return setError(t('Tenant name is missing'));
-          case 403:
-            return setError(t('You are not allowed to update the tenant'));
-          default:
-            return setError(t('Something went wrong'));
+      if (tenant._id) {
+        const { status, data } = await store.tenant.update(tenant);
+        if (status !== 200) {
+          switch (status) {
+            case 422:
+              return setError(t('Tenant name is missing'));
+            case 403:
+              return setError(t('You are not allowed to update the tenant'));
+            default:
+              return setError(t('Something went wrong'));
+          }
         }
-      }
-      store.tenant.setSelected(data);
-    } else {
-      const { status, data } = await store.tenant.create(tenant);
-      if (status !== 200) {
-        switch (status) {
-          case 422:
-            return setError(t('Tenant name is missing'));
-          case 403:
-            return setError(t('You are not allowed to create a tenant'));
-          case 409:
-            return setError(t('The tenant already exists'));
-          default:
-            return setError(t('Something went wrong'));
+        store.tenant.setSelected(data);
+      } else {
+        const { status, data } = await store.tenant.create(tenant);
+        if (status !== 200) {
+          switch (status) {
+            case 422:
+              return setError(t('Tenant name is missing'));
+            case 403:
+              return setError(t('You are not allowed to create a tenant'));
+            case 409:
+              return setError(t('The tenant already exists'));
+            default:
+              return setError(t('Something went wrong'));
+          }
         }
+        store.tenant.setSelected(data);
+        await router.push(
+          `/${store.organization.selected.name}/tenants/${data._id}`
+        );
       }
-      store.tenant.setSelected(data);
-      await router.push(
-        `/${store.organization.selected.name}/tenants/${data._id}`
-      );
-    }
-  }, []);
+    },
+    [store.organization.selected.name, store.tenant]
+  );
 
   const showTerminateLeaseButton = useMemo(
     () =>
@@ -405,7 +398,7 @@ const Tenant = observer(() => {
 
     await onSubmit({ contractId });
     return contents;
-  }, [editContract]);
+  }, [store.document, store.lease.items, editContract, onSubmit]);
 
   const onSaveContract = useCallback(
     async (contents, html) => {
@@ -432,7 +425,7 @@ const Tenant = observer(() => {
       //   return console.error(status);
       // }
     },
-    [editContract]
+    [editContract, store.document]
   );
 
   return (

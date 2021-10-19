@@ -19,12 +19,11 @@ import {
 } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { FormSection, FormTextField, SelectField, SubmitButton } from '../Form';
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { RestrictButton, RestrictIconButton } from '../RestrictedComponents';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 
 import ConfirmDialog from '../ConfirmDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { observer } from 'mobx-react-lite';
 import PersonIcon from '@material-ui/icons/Person';
 import { StoreContext } from '../../store';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
@@ -32,8 +31,9 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import useTranslation from 'next-translate/useTranslation';
 import WarningIcon from '@material-ui/icons/Warning';
+import { observer } from 'mobx-react-lite';
+import useTranslation from 'next-translate/useTranslation';
 
 const allowedRoles = [ADMIN_ROLE];
 
@@ -59,7 +59,7 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
       await onSubmit(member);
       handleClose();
     },
-    [onSubmit]
+    [onSubmit, handleClose]
   );
 
   const validationSchema = useMemo(
@@ -153,7 +153,7 @@ const Members = observer(({ onSubmit }) => {
         members: updatedMembers,
       });
     },
-    [onSubmit]
+    [onSubmit, store.organization.selected.members]
   );
 
   const removeMember = useCallback(
@@ -167,7 +167,7 @@ const Members = observer(({ onSubmit }) => {
       });
       setUpdating();
     },
-    [onSubmit]
+    [onSubmit, store.organization.selected.members]
   );
 
   const onRoleChange = useCallback(
@@ -185,7 +185,7 @@ const Members = observer(({ onSubmit }) => {
       });
       setUpdating();
     },
-    [onSubmit]
+    [onSubmit, store.organization.selected.members]
   );
 
   return (

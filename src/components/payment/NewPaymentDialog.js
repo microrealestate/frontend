@@ -15,6 +15,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import { NumberFormat } from '../../utils/numberformat';
 import { StoreContext } from '../../store';
+import { useComponentMountedRef } from '../../utils/hooks';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -25,20 +26,23 @@ const NewPaymentDialog = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(true);
   const [rents, setRents] = useState([]);
   const [selectedRent, setSelectedRent] = useState({});
+  const mountedRef = useComponentMountedRef();
 
   useEffect(() => {
     const fetchRents = async () => {
       const { status, data } = await store.rent.fetchWithoutUpdatingStore();
-      setLoading(false);
-      if (status !== 200) {
-        //TODO: handle error
-        // setError('')
-        return setRents([]);
+      if (mountedRef.current) {
+        setLoading(false);
+        if (status !== 200) {
+          //TODO: handle error
+          // setError('')
+          return setRents([]);
+        }
+        setRents(data.rents);
       }
-      setRents(data.rents);
     };
     fetchRents();
-  }, []);
+  }, [store.rent]);
 
   const onRentChange = (event) => {
     setSelectedRent(event.target.value);

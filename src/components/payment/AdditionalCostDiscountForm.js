@@ -37,23 +37,26 @@ const AdditionalCostDiscountForm = ({ onSubmit }) => {
     [store.rent.selected]
   );
 
-  const _onSubmit = useCallback(async (values) => {
-    const paymentPart = {
-      ...values,
-    };
-    try {
-      await onSubmit(paymentPart);
-    } finally {
-      if (!values.extracharge || values.extracharge === '0') {
-        values.extracharge = '';
-        values.noteextracharge = '';
+  const _onSubmit = useCallback(
+    async (values) => {
+      const paymentPart = {
+        ...values,
+      };
+      try {
+        await onSubmit(paymentPart);
+      } finally {
+        if (!values.extracharge || values.extracharge === '0') {
+          values.extracharge = '';
+          values.noteextracharge = '';
+        }
+        if (!values.promo || values.promo === '0') {
+          values.promo = '';
+          values.notepromo = '';
+        }
       }
-      if (!values.promo || values.promo === '0') {
-        values.promo = '';
-        values.notepromo = '';
-      }
-    }
-  }, []);
+    },
+    [onSubmit]
+  );
 
   return (
     <Formik

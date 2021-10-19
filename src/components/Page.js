@@ -46,11 +46,14 @@ const MainToolbar = memo(function MainToolbar() {
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
 
-  const signOut = useCallback(async (event) => {
-    event.preventDefault();
-    await store.user.signOut();
-    window.location.assign(BASE_PATH); // will be redirected to /signin
-  }, []);
+  const signOut = useCallback(
+    async (event) => {
+      event.preventDefault();
+      await store.user.signOut();
+      window.location.assign(BASE_PATH); // will be redirected to /signin
+    },
+    [store.user]
+  );
 
   return (
     <Box

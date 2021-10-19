@@ -11,10 +11,11 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
-import { Children, useCallback, useContext, useMemo, useState } from 'react';
 import { getStoreInstance, StoreContext } from '../../../store';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { isServer } from '../../../utils';
+import { nanoid } from 'nanoid';
 import NewPropertyDialog from '../../../components/properties/NewPropertyDialog';
 import { NumberFormat } from '../../../utils/numberformat';
 import { observer } from 'mobx-react-lite';
@@ -47,36 +48,42 @@ const Properties = observer(() => {
   const router = useRouter();
   const classes = useStyles();
 
-  const filters = useMemo(
-    () => [
-      { id: '', label: t('All') },
-      { id: 'vacant', label: t('Vacant') },
-      { id: 'occupied', label: t('Occupied') },
-    ],
-    []
-  );
+  const filters = useMemo(() => [
+    { id: '', label: t('All') },
+    { id: 'vacant', label: t('Vacant') },
+    { id: 'occupied', label: t('Occupied') },
+  ]);
 
-  const onSearch = useCallback((status, searchText) => {
-    store.property.setFilters({ status, searchText });
-  }, []);
+  const onSearch = useCallback(
+    (status, searchText) => {
+      store.property.setFilters({ status, searchText });
+    },
+    [store.property]
+  );
 
   const onNewProperty = useCallback(() => {
     setOpenNewPropertyDialog(true);
   }, []);
 
-  const onCreateProperty = useCallback(async (property) => {
-    store.property.setSelected(property);
-    await router.push(
-      `/${store.organization.selected.name}/properties/${property._id}`
-    );
-  }, []);
+  const onCreateProperty = useCallback(
+    async (property) => {
+      store.property.setSelected(property);
+      await router.push(
+        `/${store.organization.selected.name}/properties/${property._id}`
+      );
+    },
+    [store.organization.selected.name, store.property]
+  );
 
-  const onClick = useCallback(async (property) => {
-    store.property.setSelected(property);
-    await router.push(
-      `/${store.organization.selected.name}/properties/${property._id}`
-    );
-  }, []);
+  const onClick = useCallback(
+    async (property) => {
+      store.property.setSelected(property);
+      await router.push(
+        `/${store.organization.selected.name}/properties/${property._id}`
+      );
+    },
+    [store.organization.selected.name, store.property]
+  );
 
   return (
     <Page
@@ -120,60 +127,62 @@ const Properties = observer(() => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Children.toArray(
-              store.property.filteredItems.map((property) => {
-                return (
-                  <StyledTableRow hover onClick={() => onClick(property)}>
-                    <TableCell align="center">
-                      <PropertyAvatar
-                        type={property.type}
-                        status={property.status}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography noWrap>{property.name}</Typography>
-                      <Typography noWrap>{property.description}</Typography>
-                      <Typography
-                        variant="caption"
-                        color="textSecondary"
-                        component="div"
-                        className={
-                          property.status === 'vacant' ? classes.vacant : null
-                        }
-                      >
-                        {property.status === 'vacant'
-                          ? t('Vacant')
-                          : t('Occupied by {{tenant}}', {
-                              tenant: property.occupantLabel,
-                            })}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {property.address && (
-                        <>
-                          <Typography>{property.address.street1}</Typography>
-                          {property.address.street2 && (
-                            <Typography>{property.address.street2}</Typography>
-                          )}
-                          <Typography>
-                            {property.address.zipCode} {property.address.city}
-                          </Typography>
-                          <Typography>
-                            {property.address.state
-                              ? `${property.address.state} `
-                              : ''}
-                            {property.address.country}
-                          </Typography>
-                        </>
-                      )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <NumberFormat value={property.price} />
-                    </TableCell>
-                  </StyledTableRow>
-                );
-              })
-            )}
+            {store.property.filteredItems.map((property) => {
+              return (
+                <StyledTableRow
+                  key={nanoid()}
+                  hover
+                  onClick={() => onClick(property)}
+                >
+                  <TableCell align="center">
+                    <PropertyAvatar
+                      type={property.type}
+                      status={property.status}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography noWrap>{property.name}</Typography>
+                    <Typography noWrap>{property.description}</Typography>
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      component="div"
+                      className={
+                        property.status === 'vacant' ? classes.vacant : null
+                      }
+                    >
+                      {property.status === 'vacant'
+                        ? t('Vacant')
+                        : t('Occupied by {{tenant}}', {
+                            tenant: property.occupantLabel,
+                          })}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {property.address && (
+                      <>
+                        <Typography>{property.address.street1}</Typography>
+                        {property.address.street2 && (
+                          <Typography>{property.address.street2}</Typography>
+                        )}
+                        <Typography>
+                          {property.address.zipCode} {property.address.city}
+                        </Typography>
+                        <Typography>
+                          {property.address.state
+                            ? `${property.address.state} `
+                            : ''}
+                          {property.address.country}
+                        </Typography>
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    <NumberFormat value={property.price} />
+                  </TableCell>
+                </StyledTableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Paper>

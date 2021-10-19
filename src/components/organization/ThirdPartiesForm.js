@@ -71,7 +71,7 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
         },
       });
     },
-    [onSubmit]
+    [onSubmit, initialValues.apiKey]
   );
 
   const allowedRoles = useMemo(

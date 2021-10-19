@@ -29,7 +29,10 @@ export const getPeriod = (t, term, frequency) => {
 
 const RentPeriod = ({ term, frequency }) => {
   const { t } = useTranslation('common');
-  const period = useMemo(() => getPeriod(t, term, frequency), []);
+  const period = useMemo(
+    () => getPeriod(t, term, frequency),
+    [frequency, term]
+  );
 
   return <Typography>{period}</Typography>;
 };

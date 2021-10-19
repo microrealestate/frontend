@@ -11,10 +11,10 @@ import {
 } from '../Form';
 import { useCallback, useContext, useMemo } from 'react';
 
+import { StoreContext } from '../../store';
 import cc from 'currency-codes';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { observer } from 'mobx-react-lite';
-import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
@@ -117,7 +117,13 @@ const LandlordForm = observer(({ onSubmit, onSubmitted }) => {
         isLocaleChanged: updatedSettings.locale !== initialValues.locale,
       });
     },
-    [onSubmit, onSubmitted]
+    [
+      onSubmit,
+      onSubmitted,
+      initialValues.locale,
+      initialValues.name,
+      store.organization.selected?.companyInfo,
+    ]
   );
 
   const allowedRoles = useMemo(

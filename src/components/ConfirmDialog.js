@@ -21,7 +21,7 @@ const ConfirmDialog = ({
   const handleConfirm = useCallback(() => {
     setOpen(false);
     onConfirm(open);
-  }, [setOpen, open]);
+  }, [setOpen, onConfirm, open]);
 
   return (
     <Dialog

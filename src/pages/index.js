@@ -12,7 +12,7 @@ const Index = (props) => {
 
   useEffect(() => {
     router.push(redirectPath);
-  }, []);
+  }, [redirectPath]);
 
   return null;
 };

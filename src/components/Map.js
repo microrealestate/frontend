@@ -1,15 +1,17 @@
 import { Marker, Map as PigeonMap } from 'pigeon-maps';
 import { memo, useEffect, useState } from 'react';
 
-import axios from 'axios';
 import { LocationIllustration } from './Illustrations';
+import axios from 'axios';
+import { useComponentMountedRef } from '../utils/hooks';
 import { useTheme } from '@material-ui/core';
 
 const nominatimBaseURL = 'https://nominatim.openstreetmap.org';
 
-const Map = memo(function Map({ address, height = 300, zoom = 16 }) {
+const Map = memo(function Map({ address, height = 200, zoom = 16 }) {
   const [center, setCenter] = useState();
   const [loading, setLoading] = useState(true);
+  const mountedRef = useComponentMountedRef();
   const theme = useTheme();
 
   useEffect(() => {
@@ -37,13 +39,15 @@ const Map = memo(function Map({ address, height = 300, zoom = 16 }) {
           const response = await axios.get(
             `${nominatimBaseURL}/search?${queryAddress}&format=json&addressdetails=1`
           );
-          if (response.data?.[0]?.lat && response.data?.[0]?.lon) {
-            setCenter([
-              Number(response.data[0].lat),
-              Number(response.data[0].lon),
-            ]);
-          } else {
-            setCenter();
+          if (mountedRef.current) {
+            if (response.data?.[0]?.lat && response.data?.[0]?.lon) {
+              setCenter([
+                Number(response.data[0].lat),
+                Number(response.data[0].lon),
+              ]);
+            } else {
+              setCenter();
+            }
           }
         } catch (error) {
           console.error(error);
@@ -68,7 +72,7 @@ const Map = memo(function Map({ address, height = 300, zoom = 16 }) {
           />
         </PigeonMap>
       )}
-      {!loading && !center && <LocationIllustration height={height} />}
+      {!center && <LocationIllustration height={height} />}
     </>
   );
 });

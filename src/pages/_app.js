@@ -1,7 +1,7 @@
 import 'quill/dist/quill.snow.css';
-import '../components/RichTextEditor/richtexteditor.css';
 import 'moment/locale/fr';
 import 'moment/locale/pt';
+import '../components/RichTextEditor/richtexteditor.css';
 
 import * as Yup from 'yup';
 
@@ -12,8 +12,8 @@ import DateFnsUtils from '@date-io/moment';
 import Head from 'next/head';
 import { InjectStoreContext } from '../store';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import theme from '../styles/theme';
 import { ThemeProvider } from '@material-ui/core/styles';
+import theme from '../styles/theme';
 import { useEffect } from 'react';
 
 Yup.addMethod(Yup.string, 'emails', function (message) {

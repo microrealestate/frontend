@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 
 import { Box, Button, Grid } from '@material-ui/core';
-import { Children, useContext, useMemo, useState } from 'react';
 import {
   DateField,
   DateRangeField,
@@ -17,8 +16,10 @@ import {
   validateYupSchema,
   yupToFormErrors,
 } from 'formik';
+import { Fragment, useContext, useMemo, useState } from 'react';
 
 import moment from 'moment';
+import { nanoid } from 'nanoid';
 import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
@@ -162,7 +163,7 @@ const LeaseContractForm = observer((props) => {
         //disabled: selectedPropertyId !== _id && status === 'occupied'
       })),
     ];
-  }, [store.property.items]);
+  }, [store.tenant.selected.properties, store.property.items]);
 
   const _onSubmit = async (lease) => {
     await onSubmit({
@@ -281,81 +282,75 @@ const LeaseContractForm = observer((props) => {
                 name="properties"
                 render={(arrayHelpers) => (
                   <>
-                    {Children.toArray(
-                      values.properties.map((property, index) => (
-                        <>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12} md={9}>
-                              <SelectField
-                                label={t('Property')}
-                                name={`properties[${index}]._id`}
-                                values={availableProperties}
-                                onChange={(evt) =>
-                                  onPropertyChange(evt, property)
-                                }
-                                disabled={readOnly}
-                              />
-                            </Grid>
-                            <Grid item xs={12} md={3}>
-                              <FormTextField
-                                label={t('Rent')}
-                                name={`properties[${index}].rent`}
-                                disabled={
-                                  !values.properties[index]?._id || readOnly
-                                }
-                              />
-                            </Grid>
-                            <Grid item xs={12} md={9}>
-                              <FormTextField
-                                label={t('Expense')}
-                                name={`properties[${index}].expense.title`}
-                                disabled={
-                                  !values.properties[index]?._id || readOnly
-                                }
-                              />
-                            </Grid>
-                            <Grid item xs={12} md={3}>
-                              <FormTextField
-                                label={t('Amount')}
-                                name={`properties[${index}].expense.amount`}
-                                disabled={
-                                  !values.properties[index]?._id || readOnly
-                                }
-                              />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <DateRangeField
-                                beginLabel={t('Entry date')}
-                                beginName={`properties[${index}].entryDate`}
-                                endLabel={t('Exit date')}
-                                endName={`properties[${index}].exitDate`}
-                                minDate={values?.beginDate}
-                                maxDate={values?.endDate}
-                                disabled={
-                                  !values.properties[index]?._id || readOnly
-                                }
-                              />
-                            </Grid>
+                    {values.properties.map((property, index) => (
+                      <Fragment key={nanoid()}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} md={9}>
+                            <SelectField
+                              label={t('Property')}
+                              name={`properties[${index}]._id`}
+                              values={availableProperties}
+                              onChange={(evt) =>
+                                onPropertyChange(evt, property)
+                              }
+                              disabled={readOnly}
+                            />
                           </Grid>
-                          {!readOnly && values.properties.length > 1 && (
-                            <Box
-                              pb={2}
-                              display="flex"
-                              justifyContent="flex-end"
+                          <Grid item xs={12} md={3}>
+                            <FormTextField
+                              label={t('Rent')}
+                              name={`properties[${index}].rent`}
+                              disabled={
+                                !values.properties[index]?._id || readOnly
+                              }
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={9}>
+                            <FormTextField
+                              label={t('Expense')}
+                              name={`properties[${index}].expense.title`}
+                              disabled={
+                                !values.properties[index]?._id || readOnly
+                              }
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={3}>
+                            <FormTextField
+                              label={t('Amount')}
+                              name={`properties[${index}].expense.amount`}
+                              disabled={
+                                !values.properties[index]?._id || readOnly
+                              }
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <DateRangeField
+                              beginLabel={t('Entry date')}
+                              beginName={`properties[${index}].entryDate`}
+                              endLabel={t('Exit date')}
+                              endName={`properties[${index}].exitDate`}
+                              minDate={values?.beginDate}
+                              maxDate={values?.endDate}
+                              disabled={
+                                !values.properties[index]?._id || readOnly
+                              }
+                            />
+                          </Grid>
+                        </Grid>
+                        {!readOnly && values.properties.length > 1 && (
+                          <Box pb={2} display="flex" justifyContent="flex-end">
+                            <Button
+                              // variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => arrayHelpers.remove(index)}
                             >
-                              <Button
-                                // variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={() => arrayHelpers.remove(index)}
-                              >
-                                {t('Remove property')}
-                              </Button>
-                            </Box>
-                          )}
-                        </>
-                      ))
-                    )}
+                              {t('Remove property')}
+                            </Button>
+                          </Box>
+                        )}
+                      </Fragment>
+                    ))}
                     {!readOnly && (
                       <Box display="flex" justifyContent="space-between">
                         <Button

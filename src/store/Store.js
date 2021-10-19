@@ -2,17 +2,16 @@ import { makeObservable, observable, reaction } from 'mobx';
 
 import Dashboard from './Dashboard';
 import Document from './Document';
-import { isServer } from '../utils';
 import Lease from './Lease';
-import moment from 'moment';
 import Organization from './Organization';
 import Property from './Property';
 import Rent from './Rent';
-import { setApiHeaders } from '../utils/fetch';
-import setLanguage from 'next-translate/setLanguage';
 import Template from './Template';
 import Tenant from './Tenant';
 import User from './User';
+import { isServer } from '../utils';
+import moment from 'moment';
+import { setApiHeaders } from '../utils/fetch';
 
 export default class Store {
   user = new User();
@@ -77,11 +76,9 @@ export default class Store {
           accessToken: this.user.token,
           organizationId: organization?._id,
         });
-        const selectedLocale = this.organization.selected?.locale || 'en';
+        const selectedLocale = organization?.locale || 'en';
         moment.locale(selectedLocale);
-        if (!isServer()) {
-          await setLanguage(selectedLocale);
-        }
+        console.log(`set moment ${selectedLocale}`);
       }
     );
   }

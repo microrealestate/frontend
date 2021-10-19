@@ -1,9 +1,7 @@
 import { Box, Paper, Typography } from '@material-ui/core';
-import { Children, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { getPeriod } from './RentPeriod';
 import Loading from '../Loading';
-import moment from 'moment';
 import { NumberFormat } from '../../utils/numberformat';
 import RequestError from '../RequestError';
 import { StoreContext } from '../../store';
@@ -12,6 +10,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { getPeriod } from './RentPeriod';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
 import useTranslation from 'next-translate/useTranslation';
 
 const RentHistory = ({ tenantId }) => {
@@ -21,7 +22,10 @@ const RentHistory = ({ tenantId }) => {
   const [error, setError] = useState();
   const [tenant, setTenant] = useState();
   const selectedRowRef = useRef();
-  const selectedTerm = moment().startOf('month').format('YYYYMMDDHH');
+  const selectedTerm = useMemo(
+    () => moment().startOf('month').format('YYYYMMDDHH'),
+    []
+  );
 
   useEffect(() => {
     const fetchTenantRents = async () => {
@@ -29,21 +33,20 @@ const RentHistory = ({ tenantId }) => {
       const response = await store.rent.fetchTenantRents(tenantId);
       if (response.status !== 200) {
         setError(t('Cannot get tenant information'));
-        setLoading(false);
       } else {
         setTenant(response.data);
       }
+      setLoading(false);
     };
 
     fetchTenantRents();
   }, []);
 
   useEffect(() => {
-    if (error || tenant) {
-      setLoading(false);
+    if (!loading) {
+      selectedRowRef.current?.scrollIntoView({ block: 'center' });
     }
-    selectedRowRef.current?.scrollIntoView();
-  }, [tenant, error]);
+  }, [tenant, loading]);
 
   return (
     <>
@@ -92,61 +95,57 @@ const RentHistory = ({ tenantId }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Children.toArray(
-                  tenant?.rents?.map((rent) => {
-                    const isSelected = String(rent.term) === selectedTerm;
-                    return (
-                      <TableRow
-                        hover
-                        ref={isSelected ? selectedRowRef : null}
-                        selected={isSelected}
-                        size="small"
-                      >
-                        <TableCell>
-                          {getPeriod(t, rent.term, tenant.occupant.frequency)}
-                        </TableCell>
-                        <TableCell align="right">
+                {tenant?.rents?.map((rent) => {
+                  const isSelected = String(rent.term) === selectedTerm;
+                  return (
+                    <TableRow
+                      key={nanoid()}
+                      hover
+                      ref={isSelected ? selectedRowRef : null}
+                      selected={isSelected}
+                      size="small"
+                    >
+                      <TableCell>
+                        {getPeriod(t, rent.term, tenant.occupant.frequency)}
+                      </TableCell>
+                      <TableCell align="right">
+                        <NumberFormat
+                          variant="body1"
+                          value={
+                            rent.totalWithoutBalanceAmount +
+                            rent.promo -
+                            rent.extracharge
+                          }
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        {rent.extracharge > 0 && (
                           <NumberFormat
                             variant="body1"
-                            value={
-                              rent.totalWithoutBalanceAmount +
-                              rent.promo -
-                              rent.extracharge
-                            }
+                            value={rent.extracharge}
                           />
-                        </TableCell>
-                        <TableCell align="right">
-                          {rent.extracharge > 0 && (
-                            <NumberFormat
-                              variant="body1"
-                              value={rent.extracharge}
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          {rent.promo > 0 && (
-                            <NumberFormat variant="body1" value={rent.promo} />
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          {rent.payment > 0 && (
-                            <NumberFormat
-                              variant="body1"
-                              value={rent.payment}
-                              withColor
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {rent.promo > 0 && (
+                          <NumberFormat variant="body1" value={rent.promo} />
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {rent.payment > 0 && (
                           <NumberFormat
                             variant="body1"
-                            value={rent.newBalance}
+                            value={rent.payment}
+                            withColor
                           />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <NumberFormat variant="body1" value={rent.newBalance} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Paper>

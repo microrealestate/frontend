@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SearchIcon from '@material-ui/icons/Search';
 import ToggleMenu from './ToggleMenu';
+import { useTimeout } from '../utils/hooks';
 import useTranslation from 'next-translate/useTranslation';
 
 const SearchFilterBar = ({
@@ -14,13 +15,13 @@ const SearchFilterBar = ({
   const { t } = useTranslation('common');
   const [filter, setFilter] = useState(defaultValue.status);
   const [searchText, setSearchText] = useState(defaultValue.searchText);
+  const triggerSearch = useTimeout(() => {
+    onSearch(filter, searchText);
+  }, 250);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onSearch(filter, searchText);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [filter, searchText]);
+    triggerSearch.start();
+  }, [filter, searchText, onSearch]);
 
   return (
     <Box display="flex" alignItems="center">

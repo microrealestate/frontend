@@ -16,12 +16,15 @@ export const useTabChangeHelper = (hashes) => {
       router.push(`#${hashes[0]}`, null, { shallow: true });
     }
     setTabsReady(true);
-  }, []);
+  }, [hashes]);
 
-  const handleTabChange = useCallback((event, newValue) => {
-    router.push(`#${hashes[newValue]}`, null, { shallow: true });
-    setTabSelectedIndex(newValue);
-  }, []);
+  const handleTabChange = useCallback(
+    (event, newValue) => {
+      router.push(`#${hashes[newValue]}`, null, { shallow: true });
+      setTabSelectedIndex(newValue);
+    },
+    [hashes]
+  );
 
   return { handleTabChange, tabSelectedIndex, tabsReady };
 };

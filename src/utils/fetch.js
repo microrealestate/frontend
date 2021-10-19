@@ -8,6 +8,8 @@ let apiFetch;
 let authApiFetch;
 const withCredentials = publicRuntimeConfig.CORS_ENABLED;
 
+// TODO: rename useApiFetch as it is not a react hook
+/* eslint-disable react-hooks/rules-of-hooks */
 export const setApiHeaders = ({
   accessToken,
   organizationId,

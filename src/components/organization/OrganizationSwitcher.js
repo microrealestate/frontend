@@ -13,12 +13,17 @@ const {
 const OrganizationSwitcher = observer(() => {
   const store = useContext(StoreContext);
 
-  const onChange = useCallback(({ id }) => {
-    const organization = store.organization.items.find(({ _id }) => _id === id);
-    window.location.assign(
-      `${BASE_PATH}/${organization.locale}/${organization.name}/dashboard`
-    );
-  }, []);
+  const onChange = useCallback(
+    ({ id }) => {
+      const organization = store.organization.items.find(
+        ({ _id }) => _id === id
+      );
+      window.location.assign(
+        `${BASE_PATH}/${organization.locale}/${organization.name}/dashboard`
+      );
+    },
+    [store.organization.items]
+  );
 
   const options = useMemo(
     () =>

@@ -1,17 +1,17 @@
-import { getStoreInstance, StoreContext } from '../../../store';
 import { Paper, Tab, Tabs } from '@material-ui/core';
+import { StoreContext, getStoreInstance } from '../../../store';
 import { TabPanel, useTabChangeHelper } from '../../../components/Tabs';
 import { useCallback, useContext, useState } from 'react';
 
 import BillingForm from '../../../components/organization/BillingForm';
-import { isServer } from '../../../utils';
 import LandlordForm from '../../../components/organization/LandlordForm';
 import Leases from '../../../components/organization/Leases';
 import Members from '../../../components/organization/Members';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../components/Page';
 import RequestError from '../../../components/RequestError';
 import ThirdPartiesForm from '../../../components/organization/ThirdPartiesForm';
+import { isServer } from '../../../utils';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
@@ -26,9 +26,11 @@ const SettingTabs = observer(({ onSubmit, setError }) => {
   const { handleTabChange, tabSelectedIndex, tabsReady } =
     useTabChangeHelper(hashes);
 
-  const onSubmitted = ({ isOrgNameChanged }) => {
-    if (isOrgNameChanged) {
-      router.push(`/${store.organization.selected.name}/settings`);
+  const onSubmitted = ({ isOrgNameChanged, isLocaleChanged }) => {
+    if (isOrgNameChanged || isLocaleChanged) {
+      router.push(`/${store.organization.selected.name}/settings`, null, {
+        locale: store.organization.selected.locale,
+      });
     }
   };
 
@@ -72,46 +74,49 @@ const Settings = observer(() => {
   const store = useContext(StoreContext);
   const [error, setError] = useState('');
 
-  const onSubmit = useCallback(async (orgPart) => {
-    if (!store.user.isAdministrator) {
-      return;
-    }
-
-    const organization = {
-      // Do not update keys when the thirdParties is not touched
-      thirdParties: {
-        mailgun: { apiKeyUpdated: false },
-        b2: { applicationKeyIdUpdated: false, applicationKeyUpdated: false },
-      },
-      ...store.organization.selected,
-      ...orgPart,
-    };
-
-    setError('');
-
-    const { status, data: updatedOrganization } =
-      await store.organization.update(organization);
-    if (status !== 200) {
-      switch (status) {
-        case 422:
-          return setError(t('Some fields are missing'));
-        case 403:
-          return setError(t('You are not allowed to update the settings'));
-        case 409:
-          return setError(t('The organization name already exists'));
-        default:
-          return setError(t('Something went wrong'));
+  const onSubmit = useCallback(
+    async (orgPart) => {
+      if (!store.user.isAdministrator) {
+        return;
       }
-    }
 
-    store.organization.setSelected(updatedOrganization, store.user);
-    store.organization.setItems([
-      ...store.organization.items.filter(
-        ({ _id }) => _id !== updatedOrganization._id
-      ),
-      updatedOrganization,
-    ]);
-  }, []);
+      const organization = {
+        // Do not update keys when the thirdParties is not touched
+        thirdParties: {
+          mailgun: { apiKeyUpdated: false },
+          b2: { applicationKeyIdUpdated: false, applicationKeyUpdated: false },
+        },
+        ...store.organization.selected,
+        ...orgPart,
+      };
+
+      setError('');
+
+      const { status, data: updatedOrganization } =
+        await store.organization.update(organization);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Some fields are missing'));
+          case 403:
+            return setError(t('You are not allowed to update the settings'));
+          case 409:
+            return setError(t('The organization name already exists'));
+          default:
+            return setError(t('Something went wrong'));
+        }
+      }
+
+      store.organization.setSelected(updatedOrganization, store.user);
+      store.organization.setItems([
+        ...store.organization.items.filter(
+          ({ _id }) => _id !== updatedOrganization._id
+        ),
+        updatedOrganization,
+      ]);
+    },
+    [store.organization, store.user]
+  );
 
   return (
     <Page>

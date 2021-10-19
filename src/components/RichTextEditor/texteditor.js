@@ -1,9 +1,9 @@
 import './TemplateField';
 import './TemplateLoopBlock';
 
+import Quill from 'quill';
 import { detect } from 'detect-browser';
 import getConfig from 'next/config';
-import Quill from 'quill';
 
 const {
   publicRuntimeConfig: { BASE_PATH },
@@ -22,7 +22,8 @@ const PAGE_BREAK_HEIGHT = 14; // px
 const EDITOR = {
   // instance,
   // toolbar,
-  // wrapper
+  // wrapper,
+  textChangeListeners: [],
 };
 
 /**
@@ -120,24 +121,22 @@ export const printHandler = () => {
     )
     .forEach((element) => element && element.parentNode.removeChild(element));
 
-  setTimeout(function () {
-    try {
-      iframe.focus();
-      if (browser && ['edge', 'ie'].includes(browser.name)) {
-        try {
-          iframe.contentWindow.document.execCommand('print', false, null);
-        } catch (e) {
-          iframe.contentWindow.print();
-        }
-      } else {
+  try {
+    iframe.focus();
+    if (browser && ['edge', 'ie'].includes(browser.name)) {
+      try {
+        iframe.contentWindow.document.execCommand('print', false, null);
+      } catch (e) {
         iframe.contentWindow.print();
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      iframe.parentNode.removeChild(iframe);
+    } else {
+      iframe.contentWindow.print();
     }
-  }, 1000);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    iframe.parentNode.removeChild(iframe);
+  }
 };
 
 export const undoHandler = () => {
@@ -180,7 +179,7 @@ export const createTextEditor = (toolbar, wrapper) => {
   EDITOR.toolbar = toolbar;
   EDITOR.wrapper = wrapper;
 
-  // listen textEditor changes
+  // handle page breaks on text change event
   EDITOR.instance.on('text-change', _handlePageBreaks);
   _handlePageBreaks();
 
@@ -188,7 +187,13 @@ export const createTextEditor = (toolbar, wrapper) => {
 };
 
 export const destroyTextEditor = () => {
-  EDITOR.instance.off('text-change', _handlePageBreaks);
+  if (EDITOR.instance) {
+    EDITOR.instance.off('text-change', _handlePageBreaks);
+    EDITOR.textChangeListeners.forEach((fn) => {
+      EDITOR.instance.off('text-change', fn);
+    });
+    EDITOR.textChangeListeners = [];
+  }
   EDITOR.wrapper.innerHTML = '';
   EDITOR.instance = null;
   EDITOR.wrapper = null;
@@ -277,4 +282,24 @@ export const getHTML = () => {
     return '';
   }
   return EDITOR.wrapper.querySelector('.ql-editor').innerHTML;
+};
+
+export const addTextChangeListener = (fn) => {
+  if (!EDITOR.instance) {
+    return;
+  }
+
+  EDITOR.instance.on('text-change', fn);
+  EDITOR.textChangeListeners.push(fn);
+};
+
+export const removeTextChangeListener = (fn) => {
+  if (!EDITOR.instance) {
+    return;
+  }
+
+  EDITOR.instance.off('text-change', fn);
+  EDITOR.textChangeListeners = EDITOR.textChangeListeners.filter(
+    (listener) => fn !== listener
+  );
 };

@@ -14,15 +14,8 @@ import {
   Typography,
 } from '@material-ui/core';
 import { CardRow, DashboardCard } from '../../../components/Cards';
-import {
-  Children,
-  memo,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
 import { getStoreInstance, StoreContext } from '../../../store';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { TabPanel, useTabChangeHelper } from '../../../components/Tabs';
 
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -32,6 +25,7 @@ import { isServer } from '../../../utils';
 import Link from '../../../components/Link';
 import Map from '../../../components/Map';
 import moment from 'moment';
+import { nanoid } from 'nanoid';
 import { NumberFormat } from '../../../utils/numberformat';
 import { observer } from 'mobx-react-lite';
 import Page from '../../../components/Page';
@@ -93,25 +87,23 @@ const OccupancyHistory = () => {
   return (
     <List className={classes.root}>
       {store.property.selected?.occupancyHistory?.length ? (
-        Children.toArray(
-          store.property.selected.occupancyHistory.map((occupant) => {
-            const occupationDates = t('{{beginDate}} to {{endDate}}', {
-              beginDate: moment(occupant.beginDate, 'DD/MM/YYYY').format('LL'),
-              endDate: moment(occupant.endDate, 'DD/MM/YYYY').format('LL'),
-            });
-            return (
-              <ListItem>
-                <ListItemAvatar>
-                  <TenantAvatar tenant={occupant} />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={occupant.name}
-                  secondary={occupationDates}
-                />
-              </ListItem>
-            );
-          })
-        )
+        store.property.selected.occupancyHistory.map((occupant) => {
+          const occupationDates = t('{{beginDate}} to {{endDate}}', {
+            beginDate: moment(occupant.beginDate, 'DD/MM/YYYY').format('LL'),
+            endDate: moment(occupant.endDate, 'DD/MM/YYYY').format('LL'),
+          });
+          return (
+            <ListItem key={nanoid()}>
+              <ListItemAvatar>
+                <TenantAvatar tenant={occupant} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={occupant.name}
+                secondary={occupationDates}
+              />
+            </ListItem>
+          );
+        })
       ) : (
         <Typography color="textSecondary">
           {t('Property not rented so far')}
@@ -167,50 +159,53 @@ const Property = observer(() => {
     }
 
     await router.push(backPath);
-  }, []);
+  }, [backPath, store.property]);
 
-  const onSubmit = useCallback(async (propertyPart) => {
-    let property = {
-      ...toJS(store.property.selected),
-      ...propertyPart,
-      price: propertyPart.rent,
-    };
+  const onSubmit = useCallback(
+    async (propertyPart) => {
+      let property = {
+        ...toJS(store.property.selected),
+        ...propertyPart,
+        price: propertyPart.rent,
+      };
 
-    setError('');
+      setError('');
 
-    if (property._id) {
-      const { status, data } = await store.property.update(property);
-      if (status !== 200) {
-        switch (status) {
-          case 422:
-            return setError(t('Property name is missing'));
-          case 403:
-            return setError(t('You are not allowed to update the property'));
-          default:
-            return setError(t('Something went wrong'));
+      if (property._id) {
+        const { status, data } = await store.property.update(property);
+        if (status !== 200) {
+          switch (status) {
+            case 422:
+              return setError(t('Property name is missing'));
+            case 403:
+              return setError(t('You are not allowed to update the property'));
+            default:
+              return setError(t('Something went wrong'));
+          }
         }
-      }
-      store.property.setSelected(data);
-    } else {
-      const { status, data } = await store.property.create(property);
-      if (status !== 200) {
-        switch (status) {
-          case 422:
-            return setError(t('Property name is missing'));
-          case 403:
-            return setError(t('You are not allowed to create a property'));
-          case 409:
-            return setError(t('The property already exists'));
-          default:
-            return setError(t('Something went wrong'));
+        store.property.setSelected(data);
+      } else {
+        const { status, data } = await store.property.create(property);
+        if (status !== 200) {
+          switch (status) {
+            case 422:
+              return setError(t('Property name is missing'));
+            case 403:
+              return setError(t('You are not allowed to create a property'));
+            case 409:
+              return setError(t('The property already exists'));
+            default:
+              return setError(t('Something went wrong'));
+          }
         }
+        store.property.setSelected(data);
+        await router.push(
+          `/${store.organization.selected.name}/properties/${data._id}`
+        );
       }
-      store.property.setSelected(data);
-      await router.push(
-        `/${store.organization.selected.name}/properties/${data._id}`
-      );
-    }
-  }, []);
+    },
+    [store.organization.selected.name, store.property]
+  );
 
   return (
     <Page

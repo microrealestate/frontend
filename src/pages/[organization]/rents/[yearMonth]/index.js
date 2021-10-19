@@ -1,13 +1,10 @@
 import { Box, Grid, Hidden, Typography } from '@material-ui/core';
-import { Children, useCallback, useContext, useMemo } from 'react';
-import { getStoreInstance, StoreContext } from '../../../../store';
+import { StoreContext, getStoreInstance } from '../../../../store';
+import { useCallback, useContext, useMemo } from 'react';
 
 import FullScreenDialogButton from '../../../../components/FullScreenDialogButton';
-import { isServer } from '../../../../utils';
-import moment from 'moment';
 import MonthPicker from '../../../../components/MonthPicker';
 import { NumberFormat } from '../../../../utils/numberformat';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../../components/Page';
 import { PageCard } from '../../../../components/Cards';
 import ReceiptIcon from '@material-ui/icons/Receipt';
@@ -15,9 +12,13 @@ import RentCard from '../../../../components/rents/RentCard';
 import RentTable from '../../../../components/rents/RentTable';
 import SearchFilterBar from '../../../../components/SearchFilterBar';
 import SendIcon from '@material-ui/icons/Send';
-import { toJS } from 'mobx';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+import { isServer } from '../../../../utils';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 import { withAuthentication } from '../../../../components/Authentication';
@@ -46,34 +47,43 @@ const Rents = observer(() => {
   const store = useContext(StoreContext);
   const router = useRouter();
 
-  const onSearch = useCallback((status, searchText) => {
-    let queryString = '';
-    if (searchText || status) {
-      queryString = `?search=${encodeURIComponent(
-        searchText
-      )}&status=${encodeURIComponent(status)}`;
-    }
-    router.push(
-      `/${store.organization.selected.name}/rents/${store.rent.period}${queryString}`,
-      undefined,
-      { shallow: true }
-    );
-    store.rent.setFilters({ status, searchText });
-  }, []);
+  const onSearch = useCallback(
+    (status, searchText) => {
+      let queryString = '';
+      if (searchText || status) {
+        queryString = `?search=${encodeURIComponent(
+          searchText
+        )}&status=${encodeURIComponent(status)}`;
+      }
+      router.push(
+        `/${store.organization.selected.name}/rents/${store.rent.period}${queryString}`,
+        null,
+        { shallow: true }
+      );
+      store.rent.setFilters({ status, searchText });
+    },
+    [store.organization.selected.name]
+  );
 
-  const onPeriodChange = useCallback(async (period) => {
-    store.rent.setPeriod(period);
-    await router.push(
-      `/${store.organization.selected.name}/rents/${store.rent.period}`
-    );
-  }, []);
+  const onPeriodChange = useCallback(
+    async (period) => {
+      store.rent.setPeriod(period);
+      await router.push(
+        `/${store.organization.selected.name}/rents/${store.rent.period}`
+      );
+    },
+    [store.organization.selected.name]
+  );
 
-  const onEdit = useCallback(async (rent) => {
-    store.rent.setSelected(rent);
-    await router.push(
-      `/${store.organization.selected.name}/payment/${rent.occupant._id}/${store.rent.selected.term}`
-    );
-  }, []);
+  const onEdit = useCallback(
+    async (rent) => {
+      store.rent.setSelected(rent);
+      await router.push(
+        `/${store.organization.selected.name}/payment/${rent.occupant._id}/${store.rent.selected.term}`
+      );
+    },
+    [store.organization.selected.name]
+  );
 
   const filters = useMemo(
     () => [
@@ -167,13 +177,11 @@ const Rents = observer(() => {
         </Hidden>
       )}
       <Grid container spacing={3}>
-        {Children.toArray(
-          store.rent.filteredItems.map((rent) => (
-            <Grid item xs={12} md={4}>
-              <RentCard rent={rent} onEdit={onEdit} />
-            </Grid>
-          ))
-        )}
+        {store.rent.filteredItems.map((rent) => (
+          <Grid key={nanoid()} item xs={12} md={4}>
+            <RentCard rent={rent} onEdit={onEdit} />
+          </Grid>
+        ))}
       </Grid>
     </Page>
   );

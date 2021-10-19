@@ -33,31 +33,34 @@ const NewPropertyDialog = ({ open, setOpen, onConfirm }) => {
 
   const handleClose = useCallback(() => {
     setOpen(false);
-  }, []);
+  }, [setOpen]);
 
-  const _onSubmit = useCallback(async (propertyPart) => {
-    let property = {
-      ...propertyPart,
-      price: propertyPart.rent,
-    };
+  const _onSubmit = useCallback(
+    async (propertyPart) => {
+      let property = {
+        ...propertyPart,
+        price: propertyPart.rent,
+      };
 
-    const { status, data } = await store.property.create(property);
-    if (status !== 200) {
-      switch (status) {
-        case 422:
-          return setError(t('Property name is missing'));
-        case 403:
-          return setError(t('You are not allowed to create a property'));
-        case 409:
-          return setError(t('The property already exists'));
-        default:
-          return setError(t('Something went wrong'));
+      const { status, data } = await store.property.create(property);
+      if (status !== 200) {
+        switch (status) {
+          case 422:
+            return setError(t('Property name is missing'));
+          case 403:
+            return setError(t('You are not allowed to create a property'));
+          case 409:
+            return setError(t('The property already exists'));
+          default:
+            return setError(t('Something went wrong'));
+        }
       }
-    }
 
-    handleClose(false);
-    await onConfirm(data);
-  }, []);
+      handleClose(false);
+      await onConfirm(data);
+    },
+    [handleClose, onConfirm, store.property]
+  );
 
   const propertyTypes = useMemo(
     () =>

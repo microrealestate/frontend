@@ -75,7 +75,7 @@ const Lease = observer(() => {
         }
       }
     },
-    [setError]
+    [setError, store.lease]
   );
 
   const onLeaseRemove = useCallback(async () => {
@@ -93,7 +93,7 @@ const Lease = observer(() => {
       }
     }
     router.push(`/${store.organization.selected.name}/settings#leases`);
-  }, [setError]);
+  }, [setError, store.lease, store.organization.selected.name]);
 
   return (
     <Page

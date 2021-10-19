@@ -168,7 +168,7 @@ const Steps = memo(({ rent }) => {
       receiptSentText,
       lastPayment,
     };
-  }, [rent.emailStatus, rent.payments]);
+  }, [rent.newBalance, rent.status, rent.emailStatus, rent.payments]);
 
   return (
     <Stepper
@@ -247,7 +247,7 @@ const Steps = memo(({ rent }) => {
 
 const RentCard = observer(({ rent, onEdit }) => {
   const { t } = useTranslation('common');
-  const _onEdit = useCallback(() => onEdit(rent), [rent]);
+  const _onEdit = useCallback(() => onEdit(rent), [rent, onEdit]);
   const period = useMemo(() => moment(rent.term, 'YYYYMMDDHH'), [rent.term]);
 
   return (

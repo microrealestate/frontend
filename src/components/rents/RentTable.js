@@ -12,7 +12,6 @@ import {
   useTheme,
 } from '@material-ui/core';
 import {
-  Children,
   memo,
   useCallback,
   useContext,
@@ -21,9 +20,7 @@ import {
   useState,
 } from 'react';
 
-import { autorun } from 'mobx';
 import DownloadLink from '../DownloadLink';
-import moment from 'moment';
 import { NumberFormat } from '../../utils/numberformat';
 import RequestError from '../RequestError';
 import SearchFilterBar from '../SearchFilterBar';
@@ -33,6 +30,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { autorun } from 'mobx';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
 import useTranslation from 'next-translate/useTranslation';
 
 const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
@@ -173,7 +173,7 @@ const RentTable = () => {
   const [error, setError] = useState('');
   const theme = useTheme();
 
-  useEffect(() => autorun(() => setRents(store.rent.items)), []);
+  useEffect(() => autorun(() => setRents(store.rent.items)));
 
   useEffect(() => {
     setFilteredRents(
@@ -248,7 +248,7 @@ const RentTable = () => {
 
       setSelected([]);
     },
-    [selected]
+    [store.rent, selected]
   );
 
   const selectableRentNum = useMemo(
@@ -327,151 +327,152 @@ const RentTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Children.toArray(
-              filteredRents.map((rent) => {
-                const isItemSelected = selected
-                  .map((r) => r._id)
-                  .includes(rent._id);
-                const contactEmails = rent.occupant.contactEmails.join(', ');
-                return (
-                  <TableRow hover selected={isItemSelected} size="small">
-                    <TableCell padding="checkbox">
-                      {rent.occupant.hasContactEmails ? (
-                        <Checkbox
-                          color="default"
-                          checked={isItemSelected}
-                          onChange={(event) => onSelectClick(event, rent)}
-                          inputProps={{ 'aria-labelledby': rent.occupant.name }}
-                        />
-                      ) : (
-                        <Tooltip
-                          title={t('No emails available for this tenant')}
-                        >
-                          <span>
-                            <Checkbox
-                              onChange={(event) => onSelectClick(event, rent)}
-                              inputProps={{
-                                'aria-labelledby': rent.occupant.name,
-                              }}
-                              disabled
-                            />
-                          </span>
-                        </Tooltip>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Typography noWrap>{rent.occupant.name}</Typography>
-                      <Typography variant="caption" noWrap>
-                        {contactEmails}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <NumberFormat
-                        variant="body1"
-                        value={rent.totalToPay > 0 ? rent.totalToPay : 0}
+            {filteredRents.map((rent) => {
+              const isItemSelected = selected
+                .map((r) => r._id)
+                .includes(rent._id);
+              const contactEmails = rent.occupant.contactEmails.join(', ');
+              return (
+                <TableRow
+                  key={nanoid()}
+                  hover
+                  selected={isItemSelected}
+                  size="small"
+                >
+                  <TableCell padding="checkbox">
+                    {rent.occupant.hasContactEmails ? (
+                      <Checkbox
+                        color="default"
+                        checked={isItemSelected}
+                        onChange={(event) => onSelectClick(event, rent)}
+                        inputProps={{ 'aria-labelledby': rent.occupant.name }}
                       />
-                    </TableCell>
-                    <TableCell align="center">
-                      {['paid', 'partialypaid'].includes(rent.status) ? (
-                        <Chip
-                          label={
+                    ) : (
+                      <Tooltip title={t('No emails available for this tenant')}>
+                        <span>
+                          <Checkbox
+                            onChange={(event) => onSelectClick(event, rent)}
+                            inputProps={{
+                              'aria-labelledby': rent.occupant.name,
+                            }}
+                            disabled
+                          />
+                        </span>
+                      </Tooltip>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography noWrap>{rent.occupant.name}</Typography>
+                    <Typography variant="caption" noWrap>
+                      {contactEmails}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <NumberFormat
+                      variant="body1"
+                      value={rent.totalToPay > 0 ? rent.totalToPay : 0}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    {['paid', 'partialypaid'].includes(rent.status) ? (
+                      <Chip
+                        label={
+                          rent.status === 'paid'
+                            ? t('Paid')
+                            : t('Partially paid')
+                        }
+                        color="primary"
+                        style={{
+                          backgroundColor:
                             rent.status === 'paid'
-                              ? t('Paid')
-                              : t('Partially paid')
-                          }
-                          color="primary"
-                          style={{
-                            backgroundColor:
-                              rent.status === 'paid'
-                                ? theme.palette.success.main
-                                : theme.palette.warning.main,
-                            width: 100,
-                          }}
-                          size="small"
-                        />
-                      ) : (
-                        <Chip
-                          label={t('Not paid')}
-                          color="primary"
-                          style={{
-                            backgroundColor: theme.palette.error.main,
-                            width: 100,
-                          }}
-                          size="small"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      {rent.emailStatus && rent.emailStatus.status.rentcall ? (
-                        <DownloadLink
-                          tooltipText={t('sent on {{datetime}}', {
-                            datetime: moment(
-                              rent.emailStatus.last.rentcall.sentDate
-                            ).format('LLLL'),
-                          })}
-                          url={`/rentcall/${rent.occupant._id}/${rent.term}`}
-                          documentName={`${rent.occupant.name}-${t(
-                            'first notice'
-                          )}.pdf`}
-                          withIcon
-                        />
-                      ) : null}
-                    </TableCell>
-                    <TableCell align="center">
-                      {rent.emailStatus &&
-                      rent.emailStatus.status.rentcall_reminder ? (
-                        <DownloadLink
-                          tooltipText={t('sent on {{datetime}}', {
-                            datetime: moment(
-                              rent.emailStatus.last.rentcall_reminder.sentDate
-                            ).format('LLLL'),
-                          })}
-                          url={`/rentcall_reminder/${rent.occupant._id}/${rent.term}`}
-                          documentName={`${rent.occupant.name}-${t(
-                            'second notice'
-                          )}.pdf`}
-                          withIcon
-                        />
-                      ) : null}
-                    </TableCell>
-                    <TableCell align="center">
-                      {rent.emailStatus &&
-                      rent.emailStatus.status.rentcall_last_reminder ? (
-                        <DownloadLink
-                          tooltipText={t('sent on {{datetime}}', {
-                            datetime: moment(
-                              rent.emailStatus.last.rentcall_last_reminder
-                                .sentDate
-                            ).format('LLLL'),
-                          })}
-                          url={`/rentcall_last_reminder/${rent.occupant._id}/${rent.term}`}
-                          documentName={`${rent.occupant.name}-${t(
-                            'last notice'
-                          )}.pdf`}
-                          withIcon
-                        />
-                      ) : null}
-                    </TableCell>
-                    <TableCell align="center">
-                      {rent.emailStatus && rent.emailStatus.status.invoice ? (
-                        <DownloadLink
-                          tooltipText={t('sent on {{datetime}}', {
-                            datetime: moment(
-                              rent.emailStatus.last.invoice.sentDate
-                            ).format('LLLL'),
-                          })}
-                          url={`/invoice/${rent.occupant._id}/${rent.term}`}
-                          documentName={`${rent.occupant.name}-${t(
-                            'invoice'
-                          )}.pdf`}
-                          withIcon
-                        />
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+                              ? theme.palette.success.main
+                              : theme.palette.warning.main,
+                          width: 100,
+                        }}
+                        size="small"
+                      />
+                    ) : (
+                      <Chip
+                        label={t('Not paid')}
+                        color="primary"
+                        style={{
+                          backgroundColor: theme.palette.error.main,
+                          width: 100,
+                        }}
+                        size="small"
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rent.emailStatus && rent.emailStatus.status.rentcall ? (
+                      <DownloadLink
+                        tooltipText={t('sent on {{datetime}}', {
+                          datetime: moment(
+                            rent.emailStatus.last.rentcall.sentDate
+                          ).format('LLLL'),
+                        })}
+                        url={`/rentcall/${rent.occupant._id}/${rent.term}`}
+                        documentName={`${rent.occupant.name}-${t(
+                          'first notice'
+                        )}.pdf`}
+                        withIcon
+                      />
+                    ) : null}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rent.emailStatus &&
+                    rent.emailStatus.status.rentcall_reminder ? (
+                      <DownloadLink
+                        tooltipText={t('sent on {{datetime}}', {
+                          datetime: moment(
+                            rent.emailStatus.last.rentcall_reminder.sentDate
+                          ).format('LLLL'),
+                        })}
+                        url={`/rentcall_reminder/${rent.occupant._id}/${rent.term}`}
+                        documentName={`${rent.occupant.name}-${t(
+                          'second notice'
+                        )}.pdf`}
+                        withIcon
+                      />
+                    ) : null}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rent.emailStatus &&
+                    rent.emailStatus.status.rentcall_last_reminder ? (
+                      <DownloadLink
+                        tooltipText={t('sent on {{datetime}}', {
+                          datetime: moment(
+                            rent.emailStatus.last.rentcall_last_reminder
+                              .sentDate
+                          ).format('LLLL'),
+                        })}
+                        url={`/rentcall_last_reminder/${rent.occupant._id}/${rent.term}`}
+                        documentName={`${rent.occupant.name}-${t(
+                          'last notice'
+                        )}.pdf`}
+                        withIcon
+                      />
+                    ) : null}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rent.emailStatus && rent.emailStatus.status.invoice ? (
+                      <DownloadLink
+                        tooltipText={t('sent on {{datetime}}', {
+                          datetime: moment(
+                            rent.emailStatus.last.invoice.sentDate
+                          ).format('LLLL'),
+                        })}
+                        url={`/invoice/${rent.occupant._id}/${rent.term}`}
+                        documentName={`${rent.occupant.name}-${t(
+                          'invoice'
+                        )}.pdf`}
+                        withIcon
+                      />
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Paper>

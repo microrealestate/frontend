@@ -4,6 +4,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { ADMIN_ROLE } from '../../store/User';
 import { FormSection } from '../Form';
 import Link from '../Link';
+import { nanoid } from 'nanoid';
 import NewLeaseDialog from './NewLeaseDialog';
 import { observer } from 'mobx-react-lite';
 import { RestrictButton } from '../RestrictedComponents';
@@ -41,15 +42,18 @@ const Leases = observer(({ setError }) => {
         }
       }
     },
-    [setError]
+    [setError, store.lease]
   );
 
-  const onCreateLease = useCallback(async (lease) => {
-    store.lease.setSelected(lease);
-    await router.push(
-      `/${store.organization.selected.name}/settings/lease/${lease._id}`
-    );
-  }, []);
+  const onCreateLease = useCallback(
+    async (lease) => {
+      store.lease.setSelected(lease);
+      await router.push(
+        `/${store.organization.selected.name}/settings/lease/${lease._id}`
+      );
+    },
+    [store.lease, store.organization.selected.name]
+  );
 
   return (
     <FormSection label={t('Manage leases')}>
@@ -82,54 +86,52 @@ const Leases = observer(({ setError }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {React.Children.toArray(
-              (store.lease.items || []).map((lease) => {
-                return (
-                  <TableRow size="small">
-                    <TableCell>
-                      {lease.system ? (
-                        <Typography noWrap>{t(lease.name)}</Typography>
-                      ) : (
-                        <Link
-                          href={`/${store.organization.selected.name}/settings/lease/${lease._id}`}
-                        >
-                          <Typography noWrap>{lease.name}</Typography>
-                        </Link>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {lease.system || !lease.numberOfTerms ? (
-                        <Typography noWrap>{t('Custom')}</Typography>
-                      ) : (
-                        <Typography noWrap>
-                          {t('{{numberOfTerms}} {{timeRange}}', {
-                            numberOfTerms: lease.numberOfTerms,
-                            timeRange: lease.timeRange,
-                          })}
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {lease.system ? (
-                        <Typography>{t(lease.description)}</Typography>
-                      ) : (
-                        <Typography>{lease.description}</Typography>
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Switch
-                        color={lease.active ? 'primary' : 'default'}
-                        checked={lease.active}
-                        onChange={(evt) =>
-                          onLeaseChange(evt.target.checked, lease)
-                        }
-                        disabled={!!lease.numberOfTerms === false}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+            {(store.lease.items || []).map((lease) => {
+              return (
+                <TableRow key={nanoid()} size="small">
+                  <TableCell>
+                    {lease.system ? (
+                      <Typography noWrap>{t(lease.name)}</Typography>
+                    ) : (
+                      <Link
+                        href={`/${store.organization.selected.name}/settings/lease/${lease._id}`}
+                      >
+                        <Typography noWrap>{lease.name}</Typography>
+                      </Link>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {lease.system || !lease.numberOfTerms ? (
+                      <Typography noWrap>{t('Custom')}</Typography>
+                    ) : (
+                      <Typography noWrap>
+                        {t('{{numberOfTerms}} {{timeRange}}', {
+                          numberOfTerms: lease.numberOfTerms,
+                          timeRange: lease.timeRange,
+                        })}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {lease.system ? (
+                      <Typography>{t(lease.description)}</Typography>
+                    ) : (
+                      <Typography>{lease.description}</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Switch
+                      color={lease.active ? 'primary' : 'default'}
+                      checked={lease.active}
+                      onChange={(evt) =>
+                        onLeaseChange(evt.target.checked, lease)
+                      }
+                      disabled={!!lease.numberOfTerms === false}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Paper>

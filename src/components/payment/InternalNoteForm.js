@@ -22,12 +22,15 @@ const InternalNoteForm = ({ onSubmit }) => {
     [store.rent.selected]
   );
 
-  const _onSubmit = useCallback(async (values) => {
-    const paymentPart = {
-      ...values,
-    };
-    await onSubmit(paymentPart);
-  }, []);
+  const _onSubmit = useCallback(
+    async (values) => {
+      const paymentPart = {
+        ...values,
+      };
+      await onSubmit(paymentPart);
+    },
+    [onSubmit]
+  );
 
   return (
     <Formik

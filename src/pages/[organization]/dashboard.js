@@ -24,14 +24,15 @@ import {
   Tooltip,
   Typography,
 } from '@material-ui/core';
-import { Children, useCallback, useContext, useMemo, useState } from 'react';
 import { getStoreInstance, StoreContext } from '../../store';
 import { NumberFormat, useFormatNumber } from '../../utils/numberformat';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
 import { DashboardCard } from '../../components/Cards';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { isServer } from '../../utils';
 import moment from 'moment';
+import { nanoid } from 'nanoid';
 import NewLeaseDialog from '../../components/organization/NewLeaseDialog';
 import NewPaymentDialog from '../../components/payment/NewPaymentDialog';
 import NewPropertyDialog from '../../components/properties/NewPropertyDialog';
@@ -94,26 +95,35 @@ const Shortcuts = () => {
   }));
   const classes = useStyles();
 
-  const onCreateTenant = useCallback(async (tenant) => {
-    store.tenant.setSelected(tenant);
-    await router.push(
-      `/${store.organization.selected.name}/tenants/${tenant._id}`
-    );
-  }, []);
+  const onCreateTenant = useCallback(
+    async (tenant) => {
+      store.tenant.setSelected(tenant);
+      await router.push(
+        `/${store.organization.selected.name}/tenants/${tenant._id}`
+      );
+    },
+    [store.organization.selected.name, store.tenant]
+  );
 
-  const onCreateProperty = useCallback(async (property) => {
-    store.property.setSelected(property);
-    await router.push(
-      `/${store.organization.selected.name}/properties/${property._id}`
-    );
-  }, []);
+  const onCreateProperty = useCallback(
+    async (property) => {
+      store.property.setSelected(property);
+      await router.push(
+        `/${store.organization.selected.name}/properties/${property._id}`
+      );
+    },
+    [store.organization.selected.name, store.property]
+  );
 
-  const onCreateLease = useCallback(async (lease) => {
-    store.lease.setSelected(lease);
-    await router.push(
-      `/${store.organization.selected.name}/settings/lease/${lease._id}`
-    );
-  }, []);
+  const onCreateLease = useCallback(
+    async (lease) => {
+      store.lease.setSelected(lease);
+      await router.push(
+        `/${store.organization.selected.name}/settings/lease/${lease._id}`
+      );
+    },
+    [store.lease, store.organization.selected.name]
+  );
 
   return (
     <Grid container spacing={2}>
@@ -441,20 +451,19 @@ const MonthFigures = () => {
           </Box>
           <Paper>
             <List>
-              {Children.toArray(
-                store.dashboard.data.topUnpaid?.map(({ tenant, balance }) => (
-                  <TenantListItem
-                    tenant={tenant}
-                    balance={balance}
-                    onClick={() => {
-                      store.tenant.setSelected(tenant);
-                      router.push(
-                        `/${store.organization.selected.name}/tenants/${tenant._id}`
-                      );
-                    }}
-                  />
-                ))
-              )}
+              {store.dashboard.data.topUnpaid?.map(({ tenant, balance }) => (
+                <TenantListItem
+                  key={nanoid()}
+                  tenant={tenant}
+                  balance={balance}
+                  onClick={() => {
+                    store.tenant.setSelected(tenant);
+                    router.push(
+                      `/${store.organization.selected.name}/tenants/${tenant._id}`
+                    );
+                  }}
+                />
+              ))}
             </List>
           </Paper>
         </Grid>

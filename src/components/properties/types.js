@@ -1,4 +1,4 @@
-export default [
+const types = [
   { id: 'store', labelId: 'Store' },
   { id: 'building', labelId: 'Building' },
   { id: 'apartment', labelId: 'Apartment' },
@@ -8,3 +8,5 @@ export default [
   { id: 'parking', labelId: 'Parking spot' },
   { id: 'letterbox', labelId: 'Mailbox' },
 ];
+
+export default types;

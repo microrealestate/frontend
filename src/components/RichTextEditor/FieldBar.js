@@ -8,8 +8,9 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
-import { Children, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { nanoid } from 'nanoid';
 import SearchBar from '../SearchBar';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -53,7 +54,7 @@ export default function FieldBar({ fields, onInsertField }) {
         })
       );
     },
-    [fields]
+    [translatedFields]
   );
 
   return (
@@ -63,25 +64,27 @@ export default function FieldBar({ fields, onInsertField }) {
           <SearchBar onSearch={onSearch} />
         </Toolbar>
         <List>
-          {Children.toArray(
-            filteredFields.map((field) => {
-              return (
-                <ListItem button onClick={() => onInsertField(field)}>
-                  <ListItemText
-                    primary={<Typography noWrap>{field.title}</Typography>}
-                    // secondary={
-                    //   <Box pt={1}>
-                    //     <Typography variant="caption" noWrap={false}>
-                    //       {field.description}
-                    //     </Typography>
-                    //   </Box>
-                    // }
-                    disableTypography
-                  />
-                </ListItem>
-              );
-            })
-          )}
+          {filteredFields.map((field) => {
+            return (
+              <ListItem
+                key={nanoid()}
+                button
+                onClick={() => onInsertField(field)}
+              >
+                <ListItemText
+                  primary={<Typography noWrap>{field.title}</Typography>}
+                  // secondary={
+                  //   <Box pt={1}>
+                  //     <Typography variant="caption" noWrap={false}>
+                  //       {field.description}
+                  //     </Typography>
+                  //   </Box>
+                  // }
+                  disableTypography
+                />
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
     </StyledDrawer>

@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+
 import { Avatar } from '@material-ui/core';
 
 const TenantAvatar = memo(function TenantAvatar({ tenant, className }) {
@@ -15,7 +16,7 @@ const TenantAvatar = memo(function TenantAvatar({ tenant, className }) {
         .filter((n) => !!n)
         .map((n) => n[0])
         .join(''),
-    []
+    [tenant.name]
   );
 
   return <Avatar className={className}>{avatar}</Avatar>;

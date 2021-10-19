@@ -24,10 +24,10 @@ import { RestrictButton, RestrictedComponent } from './RestrictedComponents';
 import { useField, useFormikContext } from 'formik';
 
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import moment from 'moment';
-import useTranslation from 'next-translate/useTranslation';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import moment from 'moment';
+import useTranslation from 'next-translate/useTranslation';
 
 export const FormTextField = RestrictedComponent(
   ({ label, disabled, showHidePassword = true, ...props }) => {
@@ -233,7 +233,7 @@ export const DateRangeField = ({
         setFieldValue(endName, newEndDate, true);
       }
     }
-  }, [duration, beginField.value]);
+  }, [duration, beginField.value, endField.value, endName, setFieldValue]);
 
   return (
     <Grid container spacing={2}>

@@ -1,4 +1,14 @@
 import {
+  addTextChangeListener,
+  createTextEditor,
+  destroyTextEditor,
+  getHTML,
+  insertField,
+  printHandler,
+  redoHandler,
+  undoHandler,
+} from './texteditor';
+import {
   AppBar,
   Box,
   Button,
@@ -8,15 +18,6 @@ import {
   Typography,
   withStyles,
 } from '@material-ui/core';
-import {
-  createTextEditor,
-  destroyTextEditor,
-  getHTML,
-  insertField,
-  printHandler,
-  redoHandler,
-  undoHandler,
-} from './texteditor';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import _ from 'lodash';
@@ -27,11 +28,11 @@ import RedoIcon from '@material-ui/icons/Redo';
 import SaveIcon from '@material-ui/icons/SaveOutlined';
 import { toHandlebars } from './transformer';
 import UndoIcon from '@material-ui/icons/Undo';
+import { useTimeout } from '../../utils/hooks';
 import useTranslation from 'next-translate/useTranslation';
 
-const CHECK_CHANGE_INTERVAL_MS = 500;
-const SAVE_INTERVAL_MS = 500;
-const CLEAR_SAVE_STATE_INTERVAL_MS = 2500;
+const SAVE_DELAY = 250;
+const CLEAR_SAVE_LABEL_DELAY = 2500;
 
 const RichTextEditorBar = withStyles((theme) => ({
   root: {
@@ -51,97 +52,88 @@ const RichTextEditor = ({
   const { t } = useTranslation('common');
   const [ready, setReady] = useState(false);
   const [title, setTitle] = useState(initialTitle || t('Untitled document'));
-  const [contents, setContents] = useState();
+  const [saveData, setSaveData] = useState();
   const [saving, setSaving] = useState();
+  const editorRef = useRef();
   const editorToolbarRef = useRef();
   const editorWrapper = useRef();
-  const saveIntervalRef = useRef();
-  const saveStateIntervalRef = useRef();
+  const triggerClearSaveState = useTimeout(() => {
+    setSaving();
+  }, CLEAR_SAVE_LABEL_DELAY);
+  const triggerSaveContents = useTimeout(() => {
+    if (editorRef.current) {
+      setSaveData({
+        title,
+        contents: editorRef.current.getContents(),
+      });
+    }
+  }, SAVE_DELAY);
+  const triggerSaveTitle = useTimeout((value) => {
+    setSaveData({
+      title: value,
+      contents: editorRef.current.getContents(),
+    });
+  }, SAVE_DELAY);
 
   useEffect(() => {
-    if (!ready) {
-      return;
-    }
+    const save = async () => {
+      if (!ready) {
+        return;
+      }
 
-    clearInterval(saveIntervalRef.current);
-    clearInterval(saveStateIntervalRef.current);
-    setSaving();
-
-    let saveInterval;
-    let saveStateInterval;
-    saveInterval = setInterval(async () => {
       try {
         setSaving(true);
-        await onSave(title, contents, jsesc(await toHandlebars(getHTML())));
-        setSaving((prevSaving) => {
-          if (prevSaving === true) {
-            saveStateInterval = setInterval(() => {
-              setSaving();
-              clearInterval(saveStateInterval);
-            }, CLEAR_SAVE_STATE_INTERVAL_MS);
-            saveStateIntervalRef.current = saveStateInterval;
-            return false;
-          }
-          return prevSaving;
-        });
-        clearInterval(saveInterval);
+        await onSave(
+          saveData.title,
+          saveData.contents,
+          jsesc(await toHandlebars(getHTML()))
+        );
+        setSaving(false);
+
+        triggerClearSaveState.start();
       } catch (error) {
         console.log(error);
-        setSaving();
       }
-    }, SAVE_INTERVAL_MS);
-    saveIntervalRef.current = saveInterval;
-
-    return () => {
-      clearInterval(saveInterval);
-      clearInterval(saveStateInterval);
     };
-  }, [contents, title]);
+    save();
+  }, [saveData, onSave]);
 
   useEffect(() => {
-    let interval;
-
     const load = async () => {
       // Create the HTML editor and TextEditor
       const toolbar = editorToolbarRef.current;
       const wrapper = editorWrapper.current;
-      const textEditor = createTextEditor(toolbar, wrapper);
 
-      const updateContents = () => {
-        const newContents = textEditor.getContents();
-        setContents((prevContents) => {
-          if (!_.isEqual(prevContents, newContents)) {
-            return newContents;
-          }
-          return prevContents;
-        });
-      };
+      editorRef.current = createTextEditor(toolbar, wrapper);
 
       // load document
       const data = await onLoad();
       if (!data) {
-        textEditor.setText(placeholder);
+        editorRef.current.setText(placeholder);
       } else {
         try {
-          textEditor.setContents(data);
+          editorRef.current.setContents(data);
         } catch (error) {
           console.error(error);
-          textEditor.setContents(placeholder);
+          editorRef.current.setContents(placeholder);
         }
       }
-
-      updateContents();
+      setSaveData({
+        title,
+        contents: editorRef.current.getContents(),
+      });
       setReady(true);
 
-      // Setup the auto save
-      interval = setInterval(() => {
-        updateContents();
-      }, CHECK_CHANGE_INTERVAL_MS);
+      addTextChangeListener(() => {
+        triggerClearSaveState.clear();
+        setSaving();
+
+        triggerSaveContents.start();
+      });
     };
     load();
 
     return () => {
-      clearInterval(interval);
       destroyTextEditor();
     };
   }, []);
@@ -151,6 +143,14 @@ const RichTextEditor = ({
   const onPrint = useCallback(printHandler, []);
   const onUndo = useCallback(undoHandler, []);
   const onRedo = useCallback(redoHandler, []);
+
+  const onTitleChange = useCallback(
+    (evt) => {
+      setTitle(evt.target.value);
+      triggerSaveTitle.start(evt.target.value);
+    },
+    [setTitle]
+  );
 
   return (
     <>
@@ -165,10 +165,7 @@ const RichTextEditor = ({
             <Box display="flex" flexDirection="column" flexGrow={1}>
               <Box display="flex" alignItems="center" m={1}>
                 <Box>
-                  <TextField
-                    value={title}
-                    onChange={(evt) => setTitle(evt.target.value)}
-                  />
+                  <TextField value={title} onChange={onTitleChange} />
                 </Box>
                 <Box color="text.disabled" ml={2}>
                   {saving === true && (

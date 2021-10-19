@@ -82,7 +82,7 @@ const BillingForm = observer(({ onSubmit }) => {
         addresses: [billing.address],
       });
     },
-    [onSubmit]
+    [onSubmit, store.organization.selected.companyInfo]
   );
 
   return (

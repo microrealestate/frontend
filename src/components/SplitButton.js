@@ -18,7 +18,7 @@ export default function SplitButton({ options, value, onChange = () => {} }) {
 
   useEffect(() => {
     onChange(selectedOption);
-  }, [selectedOption]);
+  }, [selectedOption, onChange]);
 
   const handleMenuItemClick = (option) => {
     setSelectedOption(option);

@@ -24,14 +24,14 @@ const CardMenuItem = ({ illustration, label, description }) => (
   <Card>
     <CardActionArea>
       <CardContent>
-        <Box height="150px">{illustration}</Box>
+        {illustration}
         <Box py={2}>
           <Typography align="center" variant="subtitle1">
             {label}
           </Typography>
         </Box>
         {!!description && (
-          <Box height="50px">
+          <Box height={50}>
             <Typography variant="body2" color="textSecondary">
               {description}
             </Typography>
@@ -122,7 +122,7 @@ const FullScreenDialogMenu = ({
                     }) => (
                       <Box
                         key={nanoid()}
-                        width="300px"
+                        width={300}
                         pr={2}
                         pb={2}
                         onClick={() => handleMenuClick(value)}
