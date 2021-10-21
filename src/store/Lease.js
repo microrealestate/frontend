@@ -1,6 +1,6 @@
 import { action, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Lease {
   selected = {};
@@ -23,7 +23,7 @@ export default class Lease {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/leases');
+      const response = yield apiFetcher().get('/leases');
 
       this.items = response.data;
       if (this.selected) {
@@ -37,7 +37,7 @@ export default class Lease {
 
   *fetchOne(leaseId) {
     try {
-      const response = yield useApiFetch().get(`/leases/${leaseId}`);
+      const response = yield apiFetcher().get(`/leases/${leaseId}`);
       const updatedLease = response.data;
       const index = this.items.findIndex((item) => item._id === leaseId);
       if (index > -1) {
@@ -54,7 +54,7 @@ export default class Lease {
 
   *create(lease) {
     try {
-      const response = yield useApiFetch().post('/leases', lease);
+      const response = yield apiFetcher().post('/leases', lease);
       const createdLease = response.data;
       this.items.push(createdLease);
 
@@ -66,7 +66,7 @@ export default class Lease {
 
   *update(lease) {
     try {
-      const response = yield useApiFetch().patch(`/leases/${lease._id}`, lease);
+      const response = yield apiFetcher().patch(`/leases/${lease._id}`, lease);
       const updatedLease = response.data;
       const index = this.items.findIndex((item) => item._id === lease._id);
       if (index > -1) {
@@ -83,7 +83,7 @@ export default class Lease {
 
   *delete(ids) {
     try {
-      yield useApiFetch().delete(`/leases/${ids.join(',')}`);
+      yield apiFetcher().delete(`/leases/${ids.join(',')}`);
       this.items = this.items.filter((lease) => !ids.includes(lease._id));
       if (ids.includes(this.selected?._id)) {
         this.selected = null;

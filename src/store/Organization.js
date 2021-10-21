@@ -1,6 +1,6 @@
 import { action, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Organization {
   selected;
@@ -31,7 +31,7 @@ export default class Organization {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/realms');
+      const response = yield apiFetcher().get('/realms');
       this.setItems(response.data);
       return 200;
     } catch (error) {
@@ -42,7 +42,7 @@ export default class Organization {
 
   *create(organization) {
     try {
-      const response = yield useApiFetch().post('/realms', organization);
+      const response = yield apiFetcher().post('/realms', organization);
       return { status: 200, data: response.data };
     } catch (error) {
       console.error(error);
@@ -52,7 +52,7 @@ export default class Organization {
 
   *update(organization) {
     try {
-      const response = yield useApiFetch().patch(
+      const response = yield apiFetcher().patch(
         `/realms/${organization._id}`,
         organization
       );

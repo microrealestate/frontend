@@ -1,6 +1,6 @@
 import { action, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Template {
   selected = {};
@@ -26,7 +26,7 @@ export default class Template {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/templates');
+      const response = yield apiFetcher().get('/templates');
       this.items = response.data;
       if (this.selected) {
         this.selected = this.items.find(({ _id }) => this.selected._id === _id);
@@ -39,7 +39,7 @@ export default class Template {
 
   *fetchOne(templateId) {
     try {
-      const response = yield useApiFetch().get(`/templates/${templateId}`);
+      const response = yield apiFetcher().get(`/templates/${templateId}`);
       const updatedTemplate = response.data;
       const index = this.items.findIndex((item) => item._id === templateId);
       if (index > -1) {
@@ -56,7 +56,7 @@ export default class Template {
 
   *create(template) {
     try {
-      const response = yield useApiFetch().post('/templates', template);
+      const response = yield apiFetcher().post('/templates', template);
       const createdTemplate = response.data;
       this.items.push(createdTemplate);
 
@@ -68,7 +68,7 @@ export default class Template {
 
   *update(template) {
     try {
-      const response = yield useApiFetch().put('/templates', template);
+      const response = yield apiFetcher().put('/templates', template);
       const updatedTemplate = response.data;
       const index = this.items.findIndex((item) => item._id === template._id);
       if (index > -1) {
@@ -85,7 +85,7 @@ export default class Template {
 
   *delete(ids) {
     try {
-      yield useApiFetch().delete(`/templates/${ids.join(',')}`);
+      yield apiFetcher().delete(`/templates/${ids.join(',')}`);
       this.items = this.items.filter((template) => !ids.includes(template._id));
       if (ids.includes(this.selected?._id)) {
         this.selected = null;
@@ -98,7 +98,7 @@ export default class Template {
 
   *fetchFields() {
     try {
-      const response = yield useApiFetch().get('/templates/fields');
+      const response = yield apiFetcher().get('/templates/fields');
       this.fields = response.data;
       return { status: 200 };
     } catch (error) {

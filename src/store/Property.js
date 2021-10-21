@@ -1,6 +1,6 @@
 import { action, computed, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Property {
   selected = {};
@@ -57,7 +57,7 @@ export default class Property {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/properties');
+      const response = yield apiFetcher().get('/properties');
 
       this.items = response.data;
       if (this.selected._id) {
@@ -73,7 +73,7 @@ export default class Property {
 
   *fetchOne(propertyId) {
     try {
-      const response = yield useApiFetch().get(`/properties/${propertyId}`);
+      const response = yield apiFetcher().get(`/properties/${propertyId}`);
 
       return { status: 200, data: response.data };
     } catch (error) {
@@ -83,7 +83,7 @@ export default class Property {
 
   *create(property) {
     try {
-      const response = yield useApiFetch().post('/properties', property);
+      const response = yield apiFetcher().post('/properties', property);
       const createdProperty = response.data;
       this.items.push(createdProperty);
 
@@ -95,7 +95,7 @@ export default class Property {
 
   *update(property) {
     try {
-      const response = yield useApiFetch().patch(
+      const response = yield apiFetcher().patch(
         `/properties/${property._id}`,
         property
       );
@@ -115,7 +115,7 @@ export default class Property {
 
   *delete(ids) {
     try {
-      yield useApiFetch().delete(`/properties/${ids.join(',')}`);
+      yield apiFetcher().delete(`/properties/${ids.join(',')}`);
       return { status: 200 };
     } catch (error) {
       return { status: error.response.status };

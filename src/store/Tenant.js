@@ -1,6 +1,6 @@
 import { action, computed, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Tenant {
   selected = {};
@@ -97,7 +97,7 @@ export default class Tenant {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/tenants');
+      const response = yield apiFetcher().get('/tenants');
 
       this.items = response.data;
       if (this.selected._id) {
@@ -113,7 +113,7 @@ export default class Tenant {
 
   *fetchOne(tenantId) {
     try {
-      const response = yield useApiFetch().get(`/tenants/${tenantId}`);
+      const response = yield apiFetcher().get(`/tenants/${tenantId}`);
 
       return { status: 200, data: response.data };
     } catch (error) {
@@ -123,7 +123,7 @@ export default class Tenant {
 
   *create(tenant) {
     try {
-      const response = yield useApiFetch().post('/tenants', tenant);
+      const response = yield apiFetcher().post('/tenants', tenant);
       const createdTenant = response.data;
       this.items.push(createdTenant);
 
@@ -135,7 +135,7 @@ export default class Tenant {
 
   *update(tenant) {
     try {
-      const response = yield useApiFetch().patch(
+      const response = yield apiFetcher().patch(
         `/tenants/${tenant._id}`,
         tenant
       );
@@ -155,7 +155,7 @@ export default class Tenant {
 
   *delete(ids) {
     try {
-      yield useApiFetch().delete(`/tenants/${ids.join(',')}`);
+      yield apiFetcher().delete(`/tenants/${ids.join(',')}`);
       return { status: 200 };
     } catch (error) {
       return { status: error.response.status };

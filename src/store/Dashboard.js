@@ -1,7 +1,7 @@
 import { computed, flow, makeObservable, observable } from 'mobx';
 
+import { apiFetcher } from '../utils/fetch';
 import moment from 'moment';
-import { useApiFetch } from '../utils/fetch';
 
 export default class Dashboard {
   data = {};
@@ -30,7 +30,7 @@ export default class Dashboard {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/dashboard');
+      const response = yield apiFetcher().get('/dashboard');
       this.data = response.data;
 
       return { status: 200, data: response.data };

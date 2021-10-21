@@ -1,7 +1,7 @@
 import { action, computed, flow, makeObservable, observable } from 'mobx';
 
+import { apiFetcher } from '../utils/fetch';
 import moment from 'moment';
-import { useApiFetch } from '../utils/fetch';
 
 export default class Rent {
   selected = {};
@@ -125,7 +125,7 @@ export default class Rent {
       const year = period.year();
       const month = period.month() + 1;
 
-      const response = yield useApiFetch().get(`/rents/${year}/${month}`);
+      const response = yield apiFetcher().get(`/rents/${year}/${month}`);
       return { status: 200, data: response.data };
     } catch (error) {
       return { status: error.response.status };
@@ -158,7 +158,7 @@ export default class Rent {
 
   *fetchOneTenantRent(tenantId, term) {
     try {
-      const response = yield useApiFetch().get(
+      const response = yield apiFetcher().get(
         `/rents/tenant/${tenantId}/${term}`
       );
 
@@ -170,7 +170,7 @@ export default class Rent {
 
   *fetchTenantRents(tenantId) {
     try {
-      const response = yield useApiFetch().get(`/rents/tenant/${tenantId}`);
+      const response = yield apiFetcher().get(`/rents/tenant/${tenantId}`);
       return { status: 200, data: response.data };
     } catch (error) {
       console.error(error);
@@ -180,7 +180,7 @@ export default class Rent {
 
   *pay(term, payment) {
     try {
-      const response = yield useApiFetch().patch(
+      const response = yield apiFetcher().patch(
         `/rents/payment/${payment._id}/${term}`,
         payment
       );
@@ -207,7 +207,7 @@ export default class Rent {
   // }
   *sendEmail(payload) {
     try {
-      yield useApiFetch().post('/emails', payload);
+      yield apiFetcher().post('/emails', payload);
       return 200;
     } catch (error) {
       return error.response.status;

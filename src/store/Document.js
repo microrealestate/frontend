@@ -1,6 +1,6 @@
 import { action, flow, makeObservable, observable } from 'mobx';
 
-import { useApiFetch } from '../utils/fetch';
+import { apiFetcher } from '../utils/fetch';
 
 export default class Document {
   selected = {};
@@ -23,7 +23,7 @@ export default class Document {
 
   *fetch() {
     try {
-      const response = yield useApiFetch().get('/documents');
+      const response = yield apiFetcher().get('/documents');
       this.items = response.data;
       if (this.selected) {
         this.selected = this.items.find(({ _id }) => this.selected._id === _id);
@@ -36,7 +36,7 @@ export default class Document {
 
   *fetchOne(documentId) {
     try {
-      const response = yield useApiFetch().get(`/documents/${documentId}`);
+      const response = yield apiFetcher().get(`/documents/${documentId}`);
       const updatedDocument = response.data;
       const index = this.items.findIndex((item) => item._id === documentId);
       if (index > -1) {
@@ -53,7 +53,7 @@ export default class Document {
 
   *create(document) {
     try {
-      const response = yield useApiFetch().post('/documents', document);
+      const response = yield apiFetcher().post('/documents', document);
       const createdDocument = response.data;
       this.items.push(createdDocument);
 
@@ -65,10 +65,7 @@ export default class Document {
 
   *update(document) {
     try {
-      const response = yield useApiFetch().patch(
-        `/documents/${document._id}`,
-        document
-      );
+      const response = yield apiFetcher().put('/documents', document);
       const updatedDocument = response.data;
       const index = this.items.findIndex((item) => item._id === document._id);
       if (index > -1) {
@@ -85,7 +82,7 @@ export default class Document {
 
   *delete(ids) {
     try {
-      yield useApiFetch().delete(`/documents/${ids.join(',')}`);
+      yield apiFetcher().delete(`/documents/${ids.join(',')}`);
       this.items = this.items.filter((document) => !ids.includes(document._id));
       if (ids.includes(this.selected?._id)) {
         this.selected = null;

@@ -12,9 +12,10 @@ import React, { useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
 import Dialog from '@material-ui/core/Dialog';
-import { nanoid } from 'nanoid';
 import Slide from '@material-ui/core/Slide';
 import Typography from '@material-ui/core/Typography';
+import { nanoid } from 'nanoid';
+import { useComponentMountedRef } from '../utils/hooks';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -49,6 +50,7 @@ const FullScreenDialogMenu = ({
   onClick,
   ...props
 }) => {
+  const mountedRef = useComponentMountedRef();
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = useCallback(() => {
@@ -62,7 +64,9 @@ const FullScreenDialogMenu = ({
   const handleMenuClick = useCallback(
     async (value) => {
       await onClick(value);
-      setOpen(false);
+      if (mountedRef.current) {
+        setOpen(false);
+      }
     },
     [onClick]
   );

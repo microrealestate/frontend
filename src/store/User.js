@@ -1,7 +1,8 @@
 import { action, computed, flow, makeObservable, observable } from 'mobx';
-import { useApiFetch, useAuthApiFetch } from '../utils/fetch';
+import { apiFetcher, authApiFetcher } from '../utils/fetch';
 
 import { isServer } from '../utils';
+
 const jwt = require('jsonwebtoken');
 
 export const ADMIN_ROLE = 'administrator';
@@ -47,7 +48,7 @@ export default class User {
 
   *signUp(firstname, lastname, email, password) {
     try {
-      yield useApiFetch().post('/authenticator/signup', {
+      yield apiFetcher().post('/authenticator/signup', {
         firstname,
         lastname,
         email,
@@ -61,7 +62,7 @@ export default class User {
 
   *signIn(email, password) {
     try {
-      const response = yield useApiFetch().post('/authenticator/signin', {
+      const response = yield apiFetcher().post('/authenticator/signin', {
         email,
         password,
       });
@@ -84,7 +85,7 @@ export default class User {
 
   *signOut() {
     try {
-      yield useApiFetch().delete('/authenticator/signout');
+      yield apiFetcher().delete('/authenticator/signout');
     } finally {
       this.firstName = undefined;
       this.lastName = undefined;
@@ -98,7 +99,7 @@ export default class User {
     try {
       let response;
       if (isServer()) {
-        const authFetchApi = useAuthApiFetch(context.req.headers.cookie);
+        const authFetchApi = authApiFetcher(context.req.headers.cookie);
         response = yield authFetchApi.post('/authenticator/refreshtoken');
 
         const cookies = response.headers['set-cookie'];
@@ -106,7 +107,7 @@ export default class User {
           context.res.setHeader('Set-Cookie', cookies);
         }
       } else {
-        response = yield useApiFetch().post('/authenticator/refreshtoken');
+        response = yield apiFetcher().post('/authenticator/refreshtoken');
       }
       const { accessToken } = response.data;
       const {
@@ -132,7 +133,7 @@ export default class User {
 
   *forgotPassword(email) {
     try {
-      yield useApiFetch().post('/authenticator/forgotpassword', {
+      yield apiFetcher().post('/authenticator/forgotpassword', {
         email,
       });
       return 200;
@@ -144,7 +145,7 @@ export default class User {
 
   *resetPassword(resetToken, password) {
     try {
-      yield useApiFetch().patch('/authenticator/resetpassword', {
+      yield apiFetcher().patch('/authenticator/resetpassword', {
         resetToken,
         password,
       });

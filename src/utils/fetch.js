@@ -16,26 +16,26 @@ export const setApiHeaders = ({
   acceptLanguage,
 }) => {
   if (accessToken) {
-    useApiFetch();
+    apiFetcher();
     apiFetch.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
   } else if (apiFetch) {
     delete apiFetch.defaults.headers.common['Authorization'];
   }
 
   if (organizationId) {
-    useApiFetch();
+    apiFetcher();
     apiFetch.defaults.headers.organizationId = organizationId;
   } else if (apiFetch) {
     delete apiFetch.defaults.headers.organizationId;
   }
 
   if (acceptLanguage) {
-    useApiFetch();
+    apiFetcher();
     apiFetch.defaults.headers['Accept-Language'] = acceptLanguage;
   }
 };
 
-export const useApiFetch = () => {
+export const apiFetcher = () => {
   if (!apiFetch) {
     // console.log('create api fetch')
 
@@ -91,7 +91,7 @@ export const useApiFetch = () => {
   return apiFetch;
 };
 
-export const useAuthApiFetch = (cookie) => {
+export const authApiFetcher = (cookie) => {
   if (!isServer()) {
     return;
   }
@@ -124,7 +124,7 @@ export const buildFetchError = (error) => {
 };
 
 export const downloadDocument = async (endpoint, documentName) => {
-  const response = await useApiFetch().get(`/documents${endpoint}`, {
+  const response = await apiFetcher().get(`/documents${endpoint}`, {
     responseType: 'blob',
   });
   FileDownload(response.data, documentName);
