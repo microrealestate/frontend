@@ -55,14 +55,27 @@ export const PageCard = memo(function PageCard({
           borderTopRightRadius: 4,
         }}
       >
-        <IconTypography Icon={Icon}>{title}</IconTypography>
-        {children}
-      </Box>
-      <Divider />
-      <Box p={1}>
-        <Typography component="div" variant="caption">
-          {info}
-        </Typography>
+        <Typography>{title}</Typography>
+        <Box
+          position="relative"
+          height={130}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Box
+            position="absolute"
+            left={0}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            fontSize={40}
+          >
+            <Icon fontSize="inherit" />
+          </Box>
+          {children}
+        </Box>
+        {!!info && <Typography>{info}</Typography>}
       </Box>
     </Paper>
   );

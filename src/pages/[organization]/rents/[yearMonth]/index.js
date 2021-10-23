@@ -124,8 +124,8 @@ const Rents = observer(() => {
     >
       {!store.rent.filters.searchText && (
         <Hidden smDown>
-          <Box pb={5}>
-            <Grid container spacing={10}>
+          <Box pb={3}>
+            <Grid container spacing={3}>
               <Grid item xs={4}>
                 <PageCard
                   variant="info"
@@ -135,9 +135,7 @@ const Rents = observer(() => {
                     period: store.rent._period.format('MMMM YYYY'),
                   })}
                 >
-                  <Typography align="right" variant="h5">
-                    {store.rent.countAll}
-                  </Typography>
+                  <Typography variant="h3">{store.rent.countAll}</Typography>
                 </PageCard>
               </Grid>
               <Grid item xs={4}>
@@ -149,27 +147,19 @@ const Rents = observer(() => {
                     count: store.rent.countPaid + store.rent.countPartiallyPaid,
                   })}
                 >
-                  <NumberFormat
-                    align="right"
-                    variant="h5"
-                    value={store.rent.totalPaid}
-                  />
+                  <NumberFormat variant="h3" value={store.rent.totalPaid} />
                 </PageCard>
               </Grid>
               <Grid item xs={4}>
                 <PageCard
                   variant="warning"
                   Icon={TrendingDownIcon}
-                  title={t('Not paid')}
+                  title={t('Unpaid')}
                   info={t('{{count}} rents not paid', {
                     count: store.rent.countNotPaid,
                   })}
                 >
-                  <NumberFormat
-                    align="right"
-                    variant="h5"
-                    value={store.rent.totalToPay}
-                  />
+                  <NumberFormat variant="h3" value={store.rent.totalNotPaid} />
                 </PageCard>
               </Grid>
             </Grid>

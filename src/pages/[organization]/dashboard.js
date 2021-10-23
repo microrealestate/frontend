@@ -1,12 +1,10 @@
 import {
   Bar,
   BarChart,
-  CartesianGrid,
   Cell,
   Legend,
   Pie,
   PieChart,
-  Tooltip as RCTooltip,
   ReferenceLine,
   ResponsiveContainer,
   XAxis,
@@ -19,48 +17,55 @@ import {
   Hidden,
   List,
   ListItem,
-  makeStyles,
   Paper,
   Tooltip,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
-import { getStoreInstance, StoreContext } from '../../store';
 import { NumberFormat, useFormatNumber } from '../../utils/numberformat';
+import { StoreContext, getStoreInstance } from '../../store';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
+import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import { DashboardCard } from '../../components/Cards';
 import DescriptionIcon from '@material-ui/icons/Description';
-import { isServer } from '../../utils';
-import moment from 'moment';
-import { nanoid } from 'nanoid';
 import NewLeaseDialog from '../../components/organization/NewLeaseDialog';
 import NewPaymentDialog from '../../components/payment/NewPaymentDialog';
 import NewPropertyDialog from '../../components/properties/NewPropertyDialog';
 import NewTenantDialog from '../../components/tenants/NewTenantDialog';
-import { observer } from 'mobx-react-lite';
 import Page from '../../components/Page';
 import PeopleIcon from '@material-ui/icons/People';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import StopIcon from '@material-ui/icons/Stop';
 import TenantAvatar from '../../components/tenants/TenantAvatar';
 import TerminateLeaseDialog from '../../components/tenants/TerminateLeaseDialog';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { isServer } from '../../utils';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import { useTheme } from '@material-ui/styles';
 import useTranslation from 'next-translate/useTranslation';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withAuthentication } from '../../components/Authentication';
 
-const FigureCardContent = ({ children }) => (
-  <Box
-    height={150}
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-    fontWeight={500}
-    color="success.dark"
-  >
-    {children}
+const FigureCardContent = ({ nav, children }) => (
+  <Box position="relative">
+    <Box
+      height={150}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      color="success.dark"
+    >
+      {children}
+    </Box>
+    {nav && (
+      <Box position="absolute" bottom={0} right={0} fontSize={30}>
+        <ArrowRightAltIcon fontSize="inherit" color="action" />
+      </Box>
+    )}
   </Box>
 );
 
@@ -236,65 +241,38 @@ const GeneralFigures = () => {
   const store = useContext(StoreContext);
   const router = useRouter();
   const { t } = useTranslation('common');
-  const formatNumber = useFormatNumber();
-  const theme = useTheme();
-
-  const data = useMemo(() => {
-    const now = moment();
-    return store.dashboard.data.revenues?.reduce((acc, revenues) => {
-      const revenuesMoment = moment(revenues.month, 'MMYYYY');
-      const graphData = {
-        ...revenues,
-        name: revenuesMoment.format('MMM'),
-        yearMonth: moment(revenues.month, 'MMYYYY').format('YYYY.MM'),
-      };
-      if (revenuesMoment.isSameOrBefore(now)) {
-        acc.push(graphData);
-      } else {
-        acc.push({
-          ...graphData,
-          notPaid: 0,
-        });
-      }
-      return acc;
-    }, []);
-  }, [store.dashboard.data.revenues]);
-
-  const hasRevenues = useMemo(() => {
-    return data.some((r) => r.notPaid !== 0 || r.paid !== 0);
-  }, [data]);
 
   return (
-    <Grid container spacing={10}>
-      <Grid item xs={12} md={4}>
+    <Grid container spacing={5}>
+      <Grid item xs={12} md={3}>
         <DashboardCard
           title={t('Tenant under contract')}
           onClick={() => {
             router.push(`/${store.organization.selected.name}/tenants`);
           }}
         >
-          <FigureCardContent>
+          <FigureCardContent nav>
             <Typography variant="h3">
               {store.dashboard.data.overview?.tenantCount}
             </Typography>
           </FigureCardContent>
         </DashboardCard>
       </Grid>
-      <Grid item xs={12} md={4}>
+      <Grid item xs={12} md={3}>
         <DashboardCard
           title={t('Property')}
           onClick={() => {
             router.push(`/${store.organization.selected.name}/properties`);
           }}
         >
-          <FigureCardContent>
+          <FigureCardContent nav>
             <Typography variant="h3">
               {store.dashboard.data.overview?.propertyCount}
             </Typography>
           </FigureCardContent>
         </DashboardCard>
       </Grid>
-      <Grid item xs={12} md={4}>
+      <Grid item xs={12} md={3}>
         <DashboardCard title={t('Occupancy rate')}>
           <FigureCardContent>
             <NumberFormat
@@ -305,71 +283,16 @@ const GeneralFigures = () => {
           </FigureCardContent>
         </DashboardCard>
       </Grid>
-      {hasRevenues ? (
-        <>
-          <Grid item xs={12} md={8}>
-            <ResponsiveContainer minHeight={220}>
-              <BarChart
-                data={data}
-                stackOffset="sign"
-                onClick={(data) => {
-                  if (!data?.activePayload?.[0]?.payload) {
-                    return;
-                  }
-                  const {
-                    activePayload: [
-                      {
-                        payload: { yearMonth },
-                      },
-                    ],
-                  } = data;
-                  router.push(
-                    `/${store.organization.selected.name}/rents/${yearMonth}`
-                  );
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <RCTooltip
-                  formatter={(value, name) => [
-                    formatNumber(value),
-                    name === 'paid' ? t('Rent paid') : t('Rent unpaid'),
-                  ]}
-                />
-                <Legend
-                  verticalAlign="top"
-                  formatter={(value) =>
-                    value === 'paid' ? t('Rent paid') : t('Rent unpaid')
-                  }
-                />
-                <ReferenceLine y={0} stroke={theme.palette.grey[400]} />
-                <Bar
-                  dataKey="paid"
-                  fill={theme.palette.success.dark}
-                  stackId="stack"
-                  barSize={20}
-                />
-                <Bar
-                  dataKey="notPaid"
-                  fill={theme.palette.warning.main}
-                  stackId="stack"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <DashboardCard title={t('Revenues')}>
-              <FigureCardContent>
-                <NumberFormat
-                  value={store.dashboard.data.overview?.totalYearRevenues}
-                  variant="h3"
-                />
-              </FigureCardContent>
-            </DashboardCard>
-          </Grid>
-        </>
-      ) : null}
+      <Grid item xs={12} md={3}>
+        <DashboardCard title={t('Revenues')}>
+          <FigureCardContent>
+            <NumberFormat
+              value={store.dashboard.data.overview?.totalYearRevenues}
+              variant="h3"
+            />
+          </FigureCardContent>
+        </DashboardCard>
+      </Grid>
     </Grid>
   );
 };
@@ -410,38 +333,49 @@ const MonthFigures = () => {
       </Box>
       <Grid container spacing={5}>
         <Grid item xs={12} sm={5}>
-          <ResponsiveContainer minHeight={300}>
-            <PieChart>
-              <Legend
-                verticalAlign="top"
-                formatter={(value) =>
-                  value === 'paid' ? t('Rent paid') : t('Rent unpaid')
-                }
-              />
-              <Pie
-                data={data}
-                paddingAngle={5}
-                dataKey="value"
-                innerRadius="60%"
-                onClick={(data) => {
-                  if (!data?.payload) {
-                    return;
-                  }
-                  const {
-                    payload: { yearMonth, status },
-                  } = data;
-                  router.push(
-                    `/${store.organization.selected.name}/rents/${yearMonth}?status=${status}`
-                  );
-                }}
-                label={({ value }) => formatNumber(value)}
-                labelLine={false}
-              >
-                <Cell fill={theme.palette.success.dark} />
-                <Cell fill={theme.palette.warning.main} />
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+          <Box mb={1}>
+            <Typography variant="subtitle1">{t('Payments')}</Typography>
+          </Box>
+          <Paper>
+            <Box pt={2} width="100%" height={296}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Legend
+                    verticalAlign="top"
+                    formatter={(value) =>
+                      value === 'paid' ? t('Rent paid') : t('Rent unpaid')
+                    }
+                  />
+                  <Pie
+                    data={data}
+                    startAngle={180}
+                    endAngle={0}
+                    cy="70%"
+                    paddingAngle={2}
+                    dataKey="value"
+                    innerRadius="55%"
+                    cursor="pointer"
+                    onClick={(data) => {
+                      if (!data?.payload) {
+                        return;
+                      }
+                      const {
+                        payload: { yearMonth, status },
+                      } = data;
+                      router.push(
+                        `/${store.organization.selected.name}/rents/${yearMonth}?status=${status}`
+                      );
+                    }}
+                    label={({ value }) => (value ? formatNumber(value) : '')}
+                    labelLine={false}
+                  >
+                    <Cell fill={theme.palette.success.dark} />
+                    <Cell fill={theme.palette.warning.main} />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+          </Paper>
         </Grid>
         <Grid item xs={12} sm={7}>
           <Box mb={1}>
@@ -450,20 +384,22 @@ const MonthFigures = () => {
             </Typography>
           </Box>
           <Paper>
-            <List>
-              {store.dashboard.data.topUnpaid?.map(({ tenant, balance }) => (
-                <TenantListItem
-                  key={nanoid()}
-                  tenant={tenant}
-                  balance={balance}
-                  onClick={() => {
-                    store.tenant.setSelected(tenant);
-                    router.push(
-                      `/${store.organization.selected.name}/tenants/${tenant._id}`
-                    );
-                  }}
-                />
-              ))}
+            <List style={{ minHeight: 296 }}>
+              {store.dashboard.data.topUnpaid?.map(
+                ({ tenant, balance, rent }) => (
+                  <TenantListItem
+                    key={nanoid()}
+                    tenant={tenant}
+                    balance={balance}
+                    onClick={() => {
+                      store.rent.setSelected(rent);
+                      router.push(
+                        `/${store.organization.selected.name}/payment/${tenant._id}/${rent.term}`
+                      );
+                    }}
+                  />
+                )
+              )}
             </List>
           </Paper>
         </Grid>
@@ -472,20 +408,126 @@ const MonthFigures = () => {
   );
 };
 
-// const RecentActions = () => {
-//   const { t } = useTranslation('common');
-//   return (
-//     <Box mt={5}>
-//       <Box my={2}>
-//         <Typography variant="h5">{t('Recent actions')}</Typography>
-//         <Divider />
-//       </Box>
-//       <Grid container spacing={5}>
-//         <Grid item sm={12}></Grid>
-//       </Grid>
-//     </Box>
-//   );
-// };
+const YearFigures = () => {
+  const store = useContext(StoreContext);
+  const router = useRouter();
+  const { t } = useTranslation('common');
+  const formatNumber = useFormatNumber();
+  const theme = useTheme();
+
+  const data = useMemo(() => {
+    const now = moment();
+    return store.dashboard.data.revenues?.reduce((acc, revenues) => {
+      const revenuesMoment = moment(revenues.month, 'MMYYYY');
+      const graphData = {
+        ...revenues,
+        name: revenuesMoment.format('MMM'),
+        yearMonth: moment(revenues.month, 'MMYYYY').format('YYYY.MM'),
+      };
+      if (revenuesMoment.isSameOrBefore(now)) {
+        acc.push(graphData);
+      } else {
+        acc.push({
+          ...graphData,
+          paid: null,
+          notPaid: null,
+        });
+      }
+      return acc;
+    }, []);
+  }, [store.dashboard.data.revenues]);
+
+  const hasRevenues = useMemo(() => {
+    return data.some((r) => r.notPaid !== 0 || r.paid !== 0);
+  }, [data]);
+
+  const onClick = useCallback(
+    (data) => {
+      if (
+        !data?.activePayload?.[0]?.payload ||
+        !store.organization.selected?.name
+      ) {
+        return;
+      }
+      const {
+        activePayload: [
+          {
+            payload: { yearMonth },
+          },
+        ],
+      } = data;
+      store.rent.setPeriod(moment(yearMonth, 'YYYY.MM', true));
+      router.push(`/${store.organization.selected.name}/rents/${yearMonth}`);
+    },
+    [store.organization.selected.name]
+  );
+
+  return (
+    <Grid container>
+      {hasRevenues ? (
+        <>
+          <Box mb={3}>
+            <Typography variant="h5">
+              {t('Rents of {{year}}', {
+                year: moment().format('YYYY'),
+              })}
+            </Typography>
+          </Box>
+          <Grid item xs={12}>
+            <Paper>
+              <Box py={2} px={3} width="100%" height={380}>
+                <ResponsiveContainer>
+                  <BarChart data={data} stackOffset="sign" onClick={onClick}>
+                    <Legend
+                      verticalAlign="top"
+                      height={40}
+                      formatter={(value) =>
+                        value === 'paid' ? t('Rent paid') : t('Rent unpaid')
+                      }
+                    />
+
+                    <ReferenceLine y={0} stroke={theme.palette.grey[400]} />
+                    <Bar
+                      dataKey="paid"
+                      fill={theme.palette.success.dark}
+                      stackId="stack"
+                      barSize={30}
+                      cursor="pointer"
+                      label={{
+                        fill: theme.palette.success.dark,
+                        position: 'top',
+                        formatter: (value) =>
+                          value ? formatNumber(value) : '',
+                      }}
+                    />
+                    <Bar
+                      dataKey="notPaid"
+                      fill={theme.palette.warning.main}
+                      stackId="stack"
+                      cursor="pointer"
+                      label={{
+                        fill: theme.palette.warning.main,
+                        position: 'top',
+                        formatter: (value) =>
+                          value ? formatNumber(value) : '',
+                      }}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      orientation="top"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            </Paper>
+          </Grid>
+        </>
+      ) : null}
+    </Grid>
+  );
+};
 
 const Welcome = () => {
   const store = useContext(StoreContext);
@@ -520,6 +562,11 @@ const Dashboard = observer(() => {
       {!!store.dashboard.data.overview?.tenantCount && (
         <Box my={10}>
           <MonthFigures />
+        </Box>
+      )}
+      {!!store.dashboard.data.overview && (
+        <Box my={10}>
+          <YearFigures />
         </Box>
       )}
     </Page>

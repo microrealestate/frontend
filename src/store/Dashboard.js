@@ -1,4 +1,4 @@
-import { computed, flow, makeObservable, observable } from 'mobx';
+import { computed, flow, makeObservable, observable, toJS } from 'mobx';
 
 import { apiFetcher } from '../utils/fetch';
 import moment from 'moment';
@@ -16,8 +16,8 @@ export default class Dashboard {
 
   get currentRevenues() {
     const currentMonth = moment().format('MMYYYY');
-    const revenues = this.data.revenues.find(
-      ({ month }) => currentMonth === month
+    const revenues = toJS(
+      this.data.revenues.find(({ month }) => currentMonth === month)
     ) || {
       month: currentMonth,
       paid: 0,
