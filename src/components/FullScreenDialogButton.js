@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { AppBar, Box, Grid } from '@material-ui/core';
 import React, { useCallback } from 'react';
 
 import Button from '@material-ui/core/Button';
@@ -52,31 +52,34 @@ const FullScreenDialogButton = ({
         onClose={handleClose}
         TransitionComponent={Transition}
       >
-        <Toolbar>
-          <Box width="100%" display="flex" alignItems="center">
-            <Box flexGrow={1}>
-              <Typography variant="h6">{dialogTitle}</Typography>
-            </Box>
-            <Box>
-              <Grid container spacing={1}>
-                <Grid item>
-                  {showCancel && (
-                    <Button color="inherit" onClick={handleClose}>
-                      {cancelButtonLabel || t('Cancel')}
-                    </Button>
-                  )}
+        <AppBar position="sticky">
+          <Toolbar>
+            <Box width="100%" display="flex" alignItems="center">
+              <Box flexGrow={1}>
+                <Typography variant="h6">{dialogTitle}</Typography>
+              </Box>
+              <Box>
+                <Grid container spacing={1}>
+                  <Grid item>
+                    {showCancel && (
+                      <Button color="inherit" onClick={handleClose}>
+                        {cancelButtonLabel || t('Cancel')}
+                      </Button>
+                    )}
+                  </Grid>
+                  <Grid item>
+                    {showSave && (
+                      <Button autoFocus color="primary" onClick={handleSave}>
+                        {saveButtonLabel || t('Save')}
+                      </Button>
+                    )}
+                  </Grid>
                 </Grid>
-                <Grid item>
-                  {showSave && (
-                    <Button autoFocus color="primary" onClick={handleSave}>
-                      {saveButtonLabel || t('Save')}
-                    </Button>
-                  )}
-                </Grid>
-              </Grid>
+              </Box>
             </Box>
-          </Box>
-        </Toolbar>
+          </Toolbar>
+        </AppBar>
+
         <Box py={2} px={3}>
           {children}
         </Box>

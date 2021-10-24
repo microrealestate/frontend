@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  makeStyles,
   Paper,
   Table,
   TableBody,
@@ -9,20 +8,22 @@ import {
   TableHead,
   TableRow,
   Typography,
+  makeStyles,
   withStyles,
 } from '@material-ui/core';
-import { getStoreInstance, StoreContext } from '../../../store';
+import { StoreContext, getStoreInstance } from '../../../store';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
-import { isServer } from '../../../utils';
-import { nanoid } from 'nanoid';
+import { EmptyIllustration } from '../../../components/Illustrations';
 import NewPropertyDialog from '../../../components/properties/NewPropertyDialog';
 import { NumberFormat } from '../../../utils/numberformat';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../components/Page';
 import PropertyAvatar from '../../../components/properties/PropertyAvatar';
 import RequestError from '../../../components/RequestError';
 import SearchFilterBar from '../../../components/SearchFilterBar';
+import { isServer } from '../../../utils';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
@@ -110,82 +111,88 @@ const Properties = observer(() => {
       }
     >
       <RequestError error={error} />
-      <Paper variant="outlined" square>
-        <Table aria-label="property table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center" padding="checkbox"></TableCell>
-              <TableCell>
-                <Typography>{t('Property')}</Typography>
-              </TableCell>
-              <TableCell>
-                <Typography>{t('Location')}</Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography>{t('Rent')}</Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {store.property.filteredItems.map((property) => {
-              return (
-                <StyledTableRow
-                  key={nanoid()}
-                  hover
-                  onClick={() => onClick(property)}
-                >
-                  <TableCell align="center">
-                    <PropertyAvatar
-                      type={property.type}
-                      status={property.status}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography noWrap>{property.name}</Typography>
-                    <Typography noWrap>{property.description}</Typography>
-                    <Typography
-                      variant="caption"
-                      color="textSecondary"
-                      component="div"
-                      className={
-                        property.status === 'vacant' ? classes.vacant : null
-                      }
-                    >
-                      {property.status === 'vacant'
-                        ? t('Vacant')
-                        : t('Occupied by {{tenant}}', {
-                            tenant: property.occupantLabel,
-                          })}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {property.address && (
-                      <>
-                        <Typography>{property.address.street1}</Typography>
-                        {property.address.street2 && (
-                          <Typography>{property.address.street2}</Typography>
-                        )}
-                        <Typography>
-                          {property.address.zipCode} {property.address.city}
-                        </Typography>
-                        <Typography>
-                          {property.address.state
-                            ? `${property.address.state} `
-                            : ''}
-                          {property.address.country}
-                        </Typography>
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell align="right">
-                    <NumberFormat value={property.price} />
-                  </TableCell>
-                </StyledTableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Paper>
+      {store.property.filteredItems?.length ? (
+        <Paper variant="outlined" square>
+          <Table aria-label="property table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" padding="checkbox"></TableCell>
+                <TableCell>
+                  <Typography>{t('Property')}</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>{t('Location')}</Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography>{t('Rent')}</Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {store.property.filteredItems.map((property) => {
+                return (
+                  <StyledTableRow
+                    key={nanoid()}
+                    hover
+                    onClick={() => onClick(property)}
+                  >
+                    <TableCell align="center">
+                      <PropertyAvatar
+                        type={property.type}
+                        status={property.status}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography noWrap>{property.name}</Typography>
+                      <Typography noWrap>{property.description}</Typography>
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        component="div"
+                        className={
+                          property.status === 'vacant' ? classes.vacant : null
+                        }
+                      >
+                        {property.status === 'vacant'
+                          ? t('Vacant')
+                          : t('Occupied by {{tenant}}', {
+                              tenant: property.occupantLabel,
+                            })}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {property.address && (
+                        <>
+                          <Typography>{property.address.street1}</Typography>
+                          {property.address.street2 && (
+                            <Typography>{property.address.street2}</Typography>
+                          )}
+                          <Typography>
+                            {property.address.zipCode} {property.address.city}
+                          </Typography>
+                          <Typography>
+                            {property.address.state
+                              ? `${property.address.state} `
+                              : ''}
+                            {property.address.country}
+                          </Typography>
+                        </>
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      <NumberFormat value={property.price} />
+                    </TableCell>
+                  </StyledTableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Paper>
+      ) : (
+        <Box mt={20}>
+          <EmptyIllustration label={t('No properties found')} />
+        </Box>
+      )}
       <NewPropertyDialog
         open={openNewPropertyDialog}
         setOpen={setOpenNewPropertyDialog}

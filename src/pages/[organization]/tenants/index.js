@@ -8,23 +8,24 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  makeStyles,
   Paper,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
-import { getStoreInstance, StoreContext } from '../../../store';
+import { StoreContext, getStoreInstance } from '../../../store';
 import { memo, useCallback, useContext, useState } from 'react';
 
-import _ from 'lodash';
-import { isServer } from '../../../utils';
-import moment from 'moment';
-import { nanoid } from 'nanoid';
+import { EmptyIllustration } from '../../../components/Illustrations';
 import NewTenantDialog from '../../../components/tenants/NewTenantDialog';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../components/Page';
 import PropertyIcon from '../../../components/properties/PropertyIcon';
 import SearchFilterBar from '../../../components/SearchFilterBar';
 import TenantAvatar from '../../../components/tenants/TenantAvatar';
+import _ from 'lodash';
+import { isServer } from '../../../utils';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
@@ -72,7 +73,7 @@ const TenantList = () => {
     [store.organization.selected.name, store.tenant]
   );
 
-  return (
+  return store.tenant.filteredItems?.length ? (
     <List component="nav" aria-labelledby="tenant-list">
       {store.tenant.filteredItems.map((tenant) => {
         return (
@@ -159,6 +160,10 @@ const TenantList = () => {
         );
       })}
     </List>
+  ) : (
+    <Box mt={20}>
+      <EmptyIllustration label={t('No tenants found')} />
+    </Box>
   );
 };
 

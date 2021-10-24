@@ -20,7 +20,7 @@ export const useTimeout = (fn, delay) => {
 
   useEffect(() => {
     fnRef.current = fn;
-  }, [fn]);
+  }, [fn, clear]);
 
   const clear = useCallback(() => {
     timerRef.current && clearTimeout(timerRef.current);
@@ -29,8 +29,12 @@ export const useTimeout = (fn, delay) => {
   const start = useCallback((...params) => {
     clear();
     setIsRunning(true);
+    setIsDone(false);
     timerRef.current = setTimeout(async () => {
-      if (mountedRef.current && fnRef.current) {
+      if (!mountedRef.current) {
+        return clear();
+      }
+      if (fnRef.current) {
         await fnRef.current(...params);
         setIsRunning(false);
         setIsDone(true);
@@ -39,4 +43,35 @@ export const useTimeout = (fn, delay) => {
   }, []);
 
   return { start, clear, isRunning, isDone };
+};
+
+export const useInterval = (fn, delay) => {
+  const mountedRef = useComponentMountedRef();
+  const fnRef = useRef(fn);
+  const timerRef = useRef();
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn, clear]);
+
+  const clear = useCallback(() => {
+    timerRef.current && clearInterval(timerRef.current);
+  }, []);
+
+  const start = useCallback((...params) => {
+    clear();
+    setIsRunning(true);
+    timerRef.current = setInterval(async () => {
+      if (!mountedRef.current) {
+        return clear();
+      }
+      if (fnRef.current) {
+        await fnRef.current(...params);
+        setIsRunning(false);
+      }
+    }, delay);
+  }, []);
+
+  return { start, clear, isRunning };
 };

@@ -3,30 +3,36 @@ import { Typography, withStyles } from '@material-ui/core';
 import { StoreContext } from '../store';
 import { useContext } from 'react';
 
-export const formatNumber = (locale, currency, value) => {
-  return Intl.NumberFormat(locale || 'en', {
+export const formatNumber = (
+  locale = 'en',
+  currency = 'EUR',
+  value,
+  minimumFractionDigits = 2
+) => {
+  return Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: currency || 'EUR',
-    minimumFractionDigits: 2,
+    currency: currency,
+    minimumFractionDigits,
   }).format(value);
 };
 
 export const useFormatNumber = () => {
   const store = useContext(StoreContext);
 
-  return (value, style = 'currency') => {
+  return (value, style = 'currency', minimumFractionDigits) => {
     if (style === 'currency') {
       return formatNumber(
         store.organization.selected.locale,
         store.organization.selected.currency,
-        value
+        value,
+        minimumFractionDigits
       );
     }
 
     if (style === 'percent') {
       return Number(value).toLocaleString(store.organization.selected.locale, {
         style: 'percent',
-        minimumFractionDigits: 2,
+        minimumFractionDigits,
       });
     }
   };
@@ -34,6 +40,7 @@ export const useFormatNumber = () => {
 
 export const NumberFormat = ({
   value,
+  minimumFractionDigits = 2,
   style = 'currency',
   withColor,
   ...props
@@ -53,7 +60,9 @@ export const NumberFormat = ({
 
   return (
     <StyledTypography noWrap {...props}>
-      {value !== undefined && value != null ? formatNumber(value, style) : '--'}
+      {value !== undefined && value != null
+        ? formatNumber(value, style, minimumFractionDigits)
+        : '--'}
     </StyledTypography>
   );
 };

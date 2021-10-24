@@ -1,7 +1,7 @@
 import { Box, Typography } from '@material-ui/core';
 
-import getConfig from 'next/config';
 import Image from 'next/image';
+import getConfig from 'next/config';
 import useTranslation from 'next-translate/useTranslation';
 
 const {
@@ -80,6 +80,22 @@ export const Pending2Illustration = () => (
 );
 
 export const ReceiptIllustration = () => (
-  //TODO: fill the alt attribute
-  <Illustration imgName="undraw_Receipt_re_fre3" alt="" />
+  <Illustration imgName="undraw_Receipt_re_fre3" alt="Invoice" />
+);
+
+export const WelcomeIllustration = ({ height = '100%' }) => (
+  <Illustration
+    imgName="undraw_apartment_rent_o0ut"
+    height={height}
+    alt="welcome"
+  />
+);
+
+export const CelebrationIllustration = ({ label, height = '100%' }) => (
+  <Illustration
+    imgName="undraw_Celebration_re_kc9k"
+    height={height}
+    label={label}
+    alt="celebration"
+  />
 );
