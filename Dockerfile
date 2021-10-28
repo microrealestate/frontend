@@ -10,7 +10,7 @@ RUN npm set progress=false && \
 COPY public public
 COPY locales locales
 COPY src src
-COPY .babelrc .
+COPY .eslintrc.json .
 COPY i18n.json .
 COPY next.config.js .
 COPY package.json .
