@@ -5,13 +5,15 @@ import { Form, Formik } from 'formik';
 import { FormTextField, SubmitButton } from '../components/Form';
 import React, { useContext, useEffect, useState } from 'react';
 
-import getConfig from 'next/config';
 import Link from '../components/Link';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import { observer } from 'mobx-react-lite';
 import Page from '../components/Page';
 import RequestError from '../components/RequestError';
 import { StoreContext } from '../store';
+import getConfig from 'next/config';
+import moment from 'moment';
+import { observer } from 'mobx-react-lite';
+import { setOrganizationId } from '../utils/fetch';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -73,6 +75,8 @@ const SignIn = observer(() => {
             store.user
           );
         }
+        setOrganizationId(store.organization.selected._id);
+        moment.locale(store.organization.selected.locale);
         router.push(`/${store.organization.selected.name}/dashboard`);
       } else {
         router.push('/firstaccess');
