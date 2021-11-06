@@ -11,6 +11,7 @@ import Page from '../../../components/Page';
 import RequestError from '../../../components/RequestError';
 import ThirdPartiesForm from '../../../components/organization/ThirdPartiesForm';
 import { isServer } from '../../../utils';
+import moment from 'moment';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
@@ -28,6 +29,7 @@ const SettingTabs = observer(({ onSubmit, setError }) => {
 
   const onSubmitted = ({ isOrgNameChanged, isLocaleChanged }) => {
     if (isOrgNameChanged || isLocaleChanged) {
+      moment.locale(store.organization.selected.locale);
       router.push(`/${store.organization.selected.name}/settings`, null, {
         locale: store.organization.selected.locale,
       });

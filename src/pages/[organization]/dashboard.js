@@ -26,6 +26,7 @@ import {
 import { NumberFormat, useFormatNumber } from '../../utils/numberformat';
 import { StoreContext, getStoreInstance } from '../../store';
 import { useCallback, useContext, useMemo, useState } from 'react';
+import { useComponentMountedRef, useInterval } from '../../utils/hooks';
 
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import { DashboardCard } from '../../components/Cards';
@@ -47,7 +48,6 @@ import { nanoid } from 'nanoid';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useEffect } from 'react';
-import { useInterval } from '../../utils/hooks';
 import { useRouter } from 'next/router';
 import { useTheme } from '@material-ui/styles';
 import useTranslation from 'next-translate/useTranslation';
@@ -576,10 +576,16 @@ const Welcome = () => {
 const Dashboard = () => {
   console.log('Dashboard functional component');
   const store = useContext(StoreContext);
-  const triggerRefreshData = useInterval(() => fetchDashboardData(store), 5000);
+  const mountedRef = useComponentMountedRef();
+  const triggerRefreshData = useInterval(
+    () => fetchDashboardData(store),
+    10000
+  );
 
   useEffect(() => {
-    triggerRefreshData.start();
+    if (mountedRef.current) {
+      triggerRefreshData.start();
+    }
 
     return () => triggerRefreshData.clear();
   }, []);

@@ -1,5 +1,5 @@
 import { action, computed, flow, makeObservable, observable } from 'mobx';
-import { apiFetcher, authApiFetcher } from '../utils/fetch';
+import { apiFetcher, authApiFetcher, setAccessToken } from '../utils/fetch';
 
 import { isServer } from '../utils';
 
@@ -10,7 +10,6 @@ export const RENTER_ROLE = 'renter';
 export const ROLES = [ADMIN_ROLE, RENTER_ROLE];
 export default class User {
   token;
-  tokenExpiry;
   firstName;
   lastName;
   email;
@@ -19,7 +18,6 @@ export default class User {
   constructor() {
     makeObservable(this, {
       token: observable,
-      tokenExpiry: observable,
       firstName: observable,
       lastName: observable,
       email: observable,
@@ -74,8 +72,8 @@ export default class User {
       this.firstName = firstname;
       this.lastName = lastname;
       this.email = email;
-      this.tokenExpiry = exp;
       this.token = accessToken;
+      setAccessToken(accessToken);
       return 200;
     } catch (error) {
       console.error(error);
@@ -87,17 +85,18 @@ export default class User {
     try {
       yield apiFetcher().delete('/authenticator/signout');
     } finally {
-      this.firstName = undefined;
-      this.lastName = undefined;
-      this.email = undefined;
-      this.tokenExpiry = undefined;
-      this.token = undefined;
+      this.firstName = null;
+      this.lastName = null;
+      this.email = null;
+      this.token = null;
+      setAccessToken(null);
     }
   }
 
   *refreshTokens(context) {
     try {
       let response;
+      // request to get the new tokens
       if (isServer()) {
         const authFetchApi = authApiFetcher(context.req.headers.cookie);
         response = yield authFetchApi.post('/authenticator/refreshtoken');
@@ -109,24 +108,26 @@ export default class User {
       } else {
         response = yield apiFetcher().post('/authenticator/refreshtoken');
       }
-      const { accessToken } = response.data;
-      const {
-        account: { firstname, lastname, email },
-        exp,
-      } = jwt.decode(accessToken);
-      this.firstName = firstname;
-      this.lastName = lastname;
-      this.email = email;
-      this.tokenExpiry = exp;
-      this.token = accessToken;
-      return { status: 200 };
+
+      // set access token in store
+      if (response) {
+        const { accessToken } = response.data;
+        const {
+          account: { firstname, lastname, email },
+        } = jwt.decode(accessToken);
+        this.firstName = firstname;
+        this.lastName = lastname;
+        this.email = email;
+        this.token = accessToken;
+        setAccessToken(accessToken);
+        return { status: 200 };
+      }
     } catch (error) {
       this.firstName = undefined;
       this.lastName = undefined;
       this.email = undefined;
-      this.tokenExpiry = undefined;
       this.token = undefined;
-      console.error(error);
+      setAccessToken(null);
       return { status: error.response.status, error };
     }
   }

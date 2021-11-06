@@ -1,44 +1,43 @@
+import { isClient, isServer } from './index';
+
 import FileDownload from 'js-file-download';
+import { Mutex } from 'async-mutex';
 import axios from 'axios';
 import getConfig from 'next/config';
-import { isServer } from './index';
+import { getStoreInstance } from '../store';
 
 const { publicRuntimeConfig, serverRuntimeConfig } = getConfig();
 let apiFetch;
 let authApiFetch;
 const withCredentials = publicRuntimeConfig.CORS_ENABLED;
 
-// TODO: rename useApiFetch as it is not a react hook
-/* eslint-disable react-hooks/rules-of-hooks */
-export const setApiHeaders = ({
-  accessToken,
-  organizationId,
-  acceptLanguage,
-}) => {
+export const setAccessToken = (accessToken) => {
+  apiFetcher();
   if (accessToken) {
-    apiFetcher();
     apiFetch.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-  } else if (apiFetch) {
+  } else if (accessToken === null) {
     delete apiFetch.defaults.headers.common['Authorization'];
   }
+};
 
+export const setOrganizationId = (organizationId) => {
+  apiFetcher();
   if (organizationId) {
-    apiFetcher();
     apiFetch.defaults.headers.organizationId = organizationId;
-  } else if (apiFetch) {
+  } else if (organizationId === null) {
     delete apiFetch.defaults.headers.organizationId;
   }
+};
 
+export const setAcceptLanguage = (acceptLanguage) => {
+  apiFetcher();
   if (acceptLanguage) {
-    apiFetcher();
     apiFetch.defaults.headers['Accept-Language'] = acceptLanguage;
   }
 };
 
 export const apiFetcher = () => {
   if (!apiFetch) {
-    // console.log('create api fetch')
-
     // create axios instance
     if (isServer()) {
       apiFetch = axios.create({
@@ -56,12 +55,53 @@ export const apiFetcher = () => {
     if (process.env.NODE_ENV === 'development') {
       apiFetch.interceptors.request.use(
         function (config) {
+          console.log(`${config.method.toUpperCase()} ${config.url}`);
           console.log(config);
           return config;
         },
         function (error) {
           return Promise.reject(error);
         }
+      );
+    }
+
+    if (isClient()) {
+      // Call refreshTokens and retry request if accessToken has expired
+      // use mutex to avoid race condition when several requests are done in parallel
+      const RTMutex = new Mutex();
+      apiFetch.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+          try {
+            const store = getStoreInstance();
+            const config = error.config;
+            if (
+              store.user.signedIn &&
+              error.response.status === 401 &&
+              !config._retry
+            ) {
+              config._retry = true;
+              if (RTMutex.isLocked()) {
+                await RTMutex.waitForUnlock();
+              } else {
+                await RTMutex.runExclusive(async () => {
+                  await store.user.refreshTokens();
+                });
+              }
+              if (store.user.signedIn) {
+                config.headers['Authorization'] =
+                  apiFetch.defaults.headers.common['Authorization'];
+                return apiFetch(config);
+              } else {
+                return window.location.reload();
+              }
+            }
+          } catch (err) {
+            console.error(err);
+          }
+          return Promise.reject(error);
+        },
+        { synchronous: true }
       );
     }
 
@@ -92,7 +132,7 @@ export const apiFetcher = () => {
 };
 
 export const authApiFetcher = (cookie) => {
-  if (!isServer()) {
+  if (isClient()) {
     return;
   }
 

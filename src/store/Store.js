@@ -1,4 +1,5 @@
-import { makeObservable, observable, reaction } from 'mobx';
+import { makeObservable, observable } from 'mobx';
+import { setAccessToken, setOrganizationId } from '../utils/fetch';
 
 import Dashboard from './Dashboard';
 import Document from './Document';
@@ -9,9 +10,7 @@ import Rent from './Rent';
 import Template from './Template';
 import Tenant from './Tenant';
 import User from './User';
-import { isServer } from '../utils';
 import moment from 'moment';
-import { setApiHeaders } from '../utils/fetch';
 
 export default class Store {
   user = new User();
@@ -36,51 +35,6 @@ export default class Store {
       document: observable,
       dashboard: observable,
     });
-
-    let refreshTokenHandle;
-    reaction(
-      () => this.user.token,
-      (token) => {
-        // console.log('react to access token changed')
-        setApiHeaders({
-          accessToken: token,
-          organizationId: this.organization?.selected?._id,
-        });
-
-        if (!isServer()) {
-          if (token) {
-            // trigger refresh in 5 min - 10 seconds (before expiry date)
-            if (refreshTokenHandle) {
-              clearTimeout(refreshTokenHandle);
-            }
-            refreshTokenHandle = setTimeout(async () => {
-              await this.user.refreshTokens();
-              if (!this.user.signedIn) {
-                // TODO: display a dialog before reloading
-                window.location.reload();
-              }
-            }, this.user.tokenExpiry * 1000 - Date.now() - 10000);
-          } else {
-            if (refreshTokenHandle) {
-              clearTimeout(refreshTokenHandle);
-              refreshTokenHandle = null;
-            }
-          }
-        }
-      }
-    );
-    reaction(
-      () => this.organization.selected,
-      async (organization) => {
-        setApiHeaders({
-          accessToken: this.user.token,
-          organizationId: organization?._id,
-        });
-        const selectedLocale = organization?.locale || 'en';
-        moment.locale(selectedLocale);
-        console.log(`set moment ${selectedLocale}`);
-      }
-    );
   }
 
   hydrate(initialData) {
@@ -123,10 +77,12 @@ export default class Store {
     this.user.email = user.email;
     this.user.role = user.role;
     this.user.token = user.token;
-    this.user.tokenExpiry = user.tokenExpiry;
+    setAccessToken(user.token);
 
     this.organization.items = organization.items;
     this.organization.selected = organization.selected;
+    setOrganizationId(organization.selected?._id);
+    moment.locale(organization.selected?.locale || 'en');
 
     this.lease.items = lease.items;
     this.lease.selected = lease.selected;

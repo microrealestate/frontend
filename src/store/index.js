@@ -1,8 +1,8 @@
 import { createContext, useEffect, useState } from 'react';
+import { isClient, isServer } from '../utils';
 
-import { enableStaticRendering } from 'mobx-react-lite';
-import { isServer } from '../utils';
 import Store from './Store';
+import { enableStaticRendering } from 'mobx-react-lite';
 
 enableStaticRendering(isServer());
 
@@ -32,7 +32,7 @@ function InjectStoreContext({ children, initialData }) {
 
   useEffect(() => {
     setStore(getStoreInstance(initialData));
-    if (!isServer() && process.env.NODE_ENV === 'development') {
+    if (isClient() && process.env.NODE_ENV === 'development') {
       window.__store = store;
     }
   }, []);

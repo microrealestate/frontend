@@ -1,12 +1,13 @@
-import { getStoreInstance, StoreContext } from '../store';
+import { StoreContext, getStoreInstance } from '../store';
 import { isServer, redirect } from '../utils';
+import { setAcceptLanguage, setOrganizationId } from '../utils/fetch';
 import { useContext, useEffect } from 'react';
 
 import Cookies from 'universal-cookie';
 import ErrorPage from 'next/error';
-import getConfig from 'next/config';
 import { Observer } from 'mobx-react-lite';
-import { setApiHeaders } from '../utils/fetch';
+import getConfig from 'next/config';
+import moment from 'moment';
 import { toJS } from 'mobx';
 
 const {
@@ -45,38 +46,29 @@ export function withAuthentication(PageComponent) {
       // needed to update axios headers with Accept-Language for future requests done during SSR
       // like that the targeted service requested will get this header
       // see /api/documents, /api/templates
-      setApiHeaders({ acceptLanguage: context.req.headers['accept-language'] });
+      setAcceptLanguage(context.req.headers['accept-language']);
     }
     const store = getStoreInstance();
     context.store = store;
     if (isServer()) {
-      const cookies = new Cookies(context.req.headers.cookie);
-      const refreshToken = cookies.get('refreshToken');
-      if (!refreshToken) {
-        console.log('no refresh token redirecting to /signin');
-        redirect(context, '/signin');
-        return {};
-      }
-
-      // TODO not refresh token when it is not expired
-      console.log('Force refresh token');
-      // const result = await store.user.refreshTokens(context);
-      // if (result.status > 399) {
-      //     return {
-      //         error: {
-      //             statusCode: result.status,
-      //             error: buildFetchError(result.error)
-      //         }
-      //     };
-      // }
-      await store.user.refreshTokens(context);
-      if (!store.user.signedIn) {
-        console.log('current refresh token invalid redirecting to /signin');
-        redirect(context, '/signin');
-        return {};
-      }
-
       try {
+        const cookies = new Cookies(context.req.headers.cookie);
+        const refreshToken = cookies.get('refreshToken');
+        if (!refreshToken) {
+          console.log('no refresh token found redirecting to /signin');
+          redirect(context, '/signin');
+          return {};
+        }
+
+        // Force the refresh token to check the validity of the current refreshToken
+        // and to get a new tokens (refreshToken and accessToken)
+        await store.user.refreshTokens(context);
+        if (!store.user.signedIn) {
+          console.log('current refresh token invalid redirecting to /signin');
+          redirect(context, '/signin');
+          return {};
+        }
+
         await store.organization.fetch();
         if (store.organization.items.length) {
           const organizationName = context.query.organization;
@@ -93,6 +85,8 @@ export function withAuthentication(PageComponent) {
               store.user
             );
           }
+          setOrganizationId(store.organization.selected?._id);
+          moment.locale(store.organization.selected?.locale || 'en');
           if (!store.organization.selected) {
             return {
               error: {
@@ -102,16 +96,10 @@ export function withAuthentication(PageComponent) {
           }
         }
       } catch (error) {
-        if (error.response?.status === 403) {
-          console.log('current refresh token invalid redirecting to /signin');
-          redirect(context, '/signin');
-          return {};
-        }
         console.error(error);
         return {
           error: {
-            statusCode: 500,
-            //error: buildFetchError(error)
+            statusCode: error.response?.status || 500,
           },
         };
       }
