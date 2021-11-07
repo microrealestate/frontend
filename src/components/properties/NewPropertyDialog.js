@@ -80,7 +80,7 @@ const NewPropertyDialog = ({ open, setOpen, onConfirm }) => {
       onClose={handleClose}
       aria-labelledby="new-property-dialog"
     >
-      <DialogTitle>{t('Create a new property')}</DialogTitle>
+      <DialogTitle>{t('Add a new property')}</DialogTitle>
       <Box p={1}>
         <RequestError error={error} />
         <Formik

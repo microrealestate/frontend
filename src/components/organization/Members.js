@@ -87,7 +87,7 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
         onClick={handleClickOpen}
         onlyRoles={allowedRoles}
       >
-        {t('Add member')}
+        {t('Add a collaborator')}
       </RestrictButton>
       <Dialog
         open={open}
@@ -103,11 +103,11 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
             return (
               <Form autoComplete="off">
                 <DialogTitle id="form-dialog-title">
-                  {t('Add member')}
+                  {t('Add a collaborator')}
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText>
-                    {t('Add a new member to your organization')}
+                    {t('Add a new collaborator to your organization')}
                   </DialogContentText>
                   <Box minHeight={100} minWidth={500}>
                     <Grid container spacing={1}>
@@ -189,7 +189,7 @@ const Members = observer(({ onSubmit }) => {
   );
 
   return (
-    <FormSection label={t('Manage access')}>
+    <FormSection label={t('Collaborators')}>
       <Box py={2}>
         <FormDialog
           members={store.organization.selected?.members}
@@ -202,7 +202,7 @@ const Members = observer(({ onSubmit }) => {
             <TableRow>
               <TableCell></TableCell>
               <TableCell>
-                <Typography>{t('Member')}</Typography>
+                <Typography>{t('Collaborator')}</Typography>
               </TableCell>
               <TableCell>
                 <Typography>{t('Email')}</Typography>
@@ -288,7 +288,7 @@ const Members = observer(({ onSubmit }) => {
           </TableBody>
         </Table>
         <ConfirmDialog
-          title={t('Are you sure to remove this member?')}
+          title={t('Are you sure to remove this collaborator?')}
           subTitle={memberToRemove.name}
           open={memberToRemove}
           setOpen={setMemberToRemove}

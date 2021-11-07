@@ -112,7 +112,7 @@ const NewTenantDialog = ({ open, setOpen, onConfirm }) => {
       onClose={handleClose}
       aria-labelledby="new-tenant-dialog"
     >
-      <DialogTitle>{t('Create a new tenant')}</DialogTitle>
+      <DialogTitle>{t('Add a new tenant')}</DialogTitle>
       <Box p={1}>
         <RequestError error={error} />
         <Formik

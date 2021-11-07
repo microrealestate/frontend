@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
-    "generateEnStrings": "node scripts/extractlocalizedstrings.js"
+    "generateStrings": "node scripts/extractlocalizedstrings.js"
   },
   "dependencies": {
     "@date-io/moment": "1.3.13",

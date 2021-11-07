@@ -142,7 +142,7 @@ const LandlordForm = observer(({ onSubmit, onSubmitted }) => {
           <Form autoComplete="off">
             <FormSection label={t('Landlord information')}>
               <FormTextField
-                label={t('Organization/Landlord name')}
+                label={t('Name')}
                 name="name"
                 onlyRoles={allowedRoles}
               />

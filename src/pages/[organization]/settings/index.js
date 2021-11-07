@@ -48,7 +48,7 @@ const SettingTabs = observer(({ onSubmit, setError }) => {
           <Tab label={t('Landlord')} />
           <Tab label={t('Billing')} />
           <Tab label={t('Leases')} />
-          <Tab label={t('Manage access')} />
+          <Tab label={t('Collaborators')} />
           <Tab label={t('Third-parties')} />
         </Tabs>
         <TabPanel value={tabSelectedIndex} index={0}>

@@ -14,14 +14,14 @@ import {
 } from '@material-ui/core';
 import { memo, useCallback, useMemo } from 'react';
 
-import _ from 'lodash';
 import BalanceBar from './BalanceBar';
 import { CardRow } from '../Cards';
 import DownloadLink from '../DownloadLink';
-import moment from 'moment';
 import { NumberFormat } from '../../utils/numberformat';
-import { observer } from 'mobx-react-lite';
 import SendRentEmailMenu from './SendRentEmailMenu';
+import _ from 'lodash';
+import moment from 'moment';
+import { observer } from 'mobx-react-lite';
 import { useStyles } from '../../styles/components/RentCards.styles';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -132,7 +132,7 @@ const Steps = memo(({ rent }) => {
     let receiptSentText;
     if (receiptSent) {
       const sentMoment = moment(rent.emailStatus.last.invoice.sentDate);
-      receiptSentText = t('Receipt sent on {{date}}', {
+      receiptSentText = t('Invoice sent on {{date}}', {
         date: sentMoment.format('LLL'),
       });
     }
@@ -228,7 +228,7 @@ const Steps = memo(({ rent }) => {
       </Step>
       <Step>
         <StepLabel icon={' '} completed={receiptSent}>
-          {t('Receipt sent')}
+          {t('Invoice sent')}
           {receiptSent && (
             <DownloadLink
               tooltipText={receiptSentText}

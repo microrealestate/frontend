@@ -1,3 +1,4 @@
+import { ListItemIcon, Typography } from '@material-ui/core';
 import {
   memo,
   useCallback,
@@ -13,7 +14,6 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import { ListItemIcon } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 import PeopleIcon from '@material-ui/icons/People';
 import ReceiptIcon from '@material-ui/icons/Receipt';
@@ -125,7 +125,7 @@ const Nav = () => {
                 className={`${classes.itemText} ${
                   openDebounced ? classes.itemTextOpen : classes.itemTextClose
                 }`}
-                primary={item.value}
+                primary={<Typography noWrap>{item.value}</Typography>}
               />
             </ListItem>
           );

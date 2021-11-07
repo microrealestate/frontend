@@ -213,7 +213,7 @@ const Shortcuts = () => {
                   fullWidth
                   onClick={() => setOpenNewPropertyDialog(true)}
                 >
-                  {t('Create a new property')}
+                  {t('Add a new property')}
                 </Button>
               </Grid>
               <Grid item xs={12}>
@@ -224,7 +224,7 @@ const Shortcuts = () => {
                   fullWidth
                   onClick={() => setOpenNewTenantDialog(true)}
                 >
-                  {t('Create a new tenant')}
+                  {t('Add a new tenant')}
                 </Button>
               </Grid>
             </Grid>

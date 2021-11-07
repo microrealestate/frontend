@@ -106,7 +106,7 @@ const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
                     }
                     onClick={() => onClick('rentcall')}
                   >
-                    Send first notice
+                    {t('Send first notice')}
                   </Button>
                 </Grid>
                 <Grid item>
@@ -120,7 +120,7 @@ const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
                     }
                     onClick={() => onClick('rentcall_reminder')}
                   >
-                    Send second notice
+                    {t('Send second notice')}
                   </Button>
                 </Grid>
                 <Grid item>
@@ -134,7 +134,7 @@ const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
                     }
                     onClick={() => onClick('rentcall_last_reminder')}
                   >
-                    Send last notice
+                    {t('Send last notice')}
                   </Button>
                 </Grid>
                 <Grid item>
@@ -148,7 +148,7 @@ const TableToolbar = memo(({ selected = [], onSend = () => {} }) => {
                     }
                     onClick={() => onClick('invoice')}
                   >
-                    Send receipt
+                    {t('Send invoice')}
                   </Button>
                 </Grid>
               </Grid>
@@ -322,7 +322,7 @@ const RentTable = () => {
                 <Typography>{t('Last notice')}</Typography>
               </TableCell>
               <TableCell align="center">
-                <Typography>{t('Receipt')}</Typography>
+                <Typography>{t('Invoice')}</Typography>
               </TableCell>
             </TableRow>
           </TableHead>

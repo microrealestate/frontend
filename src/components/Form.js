@@ -352,7 +352,7 @@ export const AddressField = ({ onlyRoles, disabled }) => {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <FormTextField
-          label={t('Street')}
+          label={t('Street 1')}
           name="address.street1"
           onlyRoles={onlyRoles}
           disabled={disabled}
@@ -360,7 +360,7 @@ export const AddressField = ({ onlyRoles, disabled }) => {
       </Grid>
       <Grid item xs={12}>
         <FormTextField
-          label={t('Street')}
+          label={t('Street 2')}
           name="address.street2"
           onlyRoles={onlyRoles}
           disabled={disabled}

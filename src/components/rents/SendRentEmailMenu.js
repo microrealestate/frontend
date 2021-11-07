@@ -65,8 +65,8 @@ const SendRentEmailMenu = ({ period, tenant, terms, onError, ...props }) => {
           value: 'rentcall_last_reminder',
         },
         {
-          category: t('Receipt notice'),
-          label: t('Invoice by email'),
+          category: t('Invoice'),
+          label: t('Invoice'),
           illustration: <ReceiptIllustration />,
           value: 'invoice',
         },
