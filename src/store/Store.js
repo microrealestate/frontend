@@ -77,6 +77,7 @@ export default class Store {
     this.user.email = user.email;
     this.user.role = user.role;
     this.user.token = user.token;
+    this.user.tokenExpiry = user.tokenExpiry;
     setAccessToken(user.token);
 
     this.organization.items = organization.items;

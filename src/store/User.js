@@ -10,6 +10,7 @@ export const RENTER_ROLE = 'renter';
 export const ROLES = [ADMIN_ROLE, RENTER_ROLE];
 export default class User {
   token;
+  tokenExpiry;
   firstName;
   lastName;
   email;
@@ -18,6 +19,7 @@ export default class User {
   constructor() {
     makeObservable(this, {
       token: observable,
+      tokenExpiry: observable,
       firstName: observable,
       lastName: observable,
       email: observable,
@@ -73,6 +75,7 @@ export default class User {
       this.lastName = lastname;
       this.email = email;
       this.token = accessToken;
+      this.tokenExpiry = exp;
       setAccessToken(accessToken);
       return 200;
     } catch (error) {
@@ -89,6 +92,7 @@ export default class User {
       this.lastName = null;
       this.email = null;
       this.token = null;
+      this.tokenExpiry = undefined;
       setAccessToken(null);
     }
   }
@@ -114,11 +118,13 @@ export default class User {
         const { accessToken } = response.data;
         const {
           account: { firstname, lastname, email },
+          exp,
         } = jwt.decode(accessToken);
         this.firstName = firstname;
         this.lastName = lastname;
         this.email = email;
         this.token = accessToken;
+        this.tokenExpiry = exp;
         setAccessToken(accessToken);
         return { status: 200 };
       }
@@ -127,6 +133,7 @@ export default class User {
       this.lastName = undefined;
       this.email = undefined;
       this.token = undefined;
+      this.tokenExpiry = undefined;
       setAccessToken(null);
       return { status: error.response.status, error };
     }

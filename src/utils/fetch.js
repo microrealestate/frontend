@@ -77,8 +77,12 @@ export const apiFetcher = () => {
             const config = error.config;
             if (
               store.user.signedIn &&
-              error.response.status === 401 &&
-              !config._retry
+              !config._retry &&
+              // force refresh token when received 401
+              (error.response.status === 401 ||
+                // force refresh token when expiration is close to 10s
+                // this will let the time to execute all api calls which can be trigger between services
+                store.user.tokenExpiry * 1000 - Date.now() < 10000)
             ) {
               config._retry = true;
               if (RTMutex.isLocked()) {
