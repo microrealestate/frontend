@@ -51,83 +51,107 @@ export const apiFetcher = () => {
       });
     }
 
-    // add interceptors
+    // add client interceptors
+    if (isClient()) {
+      const refreshTokensAndUpdateConfig = async (store, config) => {
+        await store.user.refreshTokens();
+        if (store.user.signedIn) {
+          config.headers['Authorization'] =
+            apiFetch.defaults.headers.common['Authorization'];
+        }
+      };
+      // use mutex to avoid race condition when several requests are done in parallel
+      const RTMutex = new Mutex();
+
+      // force refresh token when expiration time is close to 10s
+      // this will let the time to propagate a valid RT in all back-end services
+      const minRTExpirationDelay = 10000; // 10s
+      apiFetch.interceptors.request.use(
+        async (config) => {
+          if (config.url !== '/authenticator/refreshtoken') {
+            const store = getStoreInstance();
+            const isRefreshTokenAboutToExpire =
+              store.user.tokenExpiry * 1000 - Date.now() <=
+              minRTExpirationDelay;
+
+            if (isRefreshTokenAboutToExpire) {
+              if (RTMutex.isLocked()) {
+                await RTMutex.waitForUnlock();
+              } else {
+                await RTMutex.runExclusive(async () => {
+                  console.log(
+                    'accessToken is about to expire, call refresh tokens'
+                  );
+                  await refreshTokensAndUpdateConfig(store, config);
+                });
+              }
+            }
+          }
+          return config;
+        },
+        (error) => {
+          return Promise.reject(error);
+        }
+      );
+
+      // Force signin if an api responded 403
+      apiFetch.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          if (error.response?.status === 403) {
+            window.location.reload();
+          }
+        }
+      );
+    }
+
+    // client/server interceptors
+    // For debugging purposes
     if (process.env.NODE_ENV === 'development') {
       apiFetch.interceptors.request.use(
-        function (config) {
-          console.log(`${config.method.toUpperCase()} ${config.url}`);
+        (config) => {
+          if (config?.method && config?.url) {
+            console.log(`${config.method.toUpperCase()} ${config.url}`);
+          }
           console.log(config);
           return config;
         },
-        function (error) {
+        (error) => {
           return Promise.reject(error);
         }
       );
     }
 
-    if (isClient()) {
-      // Call refreshTokens and retry request if accessToken has expired
-      // use mutex to avoid race condition when several requests are done in parallel
-      const RTMutex = new Mutex();
-      apiFetch.interceptors.response.use(
-        (response) => response,
-        async (error) => {
-          try {
-            const store = getStoreInstance();
-            const config = error.config;
-            if (
-              store.user.signedIn &&
-              !config._retry &&
-              // force refresh token when received 401
-              (error.response.status === 401 ||
-                // force refresh token when expiration is close to 10s
-                // this will let the time to execute all api calls which can be trigger between services
-                store.user.tokenExpiry * 1000 - Date.now() < 10000)
-            ) {
-              config._retry = true;
-              if (RTMutex.isLocked()) {
-                await RTMutex.waitForUnlock();
-              } else {
-                await RTMutex.runExclusive(async () => {
-                  await store.user.refreshTokens();
-                });
-              }
-              if (store.user.signedIn) {
-                config.headers['Authorization'] =
-                  apiFetch.defaults.headers.common['Authorization'];
-                return apiFetch(config);
-              } else {
-                return window.location.reload();
-              }
-            }
-          } catch (err) {
-            console.error(err);
-          }
-          return Promise.reject(error);
-        },
-        { synchronous: true }
-      );
-    }
-
+    // For logging purposes
     apiFetch.interceptors.response.use(
       (response) => {
-        console.log(
-          `${response.config.method.toUpperCase()} ${response.config.url} ${
-            response.status
-          }`
-        );
+        if (
+          response?.config?.method &&
+          response?.config?.url &&
+          response?.status
+        ) {
+          console.log(
+            `${response.config.method.toUpperCase()} ${response.config.url} ${
+              response.status
+            }`
+          );
+        }
         return response;
       },
       (error) => {
-        if (error.config?.method && error.response?.status) {
+        if (
+          error?.config?.method &&
+          rror?.response?.url &&
+          error?.response?.status
+        ) {
           console.error(
             `${error.config.method.toUpperCase()} ${error.config.url} ${
               error.response.status
             }`
           );
-          return Promise.reject(error);
+        } else {
+          console.error(error);
         }
-        console.error(error);
         return Promise.reject({ error });
       }
     );

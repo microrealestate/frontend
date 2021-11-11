@@ -114,7 +114,7 @@ export default class User {
       }
 
       // set access token in store
-      if (response) {
+      if (response?.data?.accessToken) {
         const { accessToken } = response.data;
         const {
           account: { firstname, lastname, email },
@@ -127,6 +127,13 @@ export default class User {
         this.tokenExpiry = exp;
         setAccessToken(accessToken);
         return { status: 200 };
+      } else {
+        this.firstName = undefined;
+        this.lastName = undefined;
+        this.email = undefined;
+        this.token = undefined;
+        this.tokenExpiry = undefined;
+        setAccessToken(null);
       }
     } catch (error) {
       this.firstName = undefined;
@@ -135,6 +142,7 @@ export default class User {
       this.token = undefined;
       this.tokenExpiry = undefined;
       setAccessToken(null);
+      console.error(error);
       return { status: error.response.status, error };
     }
   }
