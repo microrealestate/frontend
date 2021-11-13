@@ -112,7 +112,7 @@ const NewPaymentDialog = ({ open, setOpen }) => {
             onClick={onSubmit}
             disabled={!!selectedRent.occupant === false}
           >
-            {t('Pay')}
+            {t('Enter')}
           </Button>
         </DialogActions>
       </Box>

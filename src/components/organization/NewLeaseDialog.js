@@ -35,11 +35,11 @@ const NewLeaseDialog = ({ open, setOpen, onConfirm }) => {
     if (status !== 200) {
       switch (status) {
         case 422:
-          return setError(t('Lease name is missing'));
+          return setError(t('Contract name is missing'));
         case 403:
-          return setError(t('You are not allowed to create a lease'));
+          return setError(t('You are not allowed to create a contract'));
         case 409:
-          return setError(t('The lease already exists'));
+          return setError(t('The contract already exists'));
         default:
           return setError(t('Something went wrong'));
       }
@@ -55,9 +55,9 @@ const NewLeaseDialog = ({ open, setOpen, onConfirm }) => {
       fullWidth
       open={open}
       onClose={handleClose}
-      aria-labelledby="new-lease-dialog"
+      aria-labelledby="new-contract-dialog"
     >
-      <DialogTitle>{t('Create a new lease')}</DialogTitle>
+      <DialogTitle>{t('Create a new contract')}</DialogTitle>
       <Box p={1}>
         <RequestError error={error} />
         <Formik
@@ -76,7 +76,7 @@ const NewLeaseDialog = ({ open, setOpen, onConfirm }) => {
                     {t('Cancel')}
                   </Button>
                   <SubmitButton
-                    label={!isSubmitting ? t('Create') : t('Creating lease')}
+                    label={!isSubmitting ? t('Create') : t('Creating contract')}
                   />
                 </DialogActions>
               </Form>

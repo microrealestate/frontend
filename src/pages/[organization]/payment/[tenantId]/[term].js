@@ -141,7 +141,7 @@ export const PaymentBalance = () => {
       </CardRow>
       <CardRow pb={1.5}>
         <Typography color="textSecondary" noWrap>
-          {t('Payments')}
+          {t('Settlements')}
         </Typography>
         <NumberFormat
           color="textSecondary"
@@ -184,7 +184,7 @@ const PaymentTabs = ({ onSubmit }) => {
           onChange={handleTabChange}
           aria-label="Tenant tabs"
         >
-          <Tab label={t('Payments')} />
+          <Tab label={t('Settlements')} />
           <Tab label={t('Additional cost and discount')} />
           <Tab label={t('Internal note')} />
         </Tabs>
@@ -290,7 +290,7 @@ const RentPayment = observer(() => {
           </Box>
           <DashboardCard
             Icon={SendIcon}
-            title={t('Documents sent')}
+            title={t('Emails sent')}
             Toolbar={
               <SendRentEmailMenu
                 tenant={store.rent.selected.occupant}

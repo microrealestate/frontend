@@ -48,19 +48,19 @@ const SendRentEmailMenu = ({ period, tenant, terms, onError, ...props }) => {
       menuItems={[
         {
           category: t('Reminder notices'),
-          label: t('First notice email'),
+          label: t('First notice'),
           illustration: <PendingIllustration />,
           value: 'rentcall',
         },
         {
           category: t('Reminder notices'),
-          label: t('Second notice email'),
+          label: t('Second notice'),
           illustration: <Pending2Illustration />,
           value: 'rentcall_reminder',
         },
         {
           category: t('Reminder notices'),
-          label: t('Last notice email'),
+          label: t('Last notice'),
           illustration: <AlertIllustration />,
           value: 'rentcall_last_reminder',
         },

@@ -95,6 +95,34 @@ const TenantListItem = ({ tenant, balance, onClick }) => (
   </ListItem>
 );
 
+const ShortcutButton = ({ Icon, label, disabled, onClick }) => {
+  const useStyles = makeStyles((theme) => ({
+    root: {
+      paddingTop: 10,
+      paddingBottom: 10,
+      color: theme.palette.info.contrastText,
+      backgroundColor: theme.palette.info.main,
+      '&:hover': {
+        background: theme.palette.info.dark,
+      },
+    },
+  }));
+  const classes = useStyles();
+
+  return (
+    <Button
+      startIcon={<Icon style={{ fontSize: 30 }} />}
+      size="large"
+      className={classes.root}
+      fullWidth
+      disabled={!!disabled}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+};
+
 const Shortcuts = () => {
   const router = useRouter();
   const store = useContext(StoreContext);
@@ -166,66 +194,42 @@ const Shortcuts = () => {
               {!!store.dashboard.data?.overview?.tenantCount && (
                 <>
                   <Grid item xs={12}>
-                    <Button
-                      startIcon={<ReceiptIcon style={{ fontSize: 30 }} />}
-                      size="large"
-                      className={classes.root}
-                      fullWidth
+                    <ShortcutButton
+                      Icon={ReceiptIcon}
+                      label={t('Enter a rent settlement')}
                       disabled={!store.dashboard.data?.overview?.tenantCount}
                       onClick={() => setOpenNewPaymentDialog(true)}
-                    >
-                      {t('Enter a rent payment')}
-                    </Button>
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <Button
-                      startIcon={<StopIcon style={{ fontSize: 30 }} />}
-                      variant="contained"
-                      size="large"
-                      className={classes.root}
-                      fullWidth
+                    <ShortcutButton
+                      Icon={StopIcon}
+                      label={t('Terminate a lease')}
                       onClick={() => setOpenTerminateLease(true)}
-                    >
-                      {t('Terminate a contract')}
-                    </Button>
+                    />
                   </Grid>
                 </>
               )}
               <Grid item xs={12}>
-                <Button
-                  startIcon={<DescriptionIcon style={{ fontSize: 30 }} />}
-                  variant="contained"
-                  size="large"
-                  className={classes.root}
-                  disableRipple
-                  fullWidth
+                <ShortcutButton
+                  Icon={DescriptionIcon}
+                  label={t('Create a new contract')}
                   onClick={() => setOpenNewLeaseDialog(true)}
-                >
-                  {t('Create a new lease')}
-                </Button>
+                />
               </Grid>
               <Grid item xs={12}>
-                <Button
-                  startIcon={<VpnKeyIcon style={{ fontSize: 30 }} />}
-                  variant="contained"
-                  size="large"
-                  className={classes.root}
-                  fullWidth
+                <ShortcutButton
+                  Icon={VpnKeyIcon}
+                  label={t('Add a new property')}
                   onClick={() => setOpenNewPropertyDialog(true)}
-                >
-                  {t('Add a new property')}
-                </Button>
+                />
               </Grid>
               <Grid item xs={12}>
-                <Button
-                  startIcon={<PeopleIcon style={{ fontSize: 30 }} />}
-                  size="large"
-                  className={classes.root}
-                  fullWidth
+                <ShortcutButton
+                  Icon={PeopleIcon}
+                  label={t('Add a new tenant')}
                   onClick={() => setOpenNewTenantDialog(true)}
-                >
-                  {t('Add a new tenant')}
-                </Button>
+                />
               </Grid>
             </Grid>
             <NewTenantDialog
@@ -357,7 +361,7 @@ const MonthFigures = observer(() => {
       <Grid container spacing={5}>
         <Grid item xs={12} sm={5}>
           <Box mb={1}>
-            <Typography variant="subtitle1">{t('Payments')}</Typography>
+            <Typography variant="subtitle1">{t('Settlements')}</Typography>
           </Box>
           <Paper>
             <Box pt={2} width="100%" height={296}>
@@ -366,7 +370,7 @@ const MonthFigures = observer(() => {
                   <Legend
                     verticalAlign="top"
                     formatter={(value) =>
-                      value === 'paid' ? t('Rent paid') : t('Rent unpaid')
+                      value === 'paid' ? t('Rents paid') : t('Rents not paid')
                     }
                   />
                   <Pie
@@ -403,7 +407,7 @@ const MonthFigures = observer(() => {
         <Grid item xs={12} sm={7}>
           <Box mb={1}>
             <Typography variant="subtitle1">
-              {t('Top 5 unpaid rents')}
+              {t('Top 5 of not paid rents')}
             </Typography>
           </Box>
           <Paper>
@@ -513,7 +517,7 @@ const YearFigures = observer(() => {
                       verticalAlign="top"
                       height={40}
                       formatter={(value) =>
-                        value === 'paid' ? t('Rent paid') : t('Rent unpaid')
+                        value === 'paid' ? t('Rent paid') : t('Rents not paid')
                       }
                     />
 

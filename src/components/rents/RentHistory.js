@@ -87,7 +87,7 @@ const RentHistory = ({ tenantId }) => {
                     <Typography>{t('Discounts')}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography>{t('Payment')}</Typography>
+                    <Typography>{t('Settlement')}</Typography>
                   </TableCell>
                   <TableCell align="right">
                     <Typography>{t('Balance')}</Typography>

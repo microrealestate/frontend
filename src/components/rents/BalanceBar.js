@@ -56,7 +56,7 @@ const BalanceBar = memo(function BalanceBar({ rent, hideTooltip }) {
               <NumberFormat value={rent.totalToPay} />
             </CardRow>
             <CardRow pt={1}>
-              <Typography>{t('Payment')}</Typography>
+              <Typography>{t('Settlement')}</Typography>
               <NumberFormat value={rent.payment} />
             </CardRow>
           </Box>

@@ -48,7 +48,7 @@ const NewPropertyDialog = ({ open, setOpen, onConfirm }) => {
           case 422:
             return setError(t('Property name is missing'));
           case 403:
-            return setError(t('You are not allowed to create a property'));
+            return setError(t('You are not allowed to add a property'));
           case 409:
             return setError(t('The property already exists'));
           default:
@@ -116,7 +116,7 @@ const NewPropertyDialog = ({ open, setOpen, onConfirm }) => {
                     {t('Cancel')}
                   </Button>
                   <SubmitButton
-                    label={!isSubmitting ? t('Create') : t('Creating property')}
+                    label={!isSubmitting ? t('Add') : t('Adding property')}
                   />
                 </DialogActions>
               </Form>

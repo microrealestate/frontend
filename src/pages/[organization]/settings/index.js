@@ -47,7 +47,7 @@ const SettingTabs = observer(({ onSubmit, setError }) => {
         >
           <Tab label={t('Landlord')} />
           <Tab label={t('Billing')} />
-          <Tab label={t('Leases')} />
+          <Tab label={t('Contracts')} />
           <Tab label={t('Collaborators')} />
           <Tab label={t('Third-parties')} />
         </Tabs>

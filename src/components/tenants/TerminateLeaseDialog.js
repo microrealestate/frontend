@@ -17,9 +17,9 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import moment from 'moment';
 import RequestError from '../RequestError';
 import { StoreContext } from '../../store';
+import moment from 'moment';
 import { toJS } from 'mobx';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -87,8 +87,8 @@ const TerminateLeaseDialog = ({ open, setOpen, tenantList }) => {
     >
       <DialogTitle>
         {tenantList
-          ? t('Terminate a contract')
-          : t("Terminate {{tenant}}'s contract", {
+          ? t('Terminate a lease')
+          : t("Terminate {{tenant}}'s lease", {
               tenant: store.tenant.selected.name,
             })}
       </DialogTitle>
@@ -136,7 +136,7 @@ const TerminateLeaseDialog = ({ open, setOpen, tenantList }) => {
                     }
                   />
                   <FormTextField
-                    label={t('Returned deposit')}
+                    label={t('Amount of the deposit refund')}
                     name="guarantyPayback"
                   />
                 </DialogContent>

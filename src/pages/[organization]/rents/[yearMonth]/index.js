@@ -154,7 +154,7 @@ const Rents = observer(() => {
                 <PageCard
                   variant="warning"
                   Icon={TrendingDownIcon}
-                  title={t('Unpaid')}
+                  title={t('Not paid')}
                   info={t('{{count}} rents not paid', {
                     count: store.rent.countNotPaid,
                   })}

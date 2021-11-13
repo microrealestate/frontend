@@ -78,7 +78,7 @@ const NewTenantDialog = ({ open, setOpen, onConfirm }) => {
         case 422:
           return setError(t('Tenant name is missing'));
         case 403:
-          return setError(t('You are not allowed to create a tenant'));
+          return setError(t('You are not allowed to add a tenant'));
         case 409:
           return setError(t('The tenant already exists'));
         default:
@@ -129,10 +129,8 @@ const NewTenantDialog = ({ open, setOpen, onConfirm }) => {
                     <>
                       <CheckboxField
                         name="isCopyFrom"
-                        label={t('Copy information from an existing tenant')}
-                        aria-label={t(
-                          'Copy information from an existing tenant'
-                        )}
+                        label={t('Copy from an existing tenant')}
+                        aria-label={t('Copy from an existing tenant')}
                       />
                       {values.isCopyFrom && (
                         <SelectField
@@ -149,7 +147,7 @@ const NewTenantDialog = ({ open, setOpen, onConfirm }) => {
                     {t('Cancel')}
                   </Button>
                   <SubmitButton
-                    label={!isSubmitting ? t('Create') : t('Creating tenant')}
+                    label={!isSubmitting ? t('Add') : t('Adding tenant')}
                   />
                 </DialogActions>
               </Form>

@@ -4,15 +4,15 @@ import React, { useCallback, useContext, useState } from 'react';
 import { ADMIN_ROLE } from '../../store/User';
 import { FormSection } from '../Form';
 import Link from '../Link';
-import { nanoid } from 'nanoid';
 import NewLeaseDialog from './NewLeaseDialog';
-import { observer } from 'mobx-react-lite';
 import { RestrictButton } from '../RestrictedComponents';
 import { StoreContext } from '../../store';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -32,11 +32,11 @@ const Leases = observer(({ setError }) => {
           case 422:
             return setError(t('Some fields are missing'));
           case 403:
-            return setError(t('You are not allowed to update the lease'));
+            return setError(t('You are not allowed to update the contract'));
           case 404:
-            return setError(t('Lease is not found'));
+            return setError(t('Contract is not found'));
           case 409:
-            return setError(t('The lease already exists'));
+            return setError(t('The contract already exists'));
           default:
             return setError(t('Something went wrong'));
         }
@@ -56,7 +56,7 @@ const Leases = observer(({ setError }) => {
   );
 
   return (
-    <FormSection label={t('Manage leases')}>
+    <FormSection label={t('Manage contracts')}>
       <Box py={2}>
         <RestrictButton
           variant="contained"
@@ -64,11 +64,11 @@ const Leases = observer(({ setError }) => {
           onClick={() => setOpenNewLeaseDialog(true)}
           onlyRoles={[ADMIN_ROLE]}
         >
-          {t('Add lease')}
+          {t('New contract')}
         </RestrictButton>
       </Box>
       <Paper variant="outlined" square>
-        <Table aria-label="lease table">
+        <Table aria-label="contract table">
           <TableHead>
             <TableRow>
               <TableCell>

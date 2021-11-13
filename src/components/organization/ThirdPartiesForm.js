@@ -4,9 +4,9 @@ import { Form, Formik } from 'formik';
 import { FormSection, FormTextField, SubmitButton } from '../Form';
 import { useCallback, useContext, useMemo } from 'react';
 
-import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
 import { Typography } from '@material-ui/core';
+import { observer } from 'mobx-react-lite';
 import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
@@ -95,7 +95,7 @@ const ThirdPartiesForm = observer(({ onSubmit }) => {
                 )}
               </Typography>
               <FormTextField
-                label={t('API key')}
+                label={t('Private API key')}
                 name="apiKey"
                 type="password"
                 showHidePassword={values.apiKey !== initialValues.apiKey}

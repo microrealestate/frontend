@@ -1,18 +1,18 @@
 import { Breadcrumbs, Grid, Paper, Typography } from '@material-ui/core';
-import { getStoreInstance, StoreContext } from '../../../../store';
+import { StoreContext, getStoreInstance } from '../../../../store';
 import { memo, useCallback, useContext, useState } from 'react';
 
 import { ADMIN_ROLE } from '../../../../store/User';
 import ConfirmDialog from '../../../../components/ConfirmDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { isServer } from '../../../../utils';
 import LeaseForm from '../../../../components/organization/LeaseForm';
 import LeaseTemplatesCard from '../../../../components/organization/LeaseTemplatesCard';
 import Link from '../../../../components/Link';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../../components/Page';
 import RequestError from '../../../../components/RequestError';
 import { RestrictButton } from '../../../../components/RestrictedComponents';
+import { isServer } from '../../../../utils';
+import { observer } from 'mobx-react-lite';
 import router from 'next/router';
 import { toJS } from 'mobx';
 import useTranslation from 'next-translate/useTranslation';
@@ -65,11 +65,11 @@ const Lease = observer(() => {
           case 422:
             return setError(t('Some fields are missing'));
           case 403:
-            return setError(t('You are not allowed to update the lease'));
+            return setError(t('You are not allowed to update the contract'));
           case 404:
-            return setError(t('Lease is not found'));
+            return setError(t('Contract is not found'));
           case 409:
-            return setError(t('The lease already exists'));
+            return setError(t('The contract already exists'));
           default:
             return setError(t('Something went wrong'));
         }
@@ -84,10 +84,10 @@ const Lease = observer(() => {
       switch (status) {
         case 422:
           return setError(
-            t('One lease is used by tenants, it cannot be removed')
+            t('Contract is used by tenants, it cannot be removed')
           );
         case 403:
-          return setError(t('You are not allowed to update the lease'));
+          return setError(t('You are not allowed to update the contract'));
         default:
           return setError(t('Something went wrong'));
       }
@@ -99,7 +99,7 @@ const Lease = observer(() => {
     <Page
       PrimaryToolbar={
         <BreadcrumbBar
-          currentPageName={store.lease.selected?.name || t('New lease')}
+          currentPageName={store.lease.selected?.name || t('New contract')}
           backPath={`/${store.organization.selected.name}/settings#leases`}
         />
       }
@@ -113,9 +113,9 @@ const Lease = observer(() => {
           }
           disabledTooltipTitle={
             store.lease.selected?.usedByTenants
-              ? t('Lease currently used in tenant contracts')
+              ? t('Contract currently used')
               : store.lease.selected?.system
-              ? t('System lease cannot be removed')
+              ? t('System contract cannot be removed')
               : ''
           }
           onlyRoles={[ADMIN_ROLE]}
@@ -136,7 +136,7 @@ const Lease = observer(() => {
         </Grid>
       </Grid>
       <ConfirmDialog
-        title={t('Are you sure to remove this lease?')}
+        title={t('Are you sure to remove this contract?')}
         subTitle={store.lease.selected?.name}
         open={removeLease}
         setOpen={setRemoveLease}

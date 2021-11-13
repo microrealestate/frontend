@@ -272,7 +272,7 @@ const RentCard = observer(({ rent, onEdit }) => {
             onError={() => {}}
           />
           <Button onClick={_onEdit} size="small" variant="contained">
-            {t('Payment')}
+            {t('Settlement')}
           </Button>
         </CardRow>
       </CardActions>

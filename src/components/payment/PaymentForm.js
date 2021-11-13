@@ -127,7 +127,7 @@ const PaymentForm = ({ onSubmit }) => {
       {({ isSubmitting, values: { payments } }) => {
         return (
           <Form autoComplete="off">
-            <FormSection label={t('Payments')}>
+            <FormSection label={t('Settlements')}>
               <FieldArray name="payments">
                 {({ form, ...arrayHelpers }) => {
                   return Children.toArray(
@@ -186,7 +186,7 @@ const PaymentForm = ({ onSubmit }) => {
                               size="small"
                               onClick={() => arrayHelpers.push(emptyPayment)}
                             >
-                              {t('Add payment')}
+                              {t('Add a settlement')}
                             </Button>
                           )}
                           {payments.length > 1 && (
@@ -196,7 +196,7 @@ const PaymentForm = ({ onSubmit }) => {
                               size="small"
                               onClick={() => arrayHelpers.remove(index)}
                             >
-                              {t('Remove payment')}
+                              {t('Remove the settlement')}
                             </Button>
                           )}
                         </Box>

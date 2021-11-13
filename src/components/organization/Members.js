@@ -87,7 +87,7 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
         onClick={handleClickOpen}
         onlyRoles={allowedRoles}
       >
-        {t('Add a collaborator')}
+        {t('New collaborator')}
       </RestrictButton>
       <Dialog
         open={open}
@@ -103,7 +103,7 @@ const FormDialog = memo(function FormDialog({ members = [], onSubmit }) {
             return (
               <Form autoComplete="off">
                 <DialogTitle id="form-dialog-title">
-                  {t('Add a collaborator')}
+                  {t('New collaborator')}
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText>

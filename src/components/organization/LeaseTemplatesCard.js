@@ -47,7 +47,7 @@ const TemplateList = observer(({ onEdit, onDelete }) => {
       ))}
     </List>
   ) : (
-    <EmptyIllustration label={t('No document templates defined')} />
+    <EmptyIllustration label={t('No contract templates entered')} />
   );
 });
 
@@ -161,7 +161,7 @@ const LeaseTemplatesCard = () => {
   return (
     <DashboardCard
       Icon={DescriptionIcon}
-      title={t('Document templates')}
+      title={t('Contract templates')}
       Toolbar={
         <Button
           size="small"
@@ -186,7 +186,7 @@ const LeaseTemplatesCard = () => {
         fields={store.template.fields}
       />
       <ConfirmDialog
-        title={t('Are you sure to remove this template?')}
+        title={t('Are you sure to remove this contract template?')}
         subTitle={templateToRemove.name}
         open={templateToRemove}
         setOpen={setTemplateToRemove}

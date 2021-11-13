@@ -7,35 +7,35 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  makeStyles,
   Paper,
   Tab,
   Tabs,
   Typography,
+  makeStyles,
 } from '@material-ui/core';
 import { CardRow, DashboardCard } from '../../../components/Cards';
-import { getStoreInstance, StoreContext } from '../../../store';
-import { memo, useCallback, useContext, useMemo, useState } from 'react';
+import { StoreContext, getStoreInstance } from '../../../store';
 import { TabPanel, useTabChangeHelper } from '../../../components/Tabs';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HistoryIcon from '@material-ui/icons/History';
-import { isServer } from '../../../utils';
 import Link from '../../../components/Link';
 import Map from '../../../components/Map';
-import moment from 'moment';
-import { nanoid } from 'nanoid';
 import { NumberFormat } from '../../../utils/numberformat';
-import { observer } from 'mobx-react-lite';
 import Page from '../../../components/Page';
 import PropertyForm from '../../../components/properties/PropertyForm';
 import RequestError from '../../../components/RequestError';
 import TenantAvatar from '../../../components/tenants/TenantAvatar';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { isServer } from '../../../utils';
+import moment from 'moment';
+import { nanoid } from 'nanoid';
+import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withAuthentication } from '../../../components/Authentication';
 
 const BreadcrumbBar = memo(function BreadcrumbBar({ backPath }) {
@@ -191,7 +191,7 @@ const Property = observer(() => {
             case 422:
               return setError(t('Property name is missing'));
             case 403:
-              return setError(t('You are not allowed to create a property'));
+              return setError(t('You are not allowed to add a property'));
             case 409:
               return setError(t('The property already exists'));
             default:
@@ -249,7 +249,7 @@ const Property = observer(() => {
               <PropertyOverview />
             </DashboardCard>
           </Box>
-          <DashboardCard Icon={HistoryIcon} title={t('Occupancy history')}>
+          <DashboardCard Icon={HistoryIcon} title={t('Previous tenants')}>
             <OccupancyHistory />
           </DashboardCard>
         </Grid>

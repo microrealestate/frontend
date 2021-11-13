@@ -18,10 +18,10 @@ import {
 } from 'formik';
 import { Fragment, useContext, useMemo, useState } from 'react';
 
+import { StoreContext } from '../../store';
 import moment from 'moment';
 import { nanoid } from 'nanoid';
 import { observer } from 'mobx-react-lite';
-import { StoreContext } from '../../store';
 import useTranslation from 'next-translate/useTranslation';
 
 const validationSchema = Yup.object().shape({
@@ -249,7 +249,7 @@ const LeaseContractForm = observer((props) => {
                   disabled={readOnly}
                 />
                 <FormTextField
-                  label={t('Returned deposit')}
+                  label={t('Amount of the deposit refund')}
                   name="guarantyPayback"
                   disabled={readOnly}
                 />

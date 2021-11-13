@@ -6,8 +6,8 @@ import { FormSection, FormTextField, SelectField, SubmitButton } from '../Form';
 import { useContext, useMemo } from 'react';
 
 import { ADMIN_ROLE } from '../../store/User';
-import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../store';
+import { observer } from 'mobx-react-lite';
 import useTranslation from 'next-translate/useTranslation';
 
 const allowedRoles = [ADMIN_ROLE];
@@ -57,12 +57,12 @@ const LeaseForm = ({ onSubmit }) => {
         {({ values, isSubmitting }) => {
           return (
             <Form autoComplete="off">
-              <FormSection label={t('Lease information')}>
+              <FormSection label={t('Contract information')}>
                 {values.usedByTenants && (
                   <Box color="warning.dark">
                     <Typography>
                       {t(
-                        'This lease is currently used in tenant contracts, only name and description fields can be updated'
+                        'This contract is currently used, only name and description fields can be updated'
                       )}
                     </Typography>
                   </Box>
@@ -86,7 +86,7 @@ const LeaseForm = ({ onSubmit }) => {
                   </Grid>
                   <Grid item xs={6}>
                     <SelectField
-                      label={t('Time range')}
+                      label={t('Schedule type')}
                       name="timeRange"
                       values={timeRanges.map((timeRange) => ({
                         id: timeRange,
