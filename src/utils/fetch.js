@@ -68,8 +68,11 @@ export const apiFetcher = () => {
       const minRTExpirationDelay = 10000; // 10s
       apiFetch.interceptors.request.use(
         async (config) => {
-          if (config.url !== '/authenticator/refreshtoken') {
-            const store = getStoreInstance();
+          const store = getStoreInstance();
+          if (
+            store.user.signedIn &&
+            config.url !== '/authenticator/refreshtoken'
+          ) {
             const isRefreshTokenAboutToExpire =
               store.user.tokenExpiry * 1000 - Date.now() <=
               minRTExpirationDelay;
@@ -99,8 +102,9 @@ export const apiFetcher = () => {
         (response) => response,
         (error) => {
           if (error.response?.status === 403) {
-            window.location.reload();
+            return window.location.reload();
           }
+          return Promise.reject(error);
         }
       );
     }
@@ -141,7 +145,7 @@ export const apiFetcher = () => {
       (error) => {
         if (
           error?.config?.method &&
-          rror?.response?.url &&
+          error?.response?.url &&
           error?.response?.status
         ) {
           console.error(
@@ -151,8 +155,9 @@ export const apiFetcher = () => {
           );
         } else {
           console.error(error);
+          // return Promise.reject({ error });
         }
-        return Promise.reject({ error });
+        return Promise.reject(error);
       }
     );
   }

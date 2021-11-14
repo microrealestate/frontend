@@ -3,6 +3,5 @@
   "defaultLocale": "en",
   "pages": {
     "*": ["common"]
-  },
-  "localeDetection": true
+  }
 }

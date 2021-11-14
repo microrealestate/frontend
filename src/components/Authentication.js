@@ -60,8 +60,8 @@ export function withAuthentication(PageComponent) {
           return {};
         }
 
-        // Force the refresh token to check the validity of the current refreshToken
-        // and to get a new tokens (refreshToken and accessToken)
+        // Force the refresh tokens to check the validity of the tokens
+        // and to get a new ones (refreshToken and accessToken)
         await store.user.refreshTokens(context);
         if (!store.user.signedIn) {
           console.log('current refresh token invalid redirecting to /signin');

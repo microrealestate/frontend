@@ -77,7 +77,9 @@ const SignIn = observer(() => {
         }
         setOrganizationId(store.organization.selected._id);
         moment.locale(store.organization.selected.locale);
-        router.push(`/${store.organization.selected.name}/dashboard`);
+        router.push(`/${store.organization.selected.name}/dashboard`, null, {
+          locale: store.organization.selected.locale,
+        });
       } else {
         router.push('/firstaccess');
       }
