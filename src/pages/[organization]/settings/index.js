@@ -116,6 +116,7 @@ const Settings = observer(() => {
         ),
         updatedOrganization,
       ]);
+      setOrganizationId(updatedOrganization._id);
     },
     [store.organization, store.user]
   );

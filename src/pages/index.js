@@ -1,6 +1,7 @@
 import { isServer, redirect } from '../utils';
 
 import { getStoreInstance } from '../store';
+import { setOrganizationId } from '../utils/fetch';
 import { toJS } from 'mobx';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -25,6 +26,7 @@ Index.getInitialProps = async (context) => {
   if (store.organization.items.length) {
     if (!store.organization.selected) {
       store.organization.setSelected(store.organization.items[0], store.user);
+      setOrganizationId(store.organization.items[0]._id);
     }
     redirectPath = `/${store.organization.selected.name}/dashboard`;
   }

@@ -7,6 +7,7 @@ import Landlord from '../components/organization/LandlordForm';
 import Page from '../components/Page';
 import RequestError from '../components/RequestError';
 import { observer } from 'mobx-react-lite';
+import { setOrganizationId } from '../utils/fetch';
 import { toJS } from 'mobx';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
@@ -42,6 +43,7 @@ const FirstAccess = observer(() => {
       }
       store.organization.setSelected(data, store.user);
       store.organization.setItems([data]);
+      setOrganizationId(data._id);
     } catch (error) {
       console.error(error);
       setError(t('Something went wrong'));
