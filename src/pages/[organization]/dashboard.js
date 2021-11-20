@@ -31,6 +31,7 @@ import { useComponentMountedRef, useInterval } from '../../utils/hooks';
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import { DashboardCard } from '../../components/Cards';
 import DescriptionIcon from '@material-ui/icons/Description';
+import Loading from '../../components/Loading';
 import NewLeaseDialog from '../../components/organization/NewLeaseDialog';
 import NewPaymentDialog from '../../components/payment/NewPaymentDialog';
 import NewPropertyDialog from '../../components/properties/NewPropertyDialog';
@@ -42,11 +43,9 @@ import StopIcon from '@material-ui/icons/Stop';
 import TenantAvatar from '../../components/tenants/TenantAvatar';
 import TerminateLeaseDialog from '../../components/tenants/TerminateLeaseDialog';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import { isServer } from '../../utils';
 import moment from 'moment';
 import { nanoid } from 'nanoid';
 import { observer } from 'mobx-react-lite';
-import { toJS } from 'mobx';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTheme } from '@material-ui/styles';
@@ -143,7 +142,6 @@ const Shortcuts = () => {
       },
     },
   }));
-  const classes = useStyles();
 
   const onCreateTenant = useCallback(
     async (tenant) => {
@@ -580,6 +578,7 @@ const Welcome = () => {
 const Dashboard = () => {
   console.log('Dashboard functional component');
   const store = useContext(StoreContext);
+  const [ready, setReady] = useState(false);
   const mountedRef = useComponentMountedRef();
   const triggerRefreshData = useInterval(
     () => fetchDashboardData(store),
@@ -587,55 +586,52 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
-    if (mountedRef.current) {
+    const fetchData = async () => {
+      await fetchDashboardData(store);
+      setReady(true);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (mountedRef.current && ready) {
       triggerRefreshData.start();
     }
 
     return () => triggerRefreshData.clear();
-  }, []);
+  }, [ready]);
 
   return (
     <Page>
-      <Box my={5}>
-        <Welcome />
-      </Box>
-      <Box mb={10}>
-        <Shortcuts />
-      </Box>
-      {!!store.dashboard.data.overview && (
-        <Box my={10}>
-          <GeneralFigures />
-        </Box>
-      )}
-      {!!store.dashboard.data.overview?.tenantCount && (
-        <Box my={10}>
-          <MonthFigures />
-        </Box>
-      )}
-      {!!store.dashboard.data.overview && (
-        <Box my={10}>
-          <YearFigures />
-        </Box>
+      {ready ? (
+        <>
+          <Box my={5}>
+            <Welcome />
+          </Box>
+          <Box mb={10}>
+            <Shortcuts />
+          </Box>
+          {!!store.dashboard.data.overview && (
+            <Box my={10}>
+              <GeneralFigures />
+            </Box>
+          )}
+          {!!store.dashboard.data.overview?.tenantCount && (
+            <Box my={10}>
+              <MonthFigures />
+            </Box>
+          )}
+          {!!store.dashboard.data.overview && (
+            <Box my={10}>
+              <YearFigures />
+            </Box>
+          )}
+        </>
+      ) : (
+        <Loading />
       )}
     </Page>
   );
-};
-
-Dashboard.getInitialProps = async (context) => {
-  console.log('Dashboard.getInitialProps');
-  const store = isServer() ? context.store : getStoreInstance();
-
-  const errorStatusCode = await fetchDashboardData(store);
-
-  if (errorStatusCode) {
-    return { error: { statusCode: errorStatusCode } };
-  }
-
-  return {
-    initialState: {
-      store: toJS(store),
-    },
-  };
 };
 
 export default withAuthentication(Dashboard);
