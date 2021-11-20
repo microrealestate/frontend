@@ -20,7 +20,6 @@ import { Fragment, useContext, useMemo, useState } from 'react';
 
 import { StoreContext } from '../../store';
 import moment from 'moment';
-import { nanoid } from 'nanoid';
 import { observer } from 'mobx-react-lite';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -283,7 +282,7 @@ const LeaseContractForm = observer((props) => {
                 render={(arrayHelpers) => (
                   <>
                     {values.properties.map((property, index) => (
-                      <Fragment key={nanoid()}>
+                      <Fragment key={property._id}>
                         <Grid container spacing={2}>
                           <Grid item xs={12} md={9}>
                             <SelectField

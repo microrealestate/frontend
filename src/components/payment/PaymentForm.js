@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 
 import { Box, Button, Grid } from '@material-ui/core';
-import { Children, useCallback, useContext, useMemo } from 'react';
 import {
   DateField,
   FormSection,
@@ -10,6 +9,7 @@ import {
   SubmitButton,
 } from '../Form';
 import { FieldArray, Form, Formik } from 'formik';
+import { Fragment, useCallback, useContext, useMemo } from 'react';
 
 import { StoreContext } from '../../store';
 import _ from 'lodash';
@@ -130,79 +130,77 @@ const PaymentForm = ({ onSubmit }) => {
             <FormSection label={t('Settlements')}>
               <FieldArray name="payments">
                 {({ form, ...arrayHelpers }) => {
-                  return Children.toArray(
-                    payments.map((payment, index) => (
-                      <>
-                        <Grid container spacing={2}>
+                  return payments.map((payment, index) => (
+                    <Fragment key={index}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <FormTextField
+                            label={t('Amount')}
+                            name={`payments[${index}].amount`}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <DateField
+                            label={t('Date')}
+                            name={`payments[${index}].date`}
+                            minDate={store.rent._period
+                              .startOf('month')
+                              .toISOString()}
+                            maxDate={store.rent._period
+                              .endOf('month')
+                              .toISOString()}
+                          />
+                        </Grid>
+                      </Grid>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <SelectField
+                            label={t('Type')}
+                            name={`payments[${index}].type`}
+                            values={paymentTypes}
+                          />
+                        </Grid>
+                        {payments[index].type !== 'cash' && (
                           <Grid item xs={6}>
                             <FormTextField
-                              label={t('Amount')}
-                              name={`payments[${index}].amount`}
+                              label={t('Reference')}
+                              name={`payments[${index}].reference`}
                             />
                           </Grid>
-                          <Grid item xs={6}>
-                            <DateField
-                              label={t('Date')}
-                              name={`payments[${index}].date`}
-                              minDate={store.rent._period
-                                .startOf('month')
-                                .toISOString()}
-                              maxDate={store.rent._period
-                                .endOf('month')
-                                .toISOString()}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <SelectField
-                              label={t('Type')}
-                              name={`payments[${index}].type`}
-                              values={paymentTypes}
-                            />
-                          </Grid>
-                          {payments[index].type !== 'cash' && (
-                            <Grid item xs={6}>
-                              <FormTextField
-                                label={t('Reference')}
-                                name={`payments[${index}].reference`}
-                              />
-                            </Grid>
-                          )}
-                        </Grid>
-                        <Box
-                          pb={2}
-                          display="flex"
-                          justifyContent={
-                            payments.length === index + 1
-                              ? 'space-between'
-                              : 'flex-end'
-                          }
-                        >
-                          {payments.length === index + 1 && (
-                            <Button
-                              // variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => arrayHelpers.push(emptyPayment)}
-                            >
-                              {t('Add a settlement')}
-                            </Button>
-                          )}
-                          {payments.length > 1 && (
-                            <Button
-                              // variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => arrayHelpers.remove(index)}
-                            >
-                              {t('Remove the settlement')}
-                            </Button>
-                          )}
-                        </Box>
-                      </>
-                    ))
-                  );
+                        )}
+                      </Grid>
+                      <Box
+                        pb={2}
+                        display="flex"
+                        justifyContent={
+                          payments.length === index + 1
+                            ? 'space-between'
+                            : 'flex-end'
+                        }
+                      >
+                        {payments.length === index + 1 && (
+                          <Button
+                            // variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => arrayHelpers.push(emptyPayment)}
+                          >
+                            {t('Add a settlement')}
+                          </Button>
+                        )}
+                        {payments.length > 1 && (
+                          <Button
+                            // variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => arrayHelpers.remove(index)}
+                          >
+                            {t('Remove the settlement')}
+                          </Button>
+                        )}
+                      </Box>
+                    </Fragment>
+                  ));
                 }}
               </FieldArray>
             </FormSection>

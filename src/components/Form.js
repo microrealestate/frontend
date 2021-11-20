@@ -38,7 +38,7 @@ export const FormTextField = RestrictedComponent(
 
     const handleClickShowPassword = useCallback(() => {
       showPassword((displayPassword) => !displayPassword);
-    }, []);
+    }, [showPassword]);
 
     const handleMouseDownPassword = useCallback((event) => {
       event.preventDefault();
