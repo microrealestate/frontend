@@ -61,7 +61,12 @@ const MainToolbar = memo(function MainToolbar() {
           <OrganizationSwitcher />
         )}
         <Tooltip title={t('Sign out')} aria-label="sign out">
-          <IconButton aria-label="sign out" onClick={signOut} color="default">
+          <IconButton
+            aria-label="sign out"
+            onClick={signOut}
+            color="default"
+            data-cy="signout"
+          >
             <PowerSettingsNewIcon />
           </IconButton>
         </Tooltip>

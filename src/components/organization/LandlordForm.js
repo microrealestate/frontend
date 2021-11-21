@@ -167,11 +167,13 @@ const LandlordForm = observer(({ onSubmit, onSubmitted }) => {
                   value="false"
                   label={t('A personal account')}
                   onlyRoles={allowedRoles}
+                  data-cy="companyFalse"
                 />
                 <RadioField
                   value="true"
                   label={t('A business or an institution')}
                   onlyRoles={allowedRoles}
+                  data-cy="companyTrue"
                 />
               </RadioFieldGroup>
               {values.isCompany === 'true' && (
@@ -208,6 +210,7 @@ const LandlordForm = observer(({ onSubmit, onSubmitted }) => {
               size="large"
               label={!isSubmitting ? t('Save') : t('Saving')}
               onlyRoles={allowedRoles}
+              data-cy="submit"
             />
           </Form>
         );

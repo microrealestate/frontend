@@ -42,31 +42,37 @@ const Nav = () => {
         value: t('Dashboard'),
         pathname: '/dashboard',
         icon: <DashboardIcon />,
+        dataCy: 'dashboardNav',
       },
       {
         value: t('Rents'),
         pathname: '/rents/[yearMonth]',
         icon: <ReceiptIcon />,
+        dataCy: 'rentsNav',
       },
       {
         value: t('Tenants'),
         pathname: '/tenants',
         icon: <PeopleIcon />,
+        dataCy: 'tenantsNav',
       },
       {
         value: t('Properties'),
         pathname: '/properties',
         icon: <VpnKeyIcon />,
+        dataCy: 'propertiesNav',
       },
       // {
       //   value: t('Accounting'),
       //   pathname: '/accounting',
       //   icon: <AccountBalanceWalletIcon />,
+      //   dataCy: 'accountingNav'
       // },
       {
         value: t('Settings'),
         pathname: '/settings',
         icon: <SettingsIcon />,
+        dataCy: 'settingsNav',
       },
     ],
     []
@@ -117,6 +123,7 @@ const Nav = () => {
               onClick={() => handleMenuClick(item)}
               onMouseEnter={() => setOpen(true)}
               onMouseLeave={() => setOpen(false)}
+              data-cy={item.dataCy}
             >
               <ListItemIcon classes={{ root: classes.itemIcon }}>
                 {item.icon}
