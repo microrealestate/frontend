@@ -6,13 +6,13 @@ import { FormTextField, SubmitButton } from '../components/Form';
 import React, { useContext, useState } from 'react';
 
 import ErrorPage from 'next/error';
-import getConfig from 'next/config';
 import Link from '../components/Link';
 import LocationCityIcon from '@material-ui/icons/LocationCity';
-import { observer } from 'mobx-react-lite';
 import Page from '../components/Page';
 import RequestError from '../components/RequestError';
 import { StoreContext } from '../store';
+import getConfig from 'next/config';
+import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
@@ -108,6 +108,7 @@ const SignUp = observer(({ pageError }) => {
                     <SubmitButton
                       fullWidth
                       label={!isSubmitting ? t('Agree & Join') : t('Joining')}
+                      data-cy="submit"
                     />
                   </Box>
                 </Form>
@@ -121,7 +122,10 @@ const SignUp = observer(({ pageError }) => {
           <Box px={4} py={2}>
             <Typography variant="body2">
               {t('Already on {{APP_NAME}}?', { APP_NAME })}{' '}
-              <Link href="/signin">{t('Sign in')}</Link>.
+              <Link href="/signin" data-cy="signin">
+                {t('Sign in')}
+              </Link>
+              .
             </Typography>
           </Box>
         </Paper>

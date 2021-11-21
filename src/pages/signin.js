@@ -120,7 +120,7 @@ const SignIn = observer(() => {
                   />
                   {!DEMO_MODE && (
                     <Typography variant="body2">
-                      <Link href="/forgotpassword">
+                      <Link href="/forgotpassword" data-cy="forgotpassword">
                         {t('Forgot password?')}
                       </Link>
                     </Typography>
@@ -129,6 +129,7 @@ const SignIn = observer(() => {
                     <SubmitButton
                       fullWidth
                       label={!isSubmitting ? t('Sign in') : t('Signing in')}
+                      data-cy="submit"
                     />
                   </Box>
                 </Form>
@@ -143,7 +144,10 @@ const SignIn = observer(() => {
             <Box px={4} py={2}>
               <Typography variant="body2">
                 {t('New to {{APP_NAME}}?', { APP_NAME })}{' '}
-                <Link href="/signup">{t('Create an account')}</Link>.
+                <Link href="/signup" data-cy="signup">
+                  {t('Create an account')}
+                </Link>
+                .
               </Typography>
             </Box>
           </Paper>
