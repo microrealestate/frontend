@@ -310,10 +310,11 @@ const Tenant = observer(() => {
         isVat: false,
         ...tenant,
         properties: tenant.properties.map(
-          ({ propertyId, entryDate, exitDate }) => ({
+          ({ propertyId, entryDate, exitDate, expenses }) => ({
             propertyId,
             entryDate,
             exitDate,
+            expenses,
           })
         ),
         ...tenantPart,
