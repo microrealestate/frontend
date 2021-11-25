@@ -1,13 +1,5 @@
 import { ListItemIcon, Typography } from '@material-ui/core';
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useContext, useMemo, useState } from 'react';
 
 //import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import DashboardIcon from '@material-ui/icons/Dashboard';
@@ -26,10 +18,42 @@ import { useStyles } from '../styles/components/Nav.styles';
 import { useTimeout } from '../utils/hooks';
 import useTranslation from 'next-translate/useTranslation';
 
+const MenuItem = memo(function MenuItem({
+  item,
+  selected,
+  open,
+  onMouseEnter,
+  onMouseLeave,
+  onClick,
+}) {
+  const classes = useStyles();
+
+  return (
+    <ListItem
+      className={`${classes.item} ${selected ? classes.itemSelected : ''}`}
+      button
+      selected={selected}
+      onClick={() => onClick(item)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      data-cy={item.dataCy}
+    >
+      <ListItemIcon classes={{ root: classes.itemIcon }}>
+        {item.icon}
+      </ListItemIcon>
+      <ListItemText
+        className={`${classes.itemText} ${
+          open ? classes.itemTextOpen : classes.itemTextClose
+        }`}
+        primary={<Typography noWrap>{item.value}</Typography>}
+      />
+    </ListItem>
+  );
+});
+
 const Nav = () => {
   const classes = useStyles();
   const { t } = useTranslation('common');
-  const [open, setOpen] = useState(false);
   const [openDebounced, setOpenDebounced] = useState(false);
   const store = useContext(StoreContext);
 
@@ -39,24 +63,28 @@ const Nav = () => {
   const menuItems = useMemo(
     () => [
       {
+        key: nanoid(),
         value: t('Dashboard'),
         pathname: '/dashboard',
         icon: <DashboardIcon />,
         dataCy: 'dashboardNav',
       },
       {
+        key: nanoid(),
         value: t('Rents'),
         pathname: '/rents/[yearMonth]',
         icon: <ReceiptIcon />,
         dataCy: 'rentsNav',
       },
       {
+        key: nanoid(),
         value: t('Tenants'),
         pathname: '/tenants',
         icon: <PeopleIcon />,
         dataCy: 'tenantsNav',
       },
       {
+        key: nanoid(),
         value: t('Properties'),
         pathname: '/properties',
         icon: <VpnKeyIcon />,
@@ -69,6 +97,7 @@ const Nav = () => {
       //   dataCy: 'accountingNav'
       // },
       {
+        key: nanoid(),
         value: t('Settings'),
         pathname: '/settings',
         icon: <SettingsIcon />,
@@ -79,12 +108,12 @@ const Nav = () => {
   );
 
   const triggerOpen = useTimeout(() => {
-    setOpenDebounced(open);
+    !openDebounced && setOpenDebounced(true);
   }, 1000);
 
-  useEffect(() => {
-    triggerOpen.start();
-  }, [open]);
+  const triggerClose = useTimeout(() => {
+    openDebounced && setOpenDebounced(false);
+  }, 1000);
 
   const handleMenuClick = useCallback(
     (menuItem) => {
@@ -100,6 +129,16 @@ const Nav = () => {
     [store.organization.selected?.name, store.rent?.period]
   );
 
+  const handleMouseEnter = useCallback(() => {
+    triggerClose.clear();
+    !openDebounced && triggerOpen.start();
+  }, [triggerOpen, triggerClose]);
+
+  const handleMouseLeave = useCallback(() => {
+    triggerOpen.clear();
+    openDebounced && triggerClose.start();
+  }, [triggerOpen, triggerClose]);
+
   return (
     <Drawer
       className={`${openDebounced ? classes.drawerOpen : classes.drawerClose}`}
@@ -110,31 +149,16 @@ const Nav = () => {
     >
       <List className={classes.list}>
         {menuItems.map((item) => {
-          const isSelected = pathname.indexOf(item.pathname) !== -1;
-
           return (
-            <ListItem
-              key={nanoid()}
-              className={`${classes.item} ${
-                isSelected ? classes.itemSelected : ''
-              }`}
-              button
-              selected={isSelected}
-              onClick={() => handleMenuClick(item)}
-              onMouseEnter={() => setOpen(true)}
-              onMouseLeave={() => setOpen(false)}
-              data-cy={item.dataCy}
-            >
-              <ListItemIcon classes={{ root: classes.itemIcon }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                className={`${classes.itemText} ${
-                  openDebounced ? classes.itemTextOpen : classes.itemTextClose
-                }`}
-                primary={<Typography noWrap>{item.value}</Typography>}
-              />
-            </ListItem>
+            <MenuItem
+              key={item.key}
+              item={item}
+              selected={pathname.indexOf(item.pathname) !== -1}
+              open={openDebounced}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleMenuClick}
+            />
           );
         })}
       </List>

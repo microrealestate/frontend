@@ -5,6 +5,8 @@ import '../components/RichTextEditor/richtexteditor.css';
 
 import * as Yup from 'yup';
 
+import { memo, useEffect } from 'react';
+
 import App from 'next/app';
 import Application from '../components/Application';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,7 +16,6 @@ import { InjectStoreContext } from '../store';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from '../styles/theme';
-import { useEffect } from 'react';
 
 Yup.addMethod(Yup.string, 'emails', function (message) {
   return this.test({
@@ -34,7 +35,7 @@ Yup.addMethod(Yup.string, 'emails', function (message) {
   });
 });
 
-const MyApp = (props) => {
+const MyApp = memo(function MyApp(props) {
   console.log('MyApp functional component');
   const { Component, pageProps } = props;
 
@@ -67,7 +68,7 @@ const MyApp = (props) => {
       </ThemeProvider>
     </>
   );
-};
+});
 
 MyApp.getInitialProps = async (appContext) => {
   console.log('MyApp.getInitialProps');

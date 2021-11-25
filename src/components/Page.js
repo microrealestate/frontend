@@ -35,7 +35,7 @@ const Demonstrationbar = memo(function Demonstrationbar() {
   ) : null;
 });
 
-const MainToolbar = memo(function MainToolbar() {
+const MainToolbar = memo(function MainToolbar({ visible }) {
   const { t } = useTranslation('common');
   const store = useContext(StoreContext);
 
@@ -48,31 +48,58 @@ const MainToolbar = memo(function MainToolbar() {
     [store.user]
   );
 
-  return (
-    <Box
-      width="100%"
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-    >
-      <Typography variant="h5">{APP_NAME}</Typography>
-      <Box display="flex" alignItems="center">
-        {!!(store.organization.items && store.organization.items.length) && (
-          <OrganizationSwitcher />
-        )}
-        <Tooltip title={t('Sign out')} aria-label="sign out">
-          <IconButton
-            aria-label="sign out"
-            onClick={signOut}
-            color="default"
-            data-cy="signout"
-          >
-            <PowerSettingsNewIcon />
-          </IconButton>
-        </Tooltip>
+  return visible ? (
+    <Toolbar>
+      <Box
+        width="100%"
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Typography variant="h5">{APP_NAME}</Typography>
+        <Box display="flex" alignItems="center">
+          {!!(store.organization.items && store.organization.items.length) && (
+            <OrganizationSwitcher />
+          )}
+          <Tooltip title={t('Sign out')} aria-label="sign out">
+            <IconButton
+              aria-label="sign out"
+              onClick={signOut}
+              color="default"
+              data-cy="signout"
+            >
+              <PowerSettingsNewIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
-    </Box>
-  );
+    </Toolbar>
+  ) : null;
+});
+
+const SubToolbars = memo(function SubToolbars({
+  visible,
+  PrimaryToolbar,
+  SecondaryToolbar,
+}) {
+  return visible ? (
+    <ElevationScroll>
+      <AppBar position="sticky">
+        <Toolbar>
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+            spacing={5}
+          >
+            <Grid item>{PrimaryToolbar}</Grid>
+            <Grid item>{SecondaryToolbar}</Grid>
+          </Grid>
+        </Toolbar>
+      </AppBar>
+    </ElevationScroll>
+  ) : null;
 });
 
 const Page = observer(
@@ -106,32 +133,18 @@ const Page = observer(
     return (
       <>
         <Demonstrationbar />
-        {store.user.signedIn && (
-          <Toolbar>
-            <MainToolbar />
-          </Toolbar>
-        )}
-        {!loading && (PrimaryToolbar || SecondaryToolbar) && (
-          <ElevationScroll>
-            <AppBar position="sticky">
-              <Toolbar>
-                <Grid
-                  container
-                  alignItems="center"
-                  justifyContent="space-between"
-                  wrap="nowrap"
-                  spacing={5}
-                >
-                  <Grid item>{PrimaryToolbar}</Grid>
-                  <Grid item>{SecondaryToolbar}</Grid>
-                </Grid>
-              </Toolbar>
-            </AppBar>
-          </ElevationScroll>
-        )}
+
+        <MainToolbar visible={store.user.signedIn} />
+
+        <SubToolbars
+          visible={!loading && (PrimaryToolbar || SecondaryToolbar)}
+          PrimaryToolbar={PrimaryToolbar}
+          SecondaryToolbar={SecondaryToolbar}
+        />
+
         <Box mt={!loading && (PrimaryToolbar || SecondaryToolbar) ? 4 : 0}>
           <Container maxWidth={maxWidth}>
-            {loading || store.appLoading ? <Loading /> : children}
+            {loading ? <Loading /> : children}
           </Container>
         </Box>
       </>
